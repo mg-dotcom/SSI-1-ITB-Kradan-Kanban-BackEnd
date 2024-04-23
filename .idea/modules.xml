@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/SSI-1-ITB-Kradan-Kanban.iml" filepath="$PROJECT_DIR$/.idea/SSI-1-ITB-Kradan-Kanban.iml" />
+      <module fileurl="file://$PROJECT_DIR$/back-end/SSI1-ITB-Kradan Kanban/integrated.iml" filepath="$PROJECT_DIR$/back-end/SSI1-ITB-Kradan Kanban/integrated.iml" />
+    </modules>
+  </component>
+</project>

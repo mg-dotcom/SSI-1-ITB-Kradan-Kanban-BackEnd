@@ -2,6 +2,7 @@ package ssi1.integrated.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,8 +18,6 @@ import java.util.List;
 public class TaskController {
     @Autowired
     private TaskService service;
-//    @Autowired
-//    private ModelMapper modelMapper;
 
     @GetMapping("")
     public List<TaskDTO>getAllTasks(){
@@ -26,7 +25,7 @@ public class TaskController {
     }
 
     @GetMapping("{taskId}")
-    public Task getAllTasks(@PathVariable Integer taskId){
-        return service.getTask(taskId);
+    public ResponseEntity<Task> getAllTasks(@PathVariable Integer taskId){
+        return ResponseEntity.ok(service.getTask(taskId));
     }
 }

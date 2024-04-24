@@ -1,5 +1,6 @@
 package ssi1.integrated.services;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,15 +17,13 @@ import java.util.stream.Collectors;
 public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
     public List<TaskDTO> getAllTasks(){
-        return taskRepository.findAll().stream().map(task -> {
-            TaskDTO taskDTO =new TaskDTO();
-            taskDTO.setTaskTitle(task.getTaskTitle());
-            taskDTO.setTaskAssigned(task.getTaskAssigned());
-            taskDTO.setTaskStatus(task.getTaskStatus());
-            return taskDTO;
-        }).collect(Collectors.toList());
+        return taskRepository.findAll().stream()
+                .map(task -> modelMapper.map(task,TaskDTO.class))
+                .collect(Collectors.toList());
     }
 
     public Task getTask(Integer taskId){

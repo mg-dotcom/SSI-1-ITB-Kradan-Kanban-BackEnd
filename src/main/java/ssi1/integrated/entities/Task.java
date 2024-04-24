@@ -13,7 +13,6 @@ import lombok.Setter;
 @Table(name = "tasks")
 public class Task {
     @Id
-    @JsonIgnore
     private Integer taskID;
     private String taskTitle;
     private String taskDescription;

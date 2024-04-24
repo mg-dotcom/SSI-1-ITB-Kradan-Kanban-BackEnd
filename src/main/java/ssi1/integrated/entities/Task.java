@@ -17,9 +17,9 @@ public class Task {
     private Integer taskID;
     private String taskTitle;
     private String taskDescription;
+//    @Enumerated(EnumType.STRING)
     private String taskStatus;
     private String taskAssigned;
     private Date createdOn;
     private Date updatedOn;
-
 }

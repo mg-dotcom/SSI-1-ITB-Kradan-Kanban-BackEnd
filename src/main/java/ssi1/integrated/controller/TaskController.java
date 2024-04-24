@@ -12,10 +12,11 @@ import ssi1.integrated.entities.Task;
 import ssi1.integrated.services.TaskService;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping("/v1/tasks")
 public class TaskController {
     @Autowired
     TaskService service;
@@ -31,4 +32,11 @@ public class TaskController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(taskDTOs);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> findTaskById(@PathVariable Integer id){
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+
 }

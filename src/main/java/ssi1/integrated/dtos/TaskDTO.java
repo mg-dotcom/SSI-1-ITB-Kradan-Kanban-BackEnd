@@ -8,10 +8,8 @@ import java.util.Date;
 @Setter
 
 public class TaskDTO {
+    private Integer taskID;
     private String taskTitle;
     private String taskDescription;
     private String taskStatus;
-    private String taskAssigned;
-    private Date createdOn;
-    private Date updatedOn;
 }

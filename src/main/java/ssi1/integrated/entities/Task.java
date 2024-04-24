@@ -1,5 +1,6 @@
 package ssi1.integrated.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -12,6 +13,7 @@ import lombok.Setter;
 @Table(name = "tasks")
 public class Task {
     @Id
+    @JsonIgnore
     private Integer taskID;
     private String taskTitle;
     private String taskDescription;

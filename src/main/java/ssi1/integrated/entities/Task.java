@@ -7,6 +7,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Getter
 @Setter
 @Entity
@@ -18,6 +21,6 @@ public class Task {
     private String taskDescription;
     private String taskAssigned;
     private String taskStatus;
-    private String createdOn;
-    private String updatedOn;
+    private Date createdOn;
+    private Date updatedOn;
 }

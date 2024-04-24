@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.repositories.TaskRepository;
@@ -28,7 +29,7 @@ public class TaskService {
 
     public Task getTask(Integer taskId){
         return taskRepository.findById(taskId).orElseThrow(
-                ()->new HttpClientErrorException(HttpStatus.NOT_FOUND,"Task Id "+taskId+" DOES NOT EXIST!!!")
+                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Task Id "+taskId+" DOES NOT EXIST!!!")
         );
     }
 

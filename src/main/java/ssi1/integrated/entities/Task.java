@@ -15,16 +15,12 @@ import java.util.Date;
 @Table(name = "tasks")
 public class Task {
     @Id
-    @Column(name = "taskID")
     private Integer id;
-    @Column(name = "taskTitle")
     private String title;
-    @Column(name = "taskDescription")
     private String description;
-    @Column(name = "taskAssigned")
     private String assignees;
-    @Column(name = "taskStatus")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private TaskEnum status;
     private Instant createdOn;
     private Instant updatedOn;
 }

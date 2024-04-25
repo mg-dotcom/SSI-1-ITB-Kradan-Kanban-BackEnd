@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -24,6 +25,6 @@ public class Task {
     private String assignees;
     @Column(name = "taskStatus")
     private String status;
-    private Date createdOn;
-    private Date updatedOn;
+    private Instant createdOn;
+    private Instant updatedOn;
 }

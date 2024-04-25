@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 
-
+import java.time.Instant;
 import java.util.Date;
 
 @Entity
@@ -20,6 +20,6 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private TaskEnum status;
     private String assignees;
-    private Date createdOn;
-    private Date updatedOn;
+    private Instant createdOn;
+    private Instant updatedOn;
 }

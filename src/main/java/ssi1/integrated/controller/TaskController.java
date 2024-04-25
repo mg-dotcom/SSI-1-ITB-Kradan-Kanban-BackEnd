@@ -9,11 +9,11 @@ import ssi1.integrated.entities.Task;
 import ssi1.integrated.services.TaskService;
 
 import java.util.List;
-import java.util.Objects;
+
 import java.util.stream.Collectors;
 
 @RestController
-//@CrossOrigin(origins = "http://localhost:5173/")
+@CrossOrigin(origins = "http://localhost:5173/")
 @RequestMapping("/v1/tasks")
 public class TaskController {
     @Autowired

@@ -21,5 +21,5 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private TaskEnum status;
     private Date createdOn;
-    private Instant updatedOn;
+    private Date updatedOn;
 }

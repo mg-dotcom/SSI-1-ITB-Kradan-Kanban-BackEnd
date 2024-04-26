@@ -8,33 +8,23 @@ import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.services.TaskService;
 
-import java.util.List;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
-@RequestMapping("/v1/tasks")
+@RequestMapping("/itb-kk/v1/tasks")
 public class TaskController {
     @Autowired
-    TaskService service;
-
-    @Autowired
-    private ModelMapper modelMapper;
+    private TaskService service;
 
     @GetMapping("")
-    public ResponseEntity<List<TaskDTO>> findAll(){
-        List<Task> tasks = service.findAll();
-        List<TaskDTO> taskDTOs = tasks.stream()
-                .map(task -> modelMapper.map(task, TaskDTO.class))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(taskDTOs);
+    public List<TaskDTO>getAllTasks(){
+        return service.getAllTasks();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Object> findTaskById(@PathVariable Integer id){
-        return ResponseEntity.ok(service.findById(id));
+    @GetMapping("{taskId}")
+    public ResponseEntity<Task> getAllTasks(@PathVariable Integer taskId){
+        return ResponseEntity.ok(service.getTask(taskId));
     }
-
-
 }

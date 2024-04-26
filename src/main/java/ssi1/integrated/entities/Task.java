@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Getter
@@ -20,6 +21,6 @@ public class Task {
     private String assignees;
     @Enumerated(EnumType.STRING)
     private TaskEnum status;
-    private Date createdOn;
-    private Date updatedOn;
+    private ZonedDateTime createdOn;
+    private ZonedDateTime updatedOn;
 }

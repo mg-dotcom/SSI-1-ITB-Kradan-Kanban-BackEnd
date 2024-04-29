@@ -16,9 +16,13 @@ import java.util.Date;
 public class Task {
     @Id
     private Integer id;
+    @Column(name="taskTitle")
     private String title;
+    @Column(name="taskDescription")
     private String description;
+    @Column(name="taskAssignees")
     private String assignees;
+    @Column(name="taskStatus")
     @Enumerated(EnumType.STRING)
     private TaskEnum status;
     private ZonedDateTime createdOn;

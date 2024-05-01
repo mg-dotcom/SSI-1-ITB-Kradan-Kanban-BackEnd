@@ -42,6 +42,7 @@ public class TaskService {
             taskdto.setStatus("NO_STATUS");
         }
         taskRepository.save(newTask);
+        taskdto.setId(newTask.getId());
         return taskdto;
     }
 
@@ -57,12 +58,12 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO updateTask(Integer taskId){
+    public TaskDTO updateTask(Integer taskId,Task editTask){
         Task existingTask=taskRepository.findById(taskId).orElseThrow(
                 ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"NOT FOUND")
         );
         TaskDTO taskdto=modelMapper.map(existingTask,TaskDTO.class);
-        taskRepository.save(existingTask);
+        taskRepository.save(editTask);
         return taskdto;
     }
 

@@ -5,8 +5,10 @@ import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
+import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.repositories.TaskRepository;
@@ -14,12 +16,15 @@ import ssi1.integrated.repositories.TaskRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//import static ssi1.integrated.services.ListMapper.listMapper;
+
 @Service
 public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
     @Autowired
     private ModelMapper modelMapper;
+
 
     public List<TaskDTO> getAllTasks(){
         return taskRepository.findAll().stream()
@@ -32,5 +37,19 @@ public class TaskService {
                 ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Task Id "+taskId+" DOES NOT EXIST!!!")
         );
     }
+    @Transactional
+    public NewTaskDTO insertNewTask(NewTaskDTO newTask){
+        Task task = modelMapper.map(newTask, Task.class);
+        Task insertedTask =taskRepository.save(task);
+        NewTaskDTO newTaskDTO = modelMapper.map(insertedTask,NewTaskDTO.class);
+        return newTaskDTO;
+    }
 
+    @Transactional
+    public void removeTask(Integer taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(
+                () -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Task Id " + taskId + " DOES NOT EXIST !!!")
+        );
+        taskRepository.delete(task);
+    }
 }

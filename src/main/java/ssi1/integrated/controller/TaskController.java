@@ -4,6 +4,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.services.TaskService;
@@ -26,5 +27,15 @@ public class TaskController {
     @GetMapping("{taskId}")
     public ResponseEntity<Task> getAllTasks(@PathVariable Integer taskId){
         return ResponseEntity.ok(service.getTask(taskId));
+    }
+
+    @PostMapping("")
+    public ResponseEntity<NewTaskDTO> addTask(@RequestBody NewTaskDTO newTaskDTO){
+        return ResponseEntity.ok(service.insertNewTask(newTaskDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteTask(@PathVariable Integer id) {
+        service.removeTask(id);
     }
 }

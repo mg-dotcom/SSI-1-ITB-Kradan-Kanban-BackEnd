@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.AddTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Task;
+import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.TaskRepository;
 
 import java.util.List;
@@ -29,27 +30,25 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    public Task getTask(Integer taskId){
+    public Task getTaskById(Integer taskId){
         return taskRepository.findById(taskId).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Task Id "+taskId+" DOES NOT EXIST!!!")
+                ()->new ItemNotFoundException("Task Id "+taskId+" DOES NOT EXIST!!!")
         );
     }
 
     @Transactional
     public AddTaskDTO addTask(Task newTask){
-        AddTaskDTO taskdto=modelMapper.map(newTask, AddTaskDTO.class);
-        if (taskdto.getStatus().isEmpty()){
-            taskdto.setStatus("NO_STATUS");
+        if (newTask.getStatus().isEmpty()){
+            newTask.setStatus("NO_STATUS");
         }
-        taskRepository.save(newTask);
-        taskdto.setId(newTask.getId());
-        return taskdto;
+        Task task = modelMapper.map(newTask, Task.class);
+        return modelMapper.map(taskRepository.save(task), AddTaskDTO.class);
     }
 
     @Transactional
     public TaskDTO deleteTask(Integer taskId){
         Task existingTask=taskRepository.findById(taskId).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"NOT FOUND")
+                ()->new ItemNotFoundException("NOT FOUND")
         );
         TaskDTO taskdto=modelMapper.map(existingTask,TaskDTO.class);
         taskRepository.deleteById(taskId);
@@ -60,7 +59,7 @@ public class TaskService {
     @Transactional
     public TaskDTO updateTask(Integer taskId,Task editTask){
         Task existingTask=taskRepository.findById(taskId).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"NOT FOUND")
+                ()->new ItemNotFoundException("NOT FOUND")
         );
         TaskDTO taskdto=modelMapper.map(existingTask,TaskDTO.class);
         taskRepository.save(editTask);

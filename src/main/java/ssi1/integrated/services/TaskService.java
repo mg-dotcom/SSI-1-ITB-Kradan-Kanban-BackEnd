@@ -26,30 +26,47 @@ public class TaskService {
     private ModelMapper modelMapper;
 
 
-    public List<TaskDTO> getAllTasks(){
+    public List<TaskDTO> getAllTasks() {
         return taskRepository.findAll().stream()
-                .map(task -> modelMapper.map(task,TaskDTO.class))
+                .map(task -> modelMapper.map(task, TaskDTO.class))
                 .collect(Collectors.toList());
     }
 
-    public Task getTask(Integer taskId){
+    public Task getTask(Integer taskId) {
         return taskRepository.findById(taskId).orElseThrow(
-                ()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Task Id "+taskId+" DOES NOT EXIST!!!")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task Id " + taskId + " DOES NOT EXIST!!!")
         );
-    }
-    @Transactional
-    public NewTaskDTO insertNewTask(NewTaskDTO newTask){
-        Task task = modelMapper.map(newTask, Task.class);
-        Task insertedTask =taskRepository.save(task);
-        NewTaskDTO newTaskDTO = modelMapper.map(insertedTask,NewTaskDTO.class);
-        return newTaskDTO;
     }
 
     @Transactional
-    public void removeTask(Integer taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow(
-                () -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Task Id " + taskId + " DOES NOT EXIST !!!")
-        );
-        taskRepository.delete(task);
+    public NewTaskDTO insertNewTask(NewTaskDTO newTask) {
+        Task task = modelMapper.map(newTask, Task.class);
+        Task insertedTask = taskRepository.save(task);
+        NewTaskDTO newTaskDTO = modelMapper.map(insertedTask, NewTaskDTO.class);
+        return newTaskDTO;
     }
+
+
+    @Transactional
+    public NewTaskDTO updateTask(Integer taskId,NewTaskDTO updateTask){
+        Task toBeUpdateTask = taskRepository.findById(taskId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task Id " + taskId + " DOES NOT EXIST !!!")
+        );
+        toBeUpdateTask.setTitle(updateTask.getTitle());
+        toBeUpdateTask.setDescription(updateTask.getDescription());
+        toBeUpdateTask.setAssignees(updateTask.getAssignees());
+        toBeUpdateTask.setStatus(updateTask.getStatus());
+        Task updatedTask = taskRepository.save(toBeUpdateTask);
+        return modelMapper.map(updatedTask, NewTaskDTO.class);
+    }
+    @Transactional
+    public TaskDTO removeTask(Integer taskId) {
+        Task task = taskRepository.findById(taskId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task Id " + taskId + " DOES NOT EXIST !!!")
+        );
+        TaskDTO deletedTask = modelMapper.map(task,TaskDTO.class);
+        taskRepository.delete(task);
+        return deletedTask;
+    }
+
 }

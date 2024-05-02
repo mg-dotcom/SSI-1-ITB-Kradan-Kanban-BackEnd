@@ -1,16 +1,17 @@
 package ssi1.integrated.services;
 
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Task;
+import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.TaskRepository;
 
 import java.util.List;
@@ -32,9 +33,9 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    public Task getTask(Integer taskId) {
+    public Task getTaskById(Integer taskId){
         return taskRepository.findById(taskId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task Id " + taskId + " DOES NOT EXIST!!!")
+                ()->new ItemNotFoundException("NOT FOUND")
         );
     }
 
@@ -50,7 +51,7 @@ public class TaskService {
     @Transactional
     public NewTaskDTO updateTask(Integer taskId,NewTaskDTO updateTask){
         Task toBeUpdateTask = taskRepository.findById(taskId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task Id " + taskId + " DOES NOT EXIST !!!")
+                () -> new ItemNotFoundException("NOT FOUND")
         );
         toBeUpdateTask.setTitle(updateTask.getTitle());
         toBeUpdateTask.setDescription(updateTask.getDescription());
@@ -62,7 +63,7 @@ public class TaskService {
     @Transactional
     public TaskDTO removeTask(Integer taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task Id " + taskId + " DOES NOT EXIST !!!")
+                () -> new ItemNotFoundException("NOT FOUND")
         );
         TaskDTO deletedTask = modelMapper.map(task,TaskDTO.class);
         taskRepository.delete(task);

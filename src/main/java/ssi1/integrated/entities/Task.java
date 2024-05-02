@@ -1,15 +1,12 @@
 package ssi1.integrated.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Date;
+
 
 @Getter
 @Setter
@@ -18,6 +15,7 @@ import java.util.Date;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id", nullable = false ,unique = true)
     private Integer id;
     @Column(name="taskTitle")
     private String title;
@@ -28,7 +26,10 @@ public class Task {
     @Column(name="taskStatus")
     private String status;
     @CreationTimestamp
+    @Column(name="createdOn",  nullable = false, updatable = false ,insertable = false )
     private ZonedDateTime createdOn;
     @UpdateTimestamp
+    @Column(name="updatedOn" ,nullable = false,insertable = false)
     private ZonedDateTime updatedOn;
+
 }

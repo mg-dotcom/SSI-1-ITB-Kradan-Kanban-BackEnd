@@ -24,9 +24,24 @@ public class TaskController {
         return service.getAllTasks();
     }
 
-    @GetMapping("{taskId}")
-    public ResponseEntity<Task> getAllTasks(@PathVariable Integer taskId){
-        return ResponseEntity.ok(service.getTask(taskId));
+    @GetMapping("/{taskId}")
+    public ResponseEntity<Task> getTaskById(@PathVariable Integer taskId){
+        return ResponseEntity.ok(service.getTaskById(taskId));
+    }
+
+    @PostMapping("")
+    public ResponseEntity<AddTaskDTO> addTask(@RequestBody Task newTask){
+        return ResponseEntity.ok(service.addTask(newTask));
+    }
+
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<TaskDTO>deleteTask(@PathVariable Integer taskId){
+        return ResponseEntity.ok(service.deleteTask(taskId));
+    }
+
+    @PutMapping("/{taskId}")
+    public ResponseEntity<TaskDTO>updateTask(@PathVariable Integer taskId,@RequestBody Task editedTask){
+        return ResponseEntity.ok(service.updateTask(taskId,editedTask));
     }
 
     @PostMapping("")

@@ -41,6 +41,7 @@ public class TaskService {
 
     @Transactional
     public NewTaskDTO insertNewTask(NewTaskDTO newTask) {
+        System.out.println(newTask);
         Task task = modelMapper.map(newTask, Task.class);
         Task insertedTask = taskRepository.save(task);
         NewTaskDTO newTaskDTO = modelMapper.map(insertedTask, NewTaskDTO.class);

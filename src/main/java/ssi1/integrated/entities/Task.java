@@ -31,5 +31,4 @@ public class Task {
     @UpdateTimestamp
     @Column(name="updatedOn" ,nullable = false,insertable = false)
     private ZonedDateTime updatedOn;
-
 }

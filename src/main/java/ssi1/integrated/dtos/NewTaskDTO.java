@@ -1,11 +1,13 @@
 package ssi1.integrated.dtos;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 
 @Data
@@ -22,8 +24,7 @@ public class NewTaskDTO {
     @NotEmpty
     @Size(max = 30)
     private String assignees;
-    @NotNull
-    @NotEmpty
+    @ColumnDefault("NO_STATUS")
     private String status;
 
     public void setTitle(String title){
@@ -31,14 +32,15 @@ public class NewTaskDTO {
     }
 
     public void setDescription(String description){
-        this.description = description.trim();
+        this.description =  (description != null) ? description.trim() : description;
     }
 
     public void setAssignees(String assignees){
-        this.assignees = assignees.trim();
+        this.assignees = (assignees != null) ? assignees.trim() : assignees;
     }
 
-    public void setStatus(String status){
-        this.status = (status == null || status.isEmpty()) ? "No Status" : status;
+    public void setStatus(String status) {
+        this.status = (status == null || status.isEmpty()) ? "NO_STATUS" : status;
     }
+
 }

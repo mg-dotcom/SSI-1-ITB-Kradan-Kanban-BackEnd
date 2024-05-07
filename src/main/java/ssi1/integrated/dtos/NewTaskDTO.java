@@ -22,5 +22,23 @@ public class NewTaskDTO {
     @NotEmpty
     @Size(max = 30)
     private String assignees;
+    @NotNull
+    @NotEmpty
     private String status;
+
+    public void setTitle(String title){
+        this.title = title.trim();
+    }
+
+    public void setDescription(String description){
+        this.description = description.trim();
+    }
+
+    public void setAssignees(String assignees){
+        this.assignees = assignees.trim();
+    }
+
+    public void setStatus(String status){
+        this.status = (status == null || status.isEmpty()) ? "No Status" : status;
+    }
 }

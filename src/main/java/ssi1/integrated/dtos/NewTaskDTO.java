@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import ssi1.integrated.entities.Status;
 
 
 @Data
@@ -24,7 +25,7 @@ public class NewTaskDTO {
     @NotEmpty
     @Size(max = 30)
     private String assignees;
-    private String status;
+    private Status status;
 
     public void setTitle(String title){
         this.title = title.trim();
@@ -38,8 +39,8 @@ public class NewTaskDTO {
         this.assignees = (assignees != null) ? assignees.trim() : assignees;
     }
 
-    public void setStatus(String status) {
-        this.status = (status == null || status.isEmpty()) ? "NO_STATUS" : status;
+    public void setStatus(Status status) {
+        this.status.setName(status == null  ? "NO_STATUS" : status.getName());
     }
 
 }

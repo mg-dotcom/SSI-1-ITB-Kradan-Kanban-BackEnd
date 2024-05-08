@@ -24,6 +24,7 @@ public class Task {
     private String description;
     @Column(name="taskAssignees")
     private String assignees;
+
     @ManyToOne
     @JoinColumn(name="statusId", nullable = false)
     private Status status;
@@ -35,7 +36,4 @@ public class Task {
     @Column(name="updatedOn" ,nullable = false,insertable = false)
     private ZonedDateTime updatedOn;
 
-    public String getStatus() {
-        return status.getName();
-    }
 }

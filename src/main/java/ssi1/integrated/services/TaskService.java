@@ -4,11 +4,15 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
+import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
+import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
 
 import java.util.List;
@@ -20,6 +24,8 @@ import java.util.stream.Collectors;
 public class TaskService {
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private StatusRepository statusRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -40,6 +46,9 @@ public class TaskService {
     @Transactional
     public NewTaskDTO insertNewTask(NewTaskDTO newTask) {
         Task task = modelMapper.map(newTask, Task.class);
+        Status existingStatus = findStatusByName(newTask.getStatusName());
+        task.setStatus(existingStatus);
+        System.out.println(existingStatus);
         Task insertedTask = taskRepository.save(task);
         NewTaskDTO newTaskDTO = modelMapper.map(insertedTask, NewTaskDTO.class);
         return newTaskDTO;
@@ -54,7 +63,8 @@ public class TaskService {
         toBeUpdateTask.setTitle(updateTask.getTitle());
         toBeUpdateTask.setDescription(updateTask.getDescription());
         toBeUpdateTask.setAssignees(updateTask.getAssignees());
-        toBeUpdateTask.setStatus(updateTask.getStatus());
+//        toBeUpdateTask.setStatus(updateTask.getStatus());
+        System.out.println(updateTask.getStatusName());
         Task updatedTask = taskRepository.save(toBeUpdateTask);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }
@@ -68,5 +78,12 @@ public class TaskService {
         return deletedTask;
     }
 
+    public Status findStatusByName(String statusName){
+        Status status = statusRepository.findByName(statusName);
+        if(status != null){
+            return  status;
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Status with name '" + statusName + "' not found");
+    }
 
 }

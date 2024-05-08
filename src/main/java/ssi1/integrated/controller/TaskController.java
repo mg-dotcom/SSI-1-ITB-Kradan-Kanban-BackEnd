@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:5173","http://ip23ssi1.sit.kmutt.ac.th"})
-@RequestMapping("/v1/tasks")
+@RequestMapping("/v2/tasks")
 public class TaskController {
     @Autowired
     private TaskService service;

@@ -27,6 +27,7 @@ public class NewTaskDTO {
     private String assignees;
     private Status status;
 
+
     public void setTitle(String title){
         this.title = title.trim();
     }
@@ -40,7 +41,7 @@ public class NewTaskDTO {
     }
 
     public void setStatus(Status status) {
-        this.status.setName(status == null  ? "NO_STATUS" : status.getName());
+        this.status.setName(status == null ? "NO_STATUS" : status.getName());
     }
 
 }

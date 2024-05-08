@@ -36,7 +36,4 @@ public class Task {
     @Column(name="updatedOn" ,nullable = false,insertable = false)
     private ZonedDateTime updatedOn;
 
-    public String getStatus() {
-        return status.getName();
-    }
 }

@@ -25,8 +25,8 @@ public class StatusService {
         return statusRepository.findAll();
     }
 
-    public Status getStatusById(Integer taskId){
-        return statusRepository.findById(taskId).orElseThrow(
+    public Status getStatusById(Integer statusId){
+        return statusRepository.findById(statusId).orElseThrow(
                 ()->new ItemNotFoundException("NOT FOUND")
         );
 
@@ -49,8 +49,13 @@ public class StatusService {
     @Transactional
     public Status addStatus(Status newStatus){
         Status existingStatus = statusRepository.findByName(newStatus.getName());
-        return statusRepository.save(newStatus);
+        return statusRepository.save(existingStatus);
     }
 
+//    @Transactional
+//    public Status deleteStatus(Integer statusId){
+//        Status toDelete = getStatusById(statusId);
+//
+//    }
 
 }

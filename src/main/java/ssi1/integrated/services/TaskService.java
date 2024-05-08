@@ -13,11 +13,9 @@ import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-//import static ssi1.integrated.services.ListMapper.listMapper;
 
 @Service
 public class TaskService {

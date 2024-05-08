@@ -4,10 +4,7 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Task;
@@ -39,6 +36,7 @@ public class TaskService {
         );
     }
 
+
     @Transactional
     public NewTaskDTO insertNewTask(NewTaskDTO newTask) {
         Task task = modelMapper.map(newTask, Task.class);
@@ -56,7 +54,7 @@ public class TaskService {
         toBeUpdateTask.setTitle(updateTask.getTitle());
         toBeUpdateTask.setDescription(updateTask.getDescription());
         toBeUpdateTask.setAssignees(updateTask.getAssignees());
-        toBeUpdateTask.setStatus(updateTask.getStatus());
+//        toBeUpdateTask.setStatus(updateTask.getStatus());
         Task updatedTask = taskRepository.save(toBeUpdateTask);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }

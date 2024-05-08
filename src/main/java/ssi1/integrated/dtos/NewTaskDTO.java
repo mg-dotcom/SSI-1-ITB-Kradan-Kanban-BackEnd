@@ -24,7 +24,6 @@ public class NewTaskDTO {
     @NotEmpty
     @Size(max = 30)
     private String assignees;
-    @ColumnDefault("NO_STATUS")
     private String status;
 
     public void setTitle(String title){

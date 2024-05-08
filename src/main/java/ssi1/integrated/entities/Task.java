@@ -25,7 +25,6 @@ public class Task {
     @Column(name="taskAssignees")
     private String assignees;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="statusId", nullable = false)
     private Status status;
@@ -36,4 +35,8 @@ public class Task {
     @UpdateTimestamp
     @Column(name="updatedOn" ,nullable = false,insertable = false)
     private ZonedDateTime updatedOn;
+
+    public String getStatus() {
+        return status.getName();
+    }
 }

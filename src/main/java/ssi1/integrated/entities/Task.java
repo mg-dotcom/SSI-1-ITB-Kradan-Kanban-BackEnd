@@ -1,5 +1,6 @@
 package ssi1.integrated.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,10 +24,12 @@ public class Task {
     private String description;
     @Column(name="taskAssignees")
     private String assignees;
-    //connect with status
+
+    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "statusId")
+    @JoinColumn(name="statusId", nullable = false)
     private Status status;
+
     @CreationTimestamp
     @Column(name="createdOn",  nullable = false, updatable = false ,insertable = false )
     private ZonedDateTime createdOn;

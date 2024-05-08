@@ -1,15 +1,13 @@
 package ssi1.integrated.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,13 +15,15 @@ import java.util.Set;
 @Table(name = "status_v2")
 public class Status {
     @Id
-    private Integer statusId;
-    private String statusName;
-    private String statusDescription;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "statusId")
+    private Integer id;
+    @Column(name = "statusName")
+    private String name;
+    @Column(name = "statusDescription")
+    private String description;
     private String statusColor;
-
-    //connect with task
     @JsonIgnore
-    @OneToMany(mappedBy = "status")
-    private Set<Task> tasks=new LinkedHashSet<>();
+    @OneToMany(mappedBy="status")
+    private List<Task> tasks;
 }

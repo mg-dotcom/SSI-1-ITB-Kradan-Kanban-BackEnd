@@ -24,7 +24,7 @@ public class NewTaskDTO {
     @NotEmpty
     @Size(max = 30)
     private String assignees;
-    private String status;
+    private String statusName;
 
     public void setTitle(String title){
         this.title = title.trim();
@@ -38,8 +38,8 @@ public class NewTaskDTO {
         this.assignees = (assignees != null) ? assignees.trim() : assignees;
     }
 
-    public void setStatus(String status) {
-        this.status = (status == null || status.isEmpty()) ? "NO_STATUS" : status;
+    public void setStatusName(String status) {
+        this.statusName = (status == null || status.isEmpty()) ? "No Status" : status;
     }
 
 }

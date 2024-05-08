@@ -9,5 +9,5 @@ public class TaskDTO {
     private Integer id;
     private String title;
     private String assignees;
-    private String statusName;
+    private String status;
 }

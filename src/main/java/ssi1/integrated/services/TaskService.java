@@ -39,7 +39,6 @@ public class TaskService {
         );
     }
 
-
     @Transactional
     public NewTaskDTO insertNewTask(NewTaskDTO newTask) {
         Task task = modelMapper.map(newTask, Task.class);
@@ -65,6 +64,7 @@ public class TaskService {
         Task updatedTask = taskRepository.save(toBeUpdateTask);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }
+
     @Transactional
     public TaskDTO removeTask(Integer taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(
@@ -82,7 +82,4 @@ public class TaskService {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Status with name '" + statusName + "' not found");
     }
-
-
-
 }

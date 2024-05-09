@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "tasks_v2")
+@Table(name = "task")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

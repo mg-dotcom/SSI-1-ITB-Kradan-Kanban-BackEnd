@@ -48,7 +48,6 @@ public class TaskService {
         Task task = modelMapper.map(newTask, Task.class);
         Status existingStatus = findStatusByName(newTask.getStatusName());
         task.setStatus(existingStatus);
-        System.out.println(existingStatus);
         Task insertedTask = taskRepository.save(task);
         NewTaskDTO newTaskDTO = modelMapper.map(insertedTask, NewTaskDTO.class);
         return newTaskDTO;
@@ -63,8 +62,8 @@ public class TaskService {
         toBeUpdateTask.setTitle(updateTask.getTitle());
         toBeUpdateTask.setDescription(updateTask.getDescription());
         toBeUpdateTask.setAssignees(updateTask.getAssignees());
-//        toBeUpdateTask.setStatus(updateTask.getStatus());
-        System.out.println(updateTask.getStatusName());
+        Status existingStatus = findStatusByName(updateTask.getStatusName());
+        toBeUpdateTask.setStatus(existingStatus);
         Task updatedTask = taskRepository.save(toBeUpdateTask);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }
@@ -83,7 +82,7 @@ public class TaskService {
         if(status != null){
             return  status;
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Status with name '" + statusName + "' not found");
+        throw new ItemNotFoundException("NOT FOUND");
     }
 
 }

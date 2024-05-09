@@ -1,5 +1,6 @@
 package ssi1.integrated.dtos;
 
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,5 +10,5 @@ public class TaskDTO {
     private Integer id;
     private String title;
     private String assignees;
-    private String status;
+    private String statusName;
 }

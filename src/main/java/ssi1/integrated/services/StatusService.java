@@ -6,10 +6,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import ssi1.integrated.dtos.StatusDTO;
 import ssi1.integrated.entities.Status;
+import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StatusService {
@@ -20,14 +23,37 @@ public class StatusService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<Status> getAllStatus(){
-        return statusRepository.findAll();
+    public List<StatusDTO> getAllStatus(){
+        return statusRepository.findAll().stream()
+                .map(status -> modelMapper.map(status,StatusDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public Status addStatus(Status newStatus){
         Status existingStatus = statusRepository.findByName(newStatus.getName());
         return statusRepository.save(newStatus);
+    }
+
+    @Transactional
+    public Status deleteStatus(Integer statusId){
+        Status existingStatus=statusRepository.findById(statusId).orElseThrow(
+                ()->new ItemNotFoundException("NOT FOUND")
+        );
+
+        statusRepository.delete(existingStatus);
+        return existingStatus;
+
+    }
+
+    @Transactional
+    public StatusDTO tranferStatus(Integer statusId,Integer newStatusId){
+        Status oldStatus=statusRepository.findById(statusId).orElseThrow(
+                ()->new ItemNotFoundException("NOT FOUND")
+        );
+        Status newStatus=statusRepository.findById(newStatusId).orElseThrow(
+                ()->new ItemNotFoundException("NOT FOUND")
+        );
     }
 
 

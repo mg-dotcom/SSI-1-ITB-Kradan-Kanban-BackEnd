@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.NewTaskDTO;
+import ssi1.integrated.dtos.StatusDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.services.StatusService;
 
@@ -18,7 +19,7 @@ public class StatusController {
     public StatusService statusService;
 
     @GetMapping("")
-    public List<Status> getAllStatus(){
+    public List<StatusDTO> getAllStatus(){
         return statusService.getAllStatus();
     }
 
@@ -26,6 +27,12 @@ public class StatusController {
     public ResponseEntity<Status> addStatus(@RequestBody Status status){
         Status createdStatus = statusService.addStatus(status);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
+    }
+
+    @DeleteMapping("/{statusId}")
+    public Status deleteStatus(@PathVariable Integer statusId){
+        return statusService.deleteStatus(statusId);
+
     }
 
 

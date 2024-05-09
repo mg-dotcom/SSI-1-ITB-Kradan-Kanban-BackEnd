@@ -44,9 +44,9 @@ public class TaskService {
     @Transactional
     public NewTaskDTO insertNewTask(NewTaskDTO newTask) {
         Task task = modelMapper.map(newTask, Task.class);
-        Status existingStatus = findStatusByName(newTask.getStatus().getName());
+        Status existingStatus = findStatusByName(newTask.getStatusName());
         task.setStatus(existingStatus);
-        System.out.println(existingStatus);
+
         Task insertedTask = taskRepository.save(task);
         NewTaskDTO newTaskDTO = modelMapper.map(insertedTask, NewTaskDTO.class);
         return newTaskDTO;
@@ -58,12 +58,12 @@ public class TaskService {
         Task toBeUpdateTask = taskRepository.findById(taskId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")
         );
+        Status existingStatus=statusRepository.findByName(updateTask.getStatusName());
         toBeUpdateTask.setTitle(updateTask.getTitle());
         toBeUpdateTask.setDescription(updateTask.getDescription());
         toBeUpdateTask.setAssignees(updateTask.getAssignees());
 
-        toBeUpdateTask.setStatus(updateTask.getStatus());
-
+        toBeUpdateTask.setStatus(existingStatus);
         Task updatedTask = taskRepository.save(toBeUpdateTask);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }
@@ -85,16 +85,6 @@ public class TaskService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Status with name '" + statusName + "' not found");
     }
 
-//    public Task transferStatusTask(Integer toDeleteStatusId,Integer newExistingTaskStatusId){
-//        List<Status> allExistingStatus = statusRepository.findAll();
-//        Status toTransferStatus = allExistingStatus.
-//        List<Task> allExistingTask = taskRepository.findAll();
-//        for (Task task : allExistingTask) {
-//            task.setStatus( );
-//        }
-//
-//    }
-//
 
 
 

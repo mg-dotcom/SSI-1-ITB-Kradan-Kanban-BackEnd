@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import ssi1.integrated.dtos.StatusDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.services.StatusService;
@@ -17,31 +18,30 @@ import java.util.List;
 public class StatusController {
 
     @Autowired
-    private StatusService service;
+    private StatusService statusService;
 
     @GetMapping("")
+
     public List<StatusDTO> getAllStatus(){
-        return service.getAllStatus();
+        return statusService.getAllStatus();
     }
 
-    @GetMapping("/")
-    public List<Status> getAllStatusNotDTO(){
-        return service.getAllStatusNotDTO();
-    }
+
 
     @GetMapping("/{statusId}")
     public Status getStatusById(@PathVariable Integer statusId){
-        return service.getStatusById(statusId);
+        return statusService.getStatusById(statusId);
     }
 
     @PutMapping("/{statusId}")
-    public ResponseEntity<StatusDTO> updateStatus(@PathVariable Integer statusId, @RequestBody Status updateStatus){
-        return ResponseEntity.ok(service.updateStatus(statusId,updateStatus));
+
+    public ResponseEntity<Status> updateStatus(@PathVariable Integer statusId, @RequestBody Status updateStatus){
+        return ResponseEntity.ok(statusService.updateStatus(statusId,updateStatus));
     }
 
     @PostMapping("")
-    public ResponseEntity<StatusDTO> addStatus(@RequestBody Status status){
-        StatusDTO createdStatus = service.addStatus(status);
+    public ResponseEntity<Status> addStatus(@RequestBody Status status){
+        Status createdStatus = statusService.addStatus(status);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
     }
 
@@ -50,5 +50,9 @@ public class StatusController {
         return service.deleteStatus(statusId);
     }
 
+    @DeleteMapping("/{statusId}/{newStatusId}")
+    public ResponseEntity<Status>transfer(@PathVariable Integer statusId,@PathVariable Integer newStatusId){
+        return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
+    }
 
 }

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ssi1.integrated.dtos.TaskDTO;
 
 import java.util.List;
 

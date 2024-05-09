@@ -1,13 +1,17 @@
 package ssi1.integrated.dtos;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+import java.util.List;
 
+
+@Data
 public class StatusDTO {
     private Integer id;
     private String name;
     private String description;
+
+    private String statusColor;
+    private List<TaskDTO> tasks;
+
 }

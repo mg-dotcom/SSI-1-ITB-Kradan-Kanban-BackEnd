@@ -3,6 +3,7 @@ package ssi1.integrated.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import ssi1.integrated.dtos.StatusDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.services.StatusService;
@@ -19,8 +20,13 @@ public class StatusController {
     private StatusService service;
 
     @GetMapping("")
-    public List<Status> getAllStatus(){
+    public List<StatusDTO> getAllStatus(){
         return service.getAllStatus();
+    }
+
+    @GetMapping("/")
+    public List<Status> getAllStatusNotDTO(){
+        return service.getAllStatusNotDTO();
     }
 
     @GetMapping("/{statusId}")
@@ -38,5 +44,11 @@ public class StatusController {
         Status createdStatus = service.addStatus(status);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
     }
+
+    @DeleteMapping("/{statusId}")
+    public Status deleteStatus(@PathVariable Integer statusId){
+        return service.deleteStatus(statusId);
+    }
+
 
 }

@@ -22,6 +22,7 @@ public class NewTaskDTO {
     @NotEmpty
     @Size(max = 30)
     private String assignees;
+
     private Status status;
 
 
@@ -37,8 +38,10 @@ public class NewTaskDTO {
         this.assignees = (assignees != null) ? assignees.trim() : assignees;
     }
 
+
     public void setStatus(Status status) {
         this.status.setName(status == null ? "NO_STATUS" : status.getName());
+
     }
 
 }

@@ -60,7 +60,9 @@ public class TaskService {
         toBeUpdateTask.setTitle(updateTask.getTitle());
         toBeUpdateTask.setDescription(updateTask.getDescription());
         toBeUpdateTask.setAssignees(updateTask.getAssignees());
+
         toBeUpdateTask.setStatus(updateTask.getStatus());
+
         Task updatedTask = taskRepository.save(toBeUpdateTask);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }

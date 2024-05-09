@@ -86,18 +86,6 @@ public class TaskService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Status with name '" + statusName + "' not found");
     }
 
-    @Transactional
-    public Status transferStatus(Integer statusId,Integer newStatusId){
-        Status newStatus=statusRepository.findById(newStatusId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
-        List<Task> tasks=taskRepository.findByStatusId(statusId);
-        for (Task task:tasks){
-            task.setStatus(newStatus);
-        }
-        statusRepository.deleteById(statusId);
-        return newStatus;
 
-    }
 
 }

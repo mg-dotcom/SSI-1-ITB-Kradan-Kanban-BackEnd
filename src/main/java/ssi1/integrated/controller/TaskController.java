@@ -48,8 +48,4 @@ public class TaskController {
         return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO));
     }
 
-    @DeleteMapping("/{statusId}/{newStatusId}")
-    public ResponseEntity<Status>transfer(@PathVariable Integer statusId,@PathVariable Integer newStatusId){
-        return ResponseEntity.ok(service.transferStatus(statusId,newStatusId));
-    }
 }

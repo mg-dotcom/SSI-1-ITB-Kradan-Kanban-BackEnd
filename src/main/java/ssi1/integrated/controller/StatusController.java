@@ -35,10 +35,9 @@ public class StatusController {
 
     }
 
-    @GetMapping("/{statusId}")
-    public Status transfer(@PathVariable Integer statusId){
-        return statusService.deleteStatus(statusId);
-
+    @DeleteMapping("/{statusId}/{newStatusId}")
+    public ResponseEntity<Status>transfer(@PathVariable Integer statusId,@PathVariable Integer newStatusId){
+        return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
     }
 
 

@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.StatusDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Status;
+import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
@@ -47,6 +48,20 @@ public class StatusService {
         );
         statusRepository.delete(existingStatus);
         return existingStatus;
+
+    }
+
+    @Transactional
+    public Status transferStatus(Integer statusId,Integer newStatusId){
+        Status newStatus=statusRepository.findById(newStatusId).orElseThrow(
+                ()->new ItemNotFoundException("NOT FOUND")
+        );
+        List<Task> tasks=taskRepository.findByStatusId(statusId);
+        for (Task task:tasks){
+            task.setStatus(newStatus);
+        }
+        statusRepository.deleteById(statusId);
+        return newStatus;
 
     }
 

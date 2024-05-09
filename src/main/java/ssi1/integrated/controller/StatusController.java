@@ -22,7 +22,7 @@ public class StatusController {
 
     @GetMapping("")
 
-    public List<StatusDTO> getAllStatus(){
+    public List<Status> getAllStatus(){
         return statusService.getAllStatus();
     }
 
@@ -47,7 +47,7 @@ public class StatusController {
 
     @DeleteMapping("/{statusId}")
     public Status deleteStatus(@PathVariable Integer statusId){
-        return service.deleteStatus(statusId);
+        return statusService.deleteStatus(statusId);
     }
 
     @DeleteMapping("/{statusId}/{newStatusId}")

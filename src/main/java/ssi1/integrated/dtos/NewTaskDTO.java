@@ -44,9 +44,8 @@ public class NewTaskDTO {
     public void setAssignees(String assignees){
         this.assignees = (assignees != null) ? assignees.trim() : assignees;
     }
-  public void setStatus(Status status) {
-        this.status.setName(status == null ? "NO_STATUS" : status.getName());
-
+    public void setStatusName(String status) {
+        this.statusName = (status == null || status.isEmpty()) ? "No Status" : status;
     }
 
 }

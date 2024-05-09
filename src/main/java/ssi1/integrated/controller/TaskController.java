@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
+import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.services.TaskService;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -45,5 +46,10 @@ public class TaskController {
     @PutMapping("/{taskId}")
     public ResponseEntity<NewTaskDTO> updateTask(@PathVariable Integer taskId,@RequestBody NewTaskDTO newTaskDTO){
         return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO));
+    }
+
+    @DeleteMapping("/{statusId}/{newStatusId}")
+    public ResponseEntity<Status>transfer(@PathVariable Integer statusId,@PathVariable Integer newStatusId){
+        return ResponseEntity.ok(service.transferStatus(statusId,newStatusId));
     }
 }

@@ -35,5 +35,11 @@ public class StatusController {
 
     }
 
+    @GetMapping("/{statusId}")
+    public Status transfer(@PathVariable Integer statusId){
+        return statusService.deleteStatus(statusId);
+
+    }
+
 
 }

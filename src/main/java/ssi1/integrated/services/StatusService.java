@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.StatusDTO;
+import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
+import ssi1.integrated.repositories.TaskRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +21,9 @@ public class StatusService {
 
     @Autowired
     private StatusRepository statusRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -40,21 +45,12 @@ public class StatusService {
         Status existingStatus=statusRepository.findById(statusId).orElseThrow(
                 ()->new ItemNotFoundException("NOT FOUND")
         );
-
         statusRepository.delete(existingStatus);
         return existingStatus;
 
     }
 
-    @Transactional
-    public StatusDTO tranferStatus(Integer statusId,Integer newStatusId){
-        Status oldStatus=statusRepository.findById(statusId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
-        Status newStatus=statusRepository.findById(newStatusId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
-    }
+
 
 
 }

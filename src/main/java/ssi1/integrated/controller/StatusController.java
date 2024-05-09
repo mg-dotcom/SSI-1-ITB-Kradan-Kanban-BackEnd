@@ -40,8 +40,8 @@ public class StatusController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Status> addStatus(@RequestBody Status status){
-        Status createdStatus = service.addStatus(status);
+    public ResponseEntity<StatusDTO> addStatus(@RequestBody Status status){
+        StatusDTO createdStatus = service.addStatus(status);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
     }
 

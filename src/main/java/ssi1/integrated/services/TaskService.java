@@ -14,6 +14,7 @@ import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -83,5 +84,18 @@ public class TaskService {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Status with name '" + statusName + "' not found");
     }
+
+//    public Task transferStatusTask(Integer toDeleteStatusId,Integer newExistingTaskStatusId){
+//        List<Status> allExistingStatus = statusRepository.findAll();
+//        Status toTransferStatus = allExistingStatus.
+//        List<Task> allExistingTask = taskRepository.findAll();
+//        for (Task task : allExistingTask) {
+//            task.setStatus( );
+//        }
+//
+//    }
+//
+
+
 
 }

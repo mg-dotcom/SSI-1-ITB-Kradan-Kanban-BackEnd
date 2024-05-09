@@ -60,9 +60,11 @@ public class StatusService {
     }
 
     @Transactional
-    public Status addStatus(Status newStatus){
+    public StatusDTO addStatus(Status newStatus){
         Status existingStatus = statusRepository.findByName(newStatus.getName());
-        return statusRepository.save(existingStatus);
+        Status addedStatus =statusRepository.save(existingStatus);
+        StatusDTO newStatusDTO = modelMapper.map(addedStatus,StatusDTO.class);
+        return newStatusDTO;
     }
 
     @Transactional
@@ -70,22 +72,20 @@ public class StatusService {
         Status existingStatus=statusRepository.findById(statusId).orElseThrow(
                 ()->new ItemNotFoundException("NOT FOUND")
         );
-
         statusRepository.delete(existingStatus);
         return existingStatus;
-
     }
 
     @Transactional
-    public StatusDTO tranferStatus(Integer statusId,Integer newStatusId){
-        Status oldStatus=statusRepository.findById(statusId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
-        Status newStatus=statusRepository.findById(newStatusId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
+    public StatusDTO transferStatus(Integer statusId,Integer newStatusId){
+//        Status oldStatus=statusRepository.findById(statusId).orElseThrow(
+//                ()->new ItemNotFoundException("NOT FOUND")
+//        );
+//        Status newStatus=statusRepository.findById(newStatusId).orElseThrow(
+//                ()->new ItemNotFoundException("NOT FOUND")
+//        );
 
-        return 
+
     }
 
 }

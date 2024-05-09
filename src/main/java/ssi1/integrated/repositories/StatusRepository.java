@@ -10,6 +10,5 @@ import java.util.List;
 @Repository
 public interface StatusRepository extends JpaRepository<Status, Integer> {
     Status findByName(String statusName);
-
 }
 

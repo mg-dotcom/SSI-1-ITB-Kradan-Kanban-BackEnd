@@ -49,7 +49,7 @@ public class StatusService {
     }
 
     @Transactional
-    public StatusDTO updateStatus(Integer statusId, Status newStatus) {
+    public Status updateStatus(Integer statusId, Status newStatus) {
         Status toBeUpdateStatus = statusRepository.findById(statusId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")
         );
@@ -59,14 +59,21 @@ public class StatusService {
             toBeUpdateStatus.setStatusColor("#CCCCCC");
         } else toBeUpdateStatus.setStatusColor(newStatus.getStatusColor());
         Status updatedStatus = statusRepository.save(toBeUpdateStatus);
-        return modelMapper.map(updatedStatus, StatusDTO.class);
+//        return modelMapper.map(updatedStatus, StatusDTO.class);
+        return updatedStatus;
     }
 
     @Transactional
     public Status addStatus(Status newStatus){
-        Status existingStatus = statusRepository.findByName(newStatus.getName());
-        return statusRepository.save(existingStatus);
+        return statusRepository.save(newStatus);
     }
+//    @Transactional
+//    public StatusDTO addStatus(Status newStatus){
+//        Status existingStatus = statusRepository.findByName(newStatus.getName());
+//        Status addedStatus =statusRepository.save(existingStatus);
+//        StatusDTO newStatusDTO = modelMapper.map(addedStatus,StatusDTO.class);
+//        return newStatusDTO;
+//    }
 
     @Transactional
     public Status deleteStatus(Integer statusId){

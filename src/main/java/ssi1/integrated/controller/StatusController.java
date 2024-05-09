@@ -30,7 +30,7 @@ public class StatusController {
     }
 
     @PutMapping("/{statusId}")
-    public ResponseEntity<StatusDTO> updateStatus(@PathVariable Integer statusId, @RequestBody Status updateStatus){
+    public ResponseEntity<Status> updateStatus(@PathVariable Integer statusId, @RequestBody Status updateStatus){
         return ResponseEntity.ok(statusService.updateStatus(statusId,updateStatus));
     }
 

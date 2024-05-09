@@ -2,7 +2,6 @@ package ssi1.integrated.services;
 
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
-import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,11 +13,9 @@ import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-//import static ssi1.integrated.services.ListMapper.listMapper;
 
 @Service
 public class TaskService {
@@ -48,7 +45,7 @@ public class TaskService {
         Task task = modelMapper.map(newTask, Task.class);
         Status existingStatus = findStatusByName(newTask.getStatusName());
         task.setStatus(existingStatus);
-        System.out.println(existingStatus);
+
         Task insertedTask = taskRepository.save(task);
         NewTaskDTO newTaskDTO = modelMapper.map(insertedTask, NewTaskDTO.class);
         return newTaskDTO;
@@ -60,11 +57,11 @@ public class TaskService {
         Task toBeUpdateTask = taskRepository.findById(taskId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")
         );
+        Status existingStatus=statusRepository.findByName(updateTask.getStatusName());
         toBeUpdateTask.setTitle(updateTask.getTitle());
         toBeUpdateTask.setDescription(updateTask.getDescription());
         toBeUpdateTask.setAssignees(updateTask.getAssignees());
-//        toBeUpdateTask.setStatus(updateTask.getStatus());
-        System.out.println(updateTask.getStatusName());
+        toBeUpdateTask.setStatus(existingStatus);
         Task updatedTask = taskRepository.save(toBeUpdateTask);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }

@@ -7,10 +7,12 @@ import java.util.List;
 
 @Getter
 @Setter
+
 public class StatusDTO {
     private Integer id;
     private String name;
     private String description;
     private String statusColor;
     private List<TaskDTO> tasks;
+
 }

@@ -1,26 +1,37 @@
 package ssi1.integrated.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.StatusDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.services.StatusService;
-
+import org.springframework.http.HttpStatus;
 import java.util.List;
 
 @RestController
+
+@CrossOrigin(origins = {"http://localhost:5173","http://ip23ssi1.sit.kmutt.ac.th"})
 @RequestMapping("/v2/statuses")
 public class StatusController {
+
     @Autowired
-    public StatusService statusService;
+    private StatusService statusService;
 
     @GetMapping("")
-    public List<StatusDTO> getAllStatus(){
+    public List<Status> getAllStatus(){
         return statusService.getAllStatus();
+    }
+
+    @GetMapping("/{statusId}")
+    public Status getStatusById(@PathVariable Integer statusId){
+        return statusService.getStatusById(statusId);
+    }
+
+    @PutMapping("/{statusId}")
+    public ResponseEntity<StatusDTO> updateStatus(@PathVariable Integer statusId, @RequestBody Status updateStatus){
+        return ResponseEntity.ok(statusService.updateStatus(statusId,updateStatus));
     }
 
     @PostMapping("")
@@ -39,6 +50,5 @@ public class StatusController {
     public ResponseEntity<Status>transfer(@PathVariable Integer statusId,@PathVariable Integer newStatusId){
         return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
     }
-
 
 }

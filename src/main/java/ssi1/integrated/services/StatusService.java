@@ -1,19 +1,20 @@
 package ssi1.integrated.services;
-
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.StatusDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
+import ssi1.integrated.dtos.StatusDTO;
+import ssi1.integrated.entities.Status;
+import ssi1.integrated.exception.ItemNotFoundException;
+import java.util.List;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,16 +30,42 @@ public class StatusService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<StatusDTO> getAllStatus(){
-        return statusRepository.findAll().stream()
-                .map(status -> modelMapper.map(status,StatusDTO.class))
-                .collect(Collectors.toList());
+
+//    public List<StatusDTO> getAllStatus(){
+//        return statusRepository.findAll().stream()
+//                .map(status -> modelMapper.map(status,StatusDTO.class))
+//                .collect(Collectors.toList());
+
+    public List<Status> getAllStatus() {
+        return statusRepository.findAll();
+
+    }
+
+    public Status getStatusById(Integer statusId){
+        return statusRepository.findById(statusId).orElseThrow(
+                ()->new ItemNotFoundException("NOT FOUND")
+        );
+
+    }
+
+    @Transactional
+    public StatusDTO updateStatus(Integer statusId, Status newStatus) {
+        Status toBeUpdateStatus = statusRepository.findById(statusId).orElseThrow(
+                () -> new ItemNotFoundException("NOT FOUND")
+        );
+        toBeUpdateStatus.setName(newStatus.getName());
+        toBeUpdateStatus.setDescription(newStatus.getDescription());
+        if (newStatus.getStatusColor() == null || newStatus.getStatusColor().isEmpty()) {
+            toBeUpdateStatus.setStatusColor("#CCCCCC");
+        } else toBeUpdateStatus.setStatusColor(newStatus.getStatusColor());
+        Status updatedStatus = statusRepository.save(toBeUpdateStatus);
+        return modelMapper.map(updatedStatus, StatusDTO.class);
     }
 
     @Transactional
     public Status addStatus(Status newStatus){
         Status existingStatus = statusRepository.findByName(newStatus.getName());
-        return statusRepository.save(newStatus);
+        return statusRepository.save(existingStatus);
     }
 
     @Transactional
@@ -64,8 +91,5 @@ public class StatusService {
         return newStatus;
 
     }
-
-
-
 
 }

@@ -14,7 +14,6 @@ import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -40,7 +39,6 @@ public class TaskService {
         );
     }
 
-
     @Transactional
     public NewTaskDTO insertNewTask(NewTaskDTO newTask) {
         Task task = modelMapper.map(newTask, Task.class);
@@ -62,11 +60,11 @@ public class TaskService {
         toBeUpdateTask.setTitle(updateTask.getTitle());
         toBeUpdateTask.setDescription(updateTask.getDescription());
         toBeUpdateTask.setAssignees(updateTask.getAssignees());
-
         toBeUpdateTask.setStatus(existingStatus);
         Task updatedTask = taskRepository.save(toBeUpdateTask);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }
+
     @Transactional
     public TaskDTO removeTask(Integer taskId) {
         Task task = taskRepository.findById(taskId).orElseThrow(
@@ -84,8 +82,4 @@ public class TaskService {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Status with name '" + statusName + "' not found");
     }
-
-
-
-
 }

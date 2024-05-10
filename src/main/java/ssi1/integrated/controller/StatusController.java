@@ -3,8 +3,7 @@ package ssi1.integrated.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ssi1.integrated.dtos.NewTaskDTO;
-import ssi1.integrated.dtos.StatusDTO;
+import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.services.StatusService;
 import org.springframework.http.HttpStatus;
@@ -35,8 +34,8 @@ public class StatusController {
     }
 
     @PostMapping("")
-    public ResponseEntity<Status> addStatus(@RequestBody Status status){
-        Status createdStatus = statusService.addStatus(status);
+    public ResponseEntity<NewStatusDTO> addStatus(@RequestBody NewStatusDTO newStatusDTO){
+        NewStatusDTO createdStatus = statusService.insertNewStatus(newStatusDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
     }
 

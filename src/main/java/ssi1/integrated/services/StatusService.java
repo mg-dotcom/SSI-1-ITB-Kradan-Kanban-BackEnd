@@ -25,10 +25,6 @@ public class StatusService {
     private ModelMapper modelMapper;
 
 
-//    public List<StatusDTO> getAllStatus(){
-//        return statusRepository.findAll().stream()
-//                .map(status -> modelMapper.map(status,StatusDTO.class))
-//                .collect(Collectors.toList());
 
     public List<Status> getAllStatus() {
         return statusRepository.findAll();

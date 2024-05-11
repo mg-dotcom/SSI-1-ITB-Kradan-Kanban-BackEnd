@@ -6,17 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-
-import ssi1.integrated.entities.Status;
-
-
-
 @Data
 public class NewTaskDTO {
-    @NotNull
     private Integer id;
     @NotNull
     @NotEmpty
@@ -28,8 +19,7 @@ public class NewTaskDTO {
     @NotEmpty
     @Size(max = 30)
     private String assignees;
-    private String statusName;
-
+    private Integer statusId;
 
     public void setTitle(String title){
         this.title = title.trim();
@@ -43,8 +33,5 @@ public class NewTaskDTO {
         this.assignees = (assignees != null) ? assignees.trim() : assignees;
     }
 
-    public void setStatusName(String status) {
-        this.statusName = (status == null || status.isEmpty()) ? "No Status" : status;
-    }
 
 }

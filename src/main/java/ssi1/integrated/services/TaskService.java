@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Status;
@@ -27,11 +28,12 @@ public class TaskService {
     private ModelMapper modelMapper;
 
 
-    public List<TaskDTO> getAllTasks() {
+    public List<GeneralTaskDTO> getAllTasks() {
         return taskRepository.findAll().stream()
-                .map(task -> modelMapper.map(task, TaskDTO.class))
+                .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());
     }
+
 
     public Task getTaskById(Integer taskId){
         return taskRepository.findById(taskId).orElseThrow(
@@ -40,46 +42,37 @@ public class TaskService {
     }
 
     @Transactional
-    public NewTaskDTO insertNewTask(NewTaskDTO newTask) {
+    public GeneralTaskDTO insertNewTask(NewTaskDTO newTask) {
+        Status status = statusRepository.findById(newTask.getStatusId())
+                .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
         Task task = modelMapper.map(newTask, Task.class);
-        Status existingStatus = findStatusByName(newTask.getStatusName());
-        task.setStatus(existingStatus);
-
+        task.setStatus(status);
         Task insertedTask = taskRepository.save(task);
-        NewTaskDTO newTaskDTO = modelMapper.map(insertedTask, NewTaskDTO.class);
-        return newTaskDTO;
+        return modelMapper.map(insertedTask, GeneralTaskDTO.class);
     }
 
-
     @Transactional
-    public NewTaskDTO updateTask(Integer taskId,NewTaskDTO updateTask){
-        Task toBeUpdateTask = taskRepository.findById(taskId).orElseThrow(
-                () -> new ItemNotFoundException("NOT FOUND")
-        );
-        Status existingStatus=statusRepository.findByName(updateTask.getStatusName());
-        toBeUpdateTask.setTitle(updateTask.getTitle());
-        toBeUpdateTask.setDescription(updateTask.getDescription());
-        toBeUpdateTask.setAssignees(updateTask.getAssignees());
-        toBeUpdateTask.setStatus(existingStatus);
-        Task updatedTask = taskRepository.save(toBeUpdateTask);
+    public NewTaskDTO updateTask(Integer taskId,NewTaskDTO inputTask){
+        Boolean isExistingTask = taskRepository.existsById(taskId);
+        if(!isExistingTask){
+            throw new ItemNotFoundException("NOT FOUND");
+        }
+        Task task =  modelMapper.map(inputTask, Task.class);
+        task.setId(taskId);
+        Task updatedTask = taskRepository.save(task);
         return modelMapper.map(updatedTask, NewTaskDTO.class);
     }
 
     @Transactional
     public TaskDTO removeTask(Integer taskId) {
-        Task task = taskRepository.findById(taskId).orElseThrow(
-                () -> new ItemNotFoundException("NOT FOUND")
-        );
+        Boolean isExistingTask = taskRepository.existsById(taskId);
+        if(!isExistingTask){
+            throw new ItemNotFoundException("NOT FOUND");
+        }
+        Task task = getTaskById(taskId);
         TaskDTO deletedTask = modelMapper.map(task,TaskDTO.class);
         taskRepository.delete(task);
         return deletedTask;
     }
 
-    public Status findStatusByName(String statusName){
-        Status status = statusRepository.findByName(statusName);
-        if(status != null){
-            return  status;
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Status with name '" + statusName + "' not found");
-    }
 }

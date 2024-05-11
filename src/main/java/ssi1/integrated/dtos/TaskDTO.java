@@ -1,11 +1,9 @@
 package ssi1.integrated.dtos;
 
-import jakarta.persistence.ManyToOne;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+
+@Data
 public class TaskDTO {
     private Integer id;
     private String title;

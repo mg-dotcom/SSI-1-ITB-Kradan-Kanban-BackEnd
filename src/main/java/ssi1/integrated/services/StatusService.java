@@ -58,6 +58,7 @@ public class StatusService {
     public NewStatusDTO insertNewStatus(NewStatusDTO newStatusDTO) {
         Status status = modelMapper.map(newStatusDTO, Status.class);
         System.out.println(status);
+
         Status insertedStatus = statusRepository.save(status);
         NewStatusDTO mappedStatus = modelMapper.map(insertedStatus, NewStatusDTO.class);
         return mappedStatus;
@@ -90,9 +91,13 @@ public class StatusService {
         for (Task task:tasks){
             task.setStatus(newStatus);
         }
+
         statusRepository.deleteById(statusId);
         return newStatus;
 
     }
+
+
+
 
 }

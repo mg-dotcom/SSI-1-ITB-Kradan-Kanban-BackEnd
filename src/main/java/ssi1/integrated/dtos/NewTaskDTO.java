@@ -19,7 +19,7 @@ public class NewTaskDTO {
     @NotEmpty
     @Size(max = 30)
     private String assignees;
-    private Integer statusId;
+    private Integer status;
 
     public void setTitle(String title){
         this.title = title.trim();

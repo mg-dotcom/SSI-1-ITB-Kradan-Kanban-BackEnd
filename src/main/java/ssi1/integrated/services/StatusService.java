@@ -40,13 +40,13 @@ public class StatusService {
 
     @Transactional
     public Status updateStatus(Integer statusId, Status newStatus) {
-        if (statusId.equals(1)) {
+        if (statusId.equals(1)||newStatus.getName() == null || newStatus.getName().isBlank()) {
             throw new IllegalArgumentException("Updating status with ID 1 is not allowed");
         }
         Status toBeUpdateStatus = statusRepository.findById(statusId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")
         );
-        toBeUpdateStatus.setName(newStatus.getName().trim());
+        toBeUpdateStatus.setName(newStatus.getName());
         toBeUpdateStatus.setDescription(newStatus.getDescription());
         if (newStatus.getStatusColor() == null || newStatus.getStatusColor().isEmpty()) {
             toBeUpdateStatus.setStatusColor("#CCCCCC");

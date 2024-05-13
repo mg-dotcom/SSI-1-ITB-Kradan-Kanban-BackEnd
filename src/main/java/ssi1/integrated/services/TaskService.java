@@ -24,6 +24,9 @@ public class TaskService {
     private TaskRepository taskRepository;
     @Autowired
     private StatusRepository statusRepository;
+
+    @Autowired
+    private StatusService statusService;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -57,10 +60,18 @@ public class TaskService {
         if(!isExistingTask){
             throw new ItemNotFoundException("NOT FOUND");
         }
+        Status status = statusService.getStatusById(inputTask.getStatus());
         Task task =  modelMapper.map(inputTask, Task.class);
+        task.setStatus(status);
         task.setId(taskId);
         Task updatedTask = taskRepository.save(task);
-        return modelMapper.map(updatedTask, NewTaskDTO.class);
+        NewTaskDTO updatedTaskDTO = new NewTaskDTO();
+        updatedTaskDTO.setId(updatedTask.getId());
+        updatedTaskDTO.setDescription(updatedTask.getDescription());
+        updatedTaskDTO.setTitle(updatedTask.getTitle());
+        updatedTaskDTO.setAssignees(updatedTask.getAssignees());
+        updatedTaskDTO.setStatus(updatedTask.getStatus().getId());
+        return updatedTaskDTO;
     }
 
     @Transactional

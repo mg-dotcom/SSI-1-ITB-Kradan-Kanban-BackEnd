@@ -32,6 +32,6 @@ public class NewStatusDTO {
     }
 
     public void setStatusColor(String statusColor){
-        this.statusColor = (statusColor != null) ? statusColor.trim() : "#CCCCC";
+        this.statusColor = (statusColor != null) ? statusColor.trim() : "#CCCCCC";
     }
 }

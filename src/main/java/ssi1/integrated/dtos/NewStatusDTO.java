@@ -22,6 +22,7 @@ public class NewStatusDTO {
     private String description;
     private String statusColor;
 
+<<<<<<< HEAD
 
     public void setName(String title){
         this.name = title.trim();
@@ -35,3 +36,17 @@ public class NewStatusDTO {
         this.statusColor = (statusColor != null) ? statusColor.trim() : statusColor;
     }
 }
+=======
+    public void setName(String name){
+        this.name = name.trim();
+    }
+
+    public void setDescription(String description){
+        this.description =  (description != null) ? description.trim() : null;
+    }
+
+    public void setStatusColor(String statusColor){
+        this.statusColor = (statusColor != null) ? statusColor.trim() : null;
+    }
+}
+>>>>>>> 84e22339caba39484031051a26d0cde2485e0397

@@ -43,7 +43,7 @@ public class TaskService {
 
     @Transactional
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask) {
-        Status status = statusRepository.findById(newTask.getStatusId())
+        Status status = statusRepository.findById(newTask.getStatus())
                 .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
         Task task = modelMapper.map(newTask, Task.class);
         task.setStatus(status);

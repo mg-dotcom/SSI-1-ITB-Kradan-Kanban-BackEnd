@@ -36,4 +36,8 @@ public class Status {
     @JsonIgnore
     @OneToMany(mappedBy="status")
     private List<Task> tasks;
+
+    public void setDescription(String description){
+        this.description =  (description != null) ? description.trim() : description;
+    }
 }

@@ -1,13 +1,16 @@
 package ssi1.integrated.dtos;
 
+
 import lombok.Getter;
 import lombok.Setter;
+import ssi1.integrated.entities.Status;
 
 @Getter
 @Setter
-public class TaskDTO {
+public class GeneralTaskDTO {
     private Integer id;
     private String title;
+    private String description;
     private String assignees;
-    private String statusName;
+    private Status status;
 }

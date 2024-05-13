@@ -3,11 +3,12 @@ package ssi1.integrated.dtos;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import org.hibernate.validator.constraints.UniqueElements;
+import lombok.Getter;
+import lombok.Setter;
 
 
-@Data
+@Getter
+@Setter
 
 public class NewStatusDTO {
     @NotNull
@@ -31,6 +32,6 @@ public class NewStatusDTO {
     }
 
     public void setStatusColor(String statusColor){
-        this.statusColor = (statusColor != null) ? statusColor.trim() : statusColor;
+        this.statusColor = (statusColor != null) ? statusColor.trim() : "#CCCCCC";
     }
 }

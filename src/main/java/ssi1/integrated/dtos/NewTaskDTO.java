@@ -26,19 +26,17 @@ public class NewTaskDTO {
     }
 
     public void setDescription(String description){
-        // Trim the description and check if it becomes an empty string
         String trimmedDescription = (description != null) ? description.trim() : null;
-        // If the trimmed description is an empty string, set this.description to null
         this.description = (trimmedDescription != null && !trimmedDescription.isEmpty()) ? trimmedDescription : null;
     }
 
     public void setAssignees(String assignees){
-        // Trim the assignees and check if it becomes an empty string
         String trimmedAssignees = (assignees != null) ? assignees.trim() : null;
-        // If the trimmed assignees is an empty string, set this.assignees to null
         this.assignees = (trimmedAssignees != null && !trimmedAssignees.isEmpty()) ? trimmedAssignees : null;
+    }
 
-
+    public void setStatus(Integer statusId){
+        this.status = (statusId != null) ? statusId : 1;
     }
 
 

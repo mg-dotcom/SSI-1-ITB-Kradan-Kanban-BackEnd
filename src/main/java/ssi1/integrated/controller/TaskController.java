@@ -25,9 +25,19 @@ public class TaskController {
     private TaskService service;
 
     @GetMapping("")
-    public List<GeneralTaskDTO>getAllTasks(){
-        return service.getAllTasks();
+    public List<GeneralTaskDTO>getAllTasks(
+            @RequestParam(defaultValue = "id") String sortBy
+    ){
+        return service.getAllTasks(sortBy);
     }
+
+//    @GetMapping("")
+//    public List<GeneralTaskDTO>getAllTasks(
+//            @RequestParam(defaultValue = "") String sortBy
+//    ){
+//        return service.sortingAllTasks(sortBy);
+//    }
+
 
     @GetMapping("/{taskId}")
     public ResponseEntity<Task> getTaskById(@PathVariable Integer taskId){

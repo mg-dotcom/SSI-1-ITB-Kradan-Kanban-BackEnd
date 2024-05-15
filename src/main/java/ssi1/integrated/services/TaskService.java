@@ -3,6 +3,7 @@ package ssi1.integrated.services;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,11 +32,18 @@ public class TaskService {
     private ModelMapper modelMapper;
 
 
-    public List<GeneralTaskDTO> getAllTasks() {
-        return taskRepository.findAll().stream()
+    public List<GeneralTaskDTO> getAllTasks(String sortBy) {
+        return taskRepository.findAll(Sort.by(sortBy)).stream()
                 .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());
     }
+
+//    public List<GeneralTaskDTO>  sortingAllTasks(String sortBy){
+//        List<GeneralTaskDTO> allStatusName=taskRepository.findAll(Sort.by(sortBy)).stream()
+//                .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
+//                .collect(Collectors.toList());
+//        return allStatusName;
+//    }
 
 
     public Task getTaskById(Integer taskId){

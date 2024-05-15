@@ -15,6 +15,8 @@ import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,19 +34,33 @@ public class TaskService {
     private ModelMapper modelMapper;
 
 
-    public List<GeneralTaskDTO> getAllTasks(String sortBy) {
-        return taskRepository.findAll(Sort.by(sortBy)).stream()
+    public List<GeneralTaskDTO> getAllTasks(String[] sortBy,List<String> partOfName,String[] direction) {
+        if (sortBy == null || sortBy.length ==0) {
+            sortBy = new String[1];
+
+        }
+        List<Sort.Order> sortOrders = new ArrayList<>();
+        if (sortBy != null) {
+            for (int i=0;i<sortBy.length;i++) {
+                sortOrders.add(new Sort.Order((direction[i].equalsIgnoreCase ("asc") ?
+                        Sort.Direction.ASC: Sort.Direction.DESC), sortBy[i]));
+
+            }
+
+        }
+        if (partOfName == null) return taskRepository.getAllBy(Sort.by(sortOrders)).stream().map(task -> modelMapper.map(task, GeneralTaskDTO.class))
+                .collect(Collectors.toList());
+
+        return taskRepository.findByStatusContains(Sort.by(sortOrders),partOfName).stream()
                 .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());
     }
-
 //    public List<GeneralTaskDTO>  sortingAllTasks(String sortBy){
 //        List<GeneralTaskDTO> allStatusName=taskRepository.findAll(Sort.by(sortBy)).stream()
 //                .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
 //                .collect(Collectors.toList());
 //        return allStatusName;
 //    }
-
 
     public Task getTaskById(Integer taskId){
         return taskRepository.findById(taskId).orElseThrow(

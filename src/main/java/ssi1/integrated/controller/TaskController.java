@@ -26,9 +26,11 @@ public class TaskController {
 
     @GetMapping("")
     public List<GeneralTaskDTO>getAllTasks(
-            @RequestParam(defaultValue = "id") String sortBy
+            @RequestParam(defaultValue = "id") String[] sortBy,
+            @RequestParam(defaultValue = "No Status") List<String> partOfName,
+            @RequestParam(defaultValue = "ASC") String[] direction
     ){
-        return service.getAllTasks(sortBy);
+        return service.getAllTasks(sortBy, partOfName,direction);
     }
 
 //    @GetMapping("")

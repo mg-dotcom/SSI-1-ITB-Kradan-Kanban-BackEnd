@@ -46,8 +46,13 @@ public class StatusController {
     }
 
     @DeleteMapping("/{statusId}/{newStatusId}")
-    public ResponseEntity<Status>transfer(@PathVariable Integer statusId,@PathVariable Integer newStatusId){
+    public ResponseEntity<Status> transfer(@PathVariable Integer statusId,@PathVariable Integer newStatusId){
         return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
     }
+
+//    @PatchMapping("/{statusId}/maximum-task")
+//    public ResponseEntity<Status> limitStatus(@PathVariable Integer statusId, @RequestBody Status limitStatus){
+//      return ResponseEntity.ok()
+//    }
 
 }

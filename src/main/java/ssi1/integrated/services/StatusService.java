@@ -52,7 +52,6 @@ public class StatusService {
             toBeUpdateStatus.setStatusColor("#CCCCCC");
         } else toBeUpdateStatus.setStatusColor(newStatus.getStatusColor());
         Status updatedStatus = statusRepository.save(toBeUpdateStatus);
-//        return modelMapper.map(updatedStatus, StatusDTO.class);
         return updatedStatus;
     }
 
@@ -66,14 +65,6 @@ public class StatusService {
         NewStatusDTO mappedStatus = modelMapper.map(insertedStatus, NewStatusDTO.class);
         return mappedStatus;
     }
-
-//    @Transactional
-//    public StatusDTO addStatus(Status newStatus){
-//        Status existingStatus = statusRepository.findByName(newStatus.getName());
-//        Status addedStatus =statusRepository.save(existingStatus);
-//        StatusDTO newStatusDTO = modelMapper.map(addedStatus,StatusDTO.class);
-//        return newStatusDTO;
-//    }
 
     @Transactional
     public Status deleteStatus(Integer statusId){
@@ -97,7 +88,6 @@ public class StatusService {
 
         statusRepository.deleteById(statusId);
         return newStatus;
-
     }
 
 

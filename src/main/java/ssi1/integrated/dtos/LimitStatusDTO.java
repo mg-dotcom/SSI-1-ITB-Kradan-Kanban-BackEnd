@@ -1,17 +1,17 @@
 package ssi1.integrated.dtos;
 
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Getter
 @Setter
-
-public class NewStatusDTO {
-    private Integer id;
+public class LimitStatusDTO {
+   @NotNull
+   private Integer id;
     @NotNull
     @NotEmpty
     @Size(max = 50)
@@ -19,8 +19,8 @@ public class NewStatusDTO {
     @NotEmpty
     @Size(max = 200)
     private String description;
-    private String statusColor;
-
+    @NotNull
+    private Boolean limitMaximumTask;
 
     public void setName(String title){
         this.name = title.trim();
@@ -30,7 +30,5 @@ public class NewStatusDTO {
         this.description =  (description != null) ? description.trim() : description;
     }
 
-    public void setStatusColor(String statusColor){
-        this.statusColor = (statusColor != null) ? statusColor.trim() : "#CCCCCC";
-    }
+
 }

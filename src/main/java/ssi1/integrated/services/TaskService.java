@@ -34,23 +34,30 @@ public class TaskService {
     private ModelMapper modelMapper;
 
 
-    public List<GeneralTaskDTO> getAllTasks(String[] sortBy,List<String> partOfName,String[] direction) {
-        if (sortBy == null || sortBy.length ==0) {
-            sortBy = new String[1];
+    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> partOfName, String direction) {
+        if (sortBy == null || sortBy.isEmpty()) {
+            sortBy = "id"; // Replace with a default name
+        }
+        // Fallback to default direction if direction is null
+        if (direction == null || direction.isEmpty()) {
+            direction = "asc"; // Default direction
 
         }
-        List<Sort.Order> sortOrders = new ArrayList<>();
-        if (sortBy != null) {
-            for (int i=0;i<sortBy.length;i++) {
-                sortOrders.add(new Sort.Order((direction[i].equalsIgnoreCase ("asc") ?
-                        Sort.Direction.ASC: Sort.Direction.DESC), sortBy[i]));
 
-            }
+        Sort.Order sortOrder = new Sort.Order(
+                direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
+                sortBy
+        );
+
+        Sort sort = Sort.by(sortOrder);
+
+        if (partOfName == null) {
+            return taskRepository.getAllBy(sort).stream()
+                    .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
+                    .collect(Collectors.toList());
         }
-        if (partOfName == null) return taskRepository.getAllBy(Sort.by(sortOrders)).stream().map(task -> modelMapper.map(task, GeneralTaskDTO.class))
-                .collect(Collectors.toList());
 
-        return taskRepository.findByStatusContains(Sort.by(sortOrders),partOfName).stream()
+        return taskRepository.findByStatusContains(sort, partOfName).stream()
                 .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());
     }

@@ -3,6 +3,9 @@ package ssi1.integrated.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ssi1.integrated.dtos.EditLimitDTO;
+import ssi1.integrated.dtos.GeneralTaskDTO;
+import ssi1.integrated.dtos.LimitStatusDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.services.StatusService;
@@ -50,9 +53,14 @@ public class StatusController {
         return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
     }
 
-//    @PatchMapping("/{statusId}/maximum-task")
-//    public ResponseEntity<Status> limitStatus(@PathVariable Integer statusId, @RequestBody Status limitStatus){
-//      return ResponseEntity.ok()
-//    }
+    @PatchMapping("/limitStatus")
+    public List<LimitStatusDTO> updateAllStatusWithLimit(@RequestBody EditLimitDTO editLimitDTO){
+        return  statusService.updateAllStatusWithLimit(editLimitDTO);
+    }
+
+    @PatchMapping("/{statusId}/maximum-task")
+    public ResponseEntity<LimitStatusDTO> limitStatus(@PathVariable Integer statusId, @RequestBody LimitStatusDTO limitStatus){
+      return ResponseEntity.ok(statusService.updateStatusWithLimit(statusId,limitStatus));
+    }
 
 }

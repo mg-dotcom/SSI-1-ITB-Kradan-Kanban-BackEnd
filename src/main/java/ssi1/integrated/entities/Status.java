@@ -1,6 +1,9 @@
 package ssi1.integrated.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.NullSerializer;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -26,6 +29,13 @@ public class Status {
     private String description;
     private String statusColor;
 
+    @Column(name = "LimitMaximumTask")
+    private Boolean LimitMaximumTask;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Column(name = "maximumTask")
+    private Integer maximumTask;
+
     @CreationTimestamp
     @Column(name="createdOn",  nullable = false, updatable = false ,insertable = false )
     private ZonedDateTime createdOn;
@@ -38,9 +48,12 @@ public class Status {
     private List<Task> tasks;
 
     public void setName(String name){
-        this.name =  (name != null) ? name.trim() : name;
+        this.name =  (name != null) ? name.trim() : null;
     }
-    public void setDescription(String description){
-        this.description =  (description != null) ? description.trim() : description;
+
+    public void setDescription(String description) {
+        this.description = (description != null) ? description.trim() : null;
     }
+
+
 }

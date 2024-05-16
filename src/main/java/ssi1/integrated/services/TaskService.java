@@ -46,7 +46,6 @@ public class TaskService {
                         Sort.Direction.ASC: Sort.Direction.DESC), sortBy[i]));
 
             }
-
         }
         if (partOfName == null) return taskRepository.getAllBy(Sort.by(sortOrders)).stream().map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());

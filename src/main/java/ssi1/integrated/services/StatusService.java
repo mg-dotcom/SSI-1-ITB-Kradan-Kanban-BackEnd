@@ -115,7 +115,7 @@ public class StatusService {
     @Transactional
     public LimitStatusDTO updateStatusWithLimit(Integer statusId, LimitStatusDTO limitStatusDTO) {
         Status status = statusRepository.findById(statusId)
-                .orElseThrow(() -> new ItemNotFoundException("Status not found with ID: " + statusId));
+                .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
 
         int maximumTask = status.getMaximumTask();
         int noOfTask = status.getTasks().size();

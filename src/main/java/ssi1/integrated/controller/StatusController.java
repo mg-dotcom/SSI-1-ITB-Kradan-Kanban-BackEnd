@@ -10,6 +10,8 @@ import ssi1.integrated.dtos.LimitStatusDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.StatusSetting;
+import ssi1.integrated.exception.ItemNotFoundException;
+import ssi1.integrated.repositories.StatusSettingRepository;
 import ssi1.integrated.services.StatusService;
 import org.springframework.http.HttpStatus;
 import ssi1.integrated.services.StatusSettingService;
@@ -29,11 +31,31 @@ public class StatusController {
     @Autowired
     private StatusSettingService statusSettingService;
 
+    @Autowired
+    private StatusSettingRepository statusSettingRepository;
 
+
+    @GetMapping("")
+    public List<Status> getAllStatus(){
+        return  statusService.getAllStatus();
+    }
     @GetMapping("/{statusSettingId}/maximum-task")
     public Optional<StatusSetting> getStatusSetting(@PathVariable Integer statusSettingId){
         return statusSettingService.getStatusSettingById(statusSettingId);
     }
+
+    @PatchMapping("/{statusSettingId}/maximum-task")
+    public StatusSetting updateStatusSetting(@PathVariable Integer statusSettingId, @RequestBody(required = false) EditLimitDTO updateStatusSetting) {
+        if (updateStatusSetting != null) {
+            return statusSettingService.updateStatusSetting(statusSettingId, updateStatusSetting);
+        } else {
+            StatusSetting statusSetting = statusSettingRepository.findById(statusSettingId)
+                    .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+            statusSetting.setLimitMaximumTask(!statusSetting.getLimitMaximumTask());
+            return statusSettingRepository.save(statusSetting);
+        }
+    }
+
 
     @GetMapping("/{statusId}")
     public Status getStatusById(@PathVariable Integer statusId){
@@ -41,7 +63,7 @@ public class StatusController {
     }
 
     @PutMapping("/{statusId}")
-    public ResponseEntity<Status> updateStatus(@PathVariable Integer statusId, @RequestBody Status updateStatus){
+    public ResponseEntity<Status> updateStatus(@PathVariable Integer statusId, @RequestBody(required = false) Status updateStatus){
         return ResponseEntity.ok(statusService.updateStatus(statusId,updateStatus));
     }
 

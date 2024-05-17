@@ -47,13 +47,4 @@ public class Status {
     @OneToMany(mappedBy="status")
     private List<Task> tasks;
 
-    public void setName(String name){
-        this.name =  (name != null) ? name.trim() : null;
-    }
-
-    public void setDescription(String description) {
-        this.description = (description != null) ? description.trim() : null;
-    }
-
-
 }

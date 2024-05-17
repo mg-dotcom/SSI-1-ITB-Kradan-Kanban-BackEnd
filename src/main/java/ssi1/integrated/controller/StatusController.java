@@ -1,5 +1,6 @@
 package ssi1.integrated.controller;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,9 +9,13 @@ import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.LimitStatusDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.entities.Status;
+import ssi1.integrated.entities.StatusSetting;
 import ssi1.integrated.services.StatusService;
 import org.springframework.http.HttpStatus;
+import ssi1.integrated.services.StatusSettingService;
+
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 
@@ -21,9 +26,13 @@ public class StatusController {
     @Autowired
     private StatusService statusService;
 
-    @GetMapping("")
-    public List<Status> getAllStatus(){
-        return statusService.getAllStatus();
+    @Autowired
+    private StatusSettingService statusSettingService;
+
+
+    @GetMapping("/{statusSettingId}/maximum-task")
+    public Optional<StatusSetting> getStatusSetting(@PathVariable Integer statusSettingId){
+        return statusSettingService.getStatusSettingById(statusSettingId);
     }
 
     @GetMapping("/{statusId}")
@@ -45,7 +54,6 @@ public class StatusController {
     @DeleteMapping("/{statusId}")
     public Status deleteStatus(@PathVariable Integer statusId){
         return statusService.deleteStatus(statusId);
-
     }
 
     @DeleteMapping("/{statusId}/{newStatusId}")
@@ -53,14 +61,13 @@ public class StatusController {
         return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
     }
 
-    @PatchMapping("/limitStatus")
-    public List<LimitStatusDTO> updateAllStatusWithLimit(@RequestBody EditLimitDTO editLimitDTO){
-        return  statusService.updateAllStatusWithLimit(editLimitDTO);
-    }
-
-    @PatchMapping("/{statusId}/maximum-task")
-    public ResponseEntity<LimitStatusDTO> limitStatus(@PathVariable Integer statusId, @RequestBody LimitStatusDTO limitStatus){
-      return ResponseEntity.ok(statusService.updateStatusWithLimit(statusId,limitStatus));
-    }
-
+//    @PatchMapping("/limitStatus")
+//    public List<LimitStatusDTO> updateAllStatusWithLimit(@RequestBody EditLimitDTO editLimitDTO){
+//        return  statusService.updateAllStatusWithLimit(editLimitDTO);
+//    }
+//
+//    @PatchMapping("/{statusId}/maximum-task")
+//    public ResponseEntity<LimitStatusDTO> limitStatus(@PathVariable Integer statusId, @RequestBody LimitStatusDTO limitStatus){
+//      return ResponseEntity.ok(statusService.updateStatusWithLimit(statusId,limitStatus));
+//    }
 }

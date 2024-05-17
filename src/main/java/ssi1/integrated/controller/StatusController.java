@@ -39,21 +39,24 @@ public class StatusController {
     public List<Status> getAllStatus(){
         return  statusService.getAllStatus();
     }
+
     @GetMapping("/{statusSettingId}/maximum-task")
     public Optional<StatusSetting> getStatusSetting(@PathVariable Integer statusSettingId){
         return statusSettingService.getStatusSettingById(statusSettingId);
     }
 
     @PatchMapping("/{statusSettingId}/maximum-task")
-    public StatusSetting updateStatusSetting(@PathVariable Integer statusSettingId, @RequestBody(required = false) EditLimitDTO updateStatusSetting) {
-        if (updateStatusSetting != null) {
-            return statusSettingService.updateStatusSetting(statusSettingId, updateStatusSetting);
-        } else {
-            StatusSetting statusSetting = statusSettingRepository.findById(statusSettingId)
-                    .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-            statusSetting.setLimitMaximumTask(!statusSetting.getLimitMaximumTask());
-            return statusSettingRepository.save(statusSetting);
-        }
+    public StatusSetting updateStatusSetting(@PathVariable Integer statusSettingId, EditLimitDTO updateStatusSetting) {
+        return statusSettingService.updateStatusSetting(statusSettingId, updateStatusSetting);
+//        if (updateStatusSetting != null) {
+//            return statusSettingService.updateStatusSetting(statusSettingId, updateStatusSetting);
+//        }
+//        } else {
+//            StatusSetting statusSetting = statusSettingRepository.findById(statusSettingId)
+//                    .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+//            statusSetting.setLimitMaximumTask(!statusSetting.getLimitMaximumTask());
+//            return statusSettingRepository.save(statusSetting);
+//        }
     }
 
 

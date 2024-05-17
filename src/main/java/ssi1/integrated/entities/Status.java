@@ -47,4 +47,6 @@ public class Status {
     @OneToMany(mappedBy="status")
     private List<Task> tasks;
 
+
+
 }

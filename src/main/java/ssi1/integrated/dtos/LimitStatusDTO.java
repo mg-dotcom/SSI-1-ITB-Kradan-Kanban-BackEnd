@@ -52,17 +52,17 @@ public class LimitStatusDTO {
      }
 
     public void setTasks(List<TaskDTO> tasks) {
-           this.tasks = tasks;
-           updateNoOfTasks();
-         }
+        this.tasks = tasks;
+        updateNoOfTasks();
+     }
 
-        private void updateNoOfTasks() {
+     private void updateNoOfTasks() {
          if (tasks != null) {
           this.noOfTasks = tasks.size();
          } else {
           this.noOfTasks = 0;
          }
-        }
+     }
 
  }
 

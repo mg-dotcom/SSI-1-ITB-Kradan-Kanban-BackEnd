@@ -25,13 +25,15 @@ public class StatusSettingService {
 
     public StatusSetting updateStatusSetting(Integer statusSettingId, EditLimitDTO editLimitDTO){
         StatusSetting statusSetting = repository.findById(statusSettingId).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        if(editLimitDTO != null ){
-            statusSetting.setId(statusSettingId);
-            statusSetting.setLimitMaximumTask(editLimitDTO.getLimitMaximumTask());
-            StatusSetting updateSetting = repository.save(statusSetting);
-            return  updateSetting;
+        if(editLimitDTO == null ){
+            statusSetting.setLimitMaximumTask(statusSetting.getLimitMaximumTask());
+            repository.save(statusSetting);
+            return statusSetting;
         }
-        throw new EntityNotFoundException("Status Limit not found with ID : " + statusSettingId);
+        statusSetting.setId(statusSettingId);
+        statusSetting.setLimitMaximumTask(editLimitDTO.getLimitMaximumTask());
+        repository.save(statusSetting);
+        return  statusSetting;
     }
 
 

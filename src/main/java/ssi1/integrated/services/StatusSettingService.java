@@ -22,7 +22,6 @@ public class StatusSettingService {
         }
         return  repository.findById(statusSettingId);
     }
-
     public StatusSetting updateStatusSetting(Integer statusSettingId, EditLimitDTO editLimitDTO){
         StatusSetting statusSetting = repository.findById(statusSettingId).orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
         if(editLimitDTO == null ){

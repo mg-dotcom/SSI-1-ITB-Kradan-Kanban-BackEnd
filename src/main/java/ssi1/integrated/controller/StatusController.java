@@ -50,7 +50,6 @@ public class StatusController {
         return statusSettingService.updateStatusSetting(statusSettingId, updateStatusSetting);
     }
 
-
     @GetMapping("/{statusId}")
     public Status getStatusById(@PathVariable Integer statusId){
         return statusService.getStatusById(statusId);

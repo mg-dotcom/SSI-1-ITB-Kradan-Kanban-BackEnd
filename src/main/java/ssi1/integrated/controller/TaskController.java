@@ -33,14 +33,6 @@ public class TaskController {
         return service.getAllTasks(sortBy, partOfName, direction);
     }
 
-//    @GetMapping("")
-//    public List<GeneralTaskDTO>getAllTasks(
-//            @RequestParam(defaultValue = "") String sortBy
-//    ){
-//        return service.sortingAllTasks(sortBy);
-//    }
-
-
     @GetMapping("/{taskId}")
     public ResponseEntity<Task> getTaskById(@PathVariable Integer taskId){
         return ResponseEntity.ok(service.getTaskById(taskId));

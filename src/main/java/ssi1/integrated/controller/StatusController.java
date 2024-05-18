@@ -83,13 +83,5 @@ public class StatusController {
         return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
     }
 
-//    @PatchMapping("/limitStatus")
-//    public List<LimitStatusDTO> updateAllStatusWithLimit(@RequestBody EditLimitDTO editLimitDTO){
-//        return  statusService.updateAllStatusWithLimit(editLimitDTO);
-//    }
-//
-//    @PatchMapping("/{statusId}/maximum-task")
-//    public ResponseEntity<LimitStatusDTO> limitStatus(@PathVariable Integer statusId, @RequestBody LimitStatusDTO limitStatus){
-//      return ResponseEntity.ok(statusService.updateStatusWithLimit(statusId,limitStatus));
-//    }
+
 }

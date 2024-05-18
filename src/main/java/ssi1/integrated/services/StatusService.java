@@ -101,57 +101,57 @@ public class StatusService {
         return newStatus;
     }
 
-    @Transactional
-    public List<LimitStatusDTO> updateAllStatusWithLimit(EditLimitDTO editLimitDTO) {
-        List<Status> statusList = statusRepository.findAll();
-        for (Status status : statusList) {
-            modelMapper.map(editLimitDTO, status);
-        }
-        statusRepository.saveAll(statusList);
-        return listMapper.mapList(statusList, LimitStatusDTO.class);
-    }
-
-
-    @Transactional
-    public LimitStatusDTO updateStatusWithLimit(Integer statusId, LimitStatusDTO limitStatusDTO) {
-        Status status = statusRepository.findById(statusId)
-                .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-
-        int maximumTask = status.getMaximumTask();
-        int noOfTask = status.getTasks().size();
-        limitStatusDTO.setMaximumTask(maximumTask);
-        List<Task> tasks = taskRepository.findByStatusId(statusId);
-
-        // Cant patch by > maximumTask
-        if (noOfTask > maximumTask) {
-            status.setLimitMaximumTask(false);
-            status = statusRepository.save(status);
-            return modelMapper.map(status, LimitStatusDTO.class);
-        }
-
-        if (statusId == 1 || statusId == 4) {
-          status.setMaximumTask(null);
-          status.setLimitMaximumTask(false);
-        }
-
-       // by new name < maximumTask
-        LimitStatusDTO updatedStatus = new LimitStatusDTO();
-        updatedStatus.setId(limitStatusDTO.getId());
-        updatedStatus.setName(limitStatusDTO.getName());
-        updatedStatus.setDescription(limitStatusDTO.getDescription());
-        updatedStatus.setLimitMaximumTask(limitStatusDTO.getLimitMaximumTask());
-        updatedStatus.setNoOfTasks(tasks.size()); // Set the number of tasks
-        updatedStatus.setMaximumTask(status.getMaximumTask());
-        updatedStatus.setStatusColor(status.getStatusColor());
-        Status statusData =  modelMapper.map(updatedStatus,Status.class);
-        for (Task task : tasks) {
-            task.setStatus(statusData);
-        }
-        statusRepository.save(statusData);
-
-        // by existing name < maximumTask
-
-
-        return updatedStatus;
-    }
+//    @Transactional
+//    public List<LimitStatusDTO> updateAllStatusWithLimit(EditLimitDTO editLimitDTO) {
+//        List<Status> statusList = statusRepository.findAll();
+//        for (Status status : statusList) {
+//            modelMapper.map(editLimitDTO, status);
+//        }
+//        statusRepository.saveAll(statusList);
+//        return listMapper.mapList(statusList, LimitStatusDTO.class);
+//    }
+//
+//
+//    @Transactional
+//    public LimitStatusDTO updateStatusWithLimit(Integer statusId, LimitStatusDTO limitStatusDTO) {
+//        Status status = statusRepository.findById(statusId)
+//                .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+//
+//        int maximumTask = status.getMaximumTask();
+//        int noOfTask = status.getTasks().size();
+//        limitStatusDTO.setMaximumTask(maximumTask);
+//        List<Task> tasks = taskRepository.findByStatusId(statusId);
+//
+//        // Cant patch by > maximumTask
+//        if (noOfTask > maximumTask) {
+//            status.setLimitMaximumTask(false);
+//            status = statusRepository.save(status);
+//            return modelMapper.map(status, LimitStatusDTO.class);
+//        }
+//
+//        if (statusId == 1 || statusId == 4) {
+//          status.setMaximumTask(null);
+//          status.setLimitMaximumTask(false);
+//        }
+//
+//       // by new name < maximumTask
+//        LimitStatusDTO updatedStatus = new LimitStatusDTO();
+//        updatedStatus.setId(limitStatusDTO.getId());
+//        updatedStatus.setName(limitStatusDTO.getName());
+//        updatedStatus.setDescription(limitStatusDTO.getDescription());
+//        updatedStatus.setLimitMaximumTask(limitStatusDTO.getLimitMaximumTask());
+//        updatedStatus.setNoOfTasks(tasks.size()); // Set the number of tasks
+//        updatedStatus.setMaximumTask(status.getMaximumTask());
+//        updatedStatus.setStatusColor(status.getStatusColor());
+//        Status statusData =  modelMapper.map(updatedStatus,Status.class);
+//        for (Task task : tasks) {
+//            task.setStatus(statusData);
+//        }
+//        statusRepository.save(statusData);
+//
+//        // by existing name < maximumTask
+//
+//
+//        return updatedStatus;
+//    }
 }

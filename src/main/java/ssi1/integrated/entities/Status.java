@@ -29,12 +29,6 @@ public class Status {
     private String description;
     private String statusColor;
 
-    @Column(name = "LimitMaximumTask")
-    private Boolean LimitMaximumTask;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Column(name = "maximumTask")
-    private Integer maximumTask;
 
     @CreationTimestamp
     @Column(name="createdOn",  nullable = false, updatable = false ,insertable = false )

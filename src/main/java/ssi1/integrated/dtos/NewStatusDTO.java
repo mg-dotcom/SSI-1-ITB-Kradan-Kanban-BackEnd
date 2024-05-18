@@ -6,12 +6,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 
 @Getter
 @Setter
 
 public class NewStatusDTO {
-    @NotNull
     private Integer id;
     @NotNull
     @NotEmpty
@@ -27,9 +28,10 @@ public class NewStatusDTO {
         this.name = title.trim();
     }
 
-    public void setDescription(String description){
-        this.description =  (description != null) ? description.trim() : description;
+    public void setDescription(String description) {
+        this.description = (description != null) ? description.trim() : null;
     }
+
 
     public void setStatusColor(String statusColor){
         this.statusColor = (statusColor != null) ? statusColor.trim() : "#CCCCCC";

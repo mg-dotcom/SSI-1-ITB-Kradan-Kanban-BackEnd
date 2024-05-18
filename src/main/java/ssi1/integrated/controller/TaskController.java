@@ -25,8 +25,12 @@ public class TaskController {
     private TaskService service;
 
     @GetMapping("")
-    public List<GeneralTaskDTO>getAllTasks(){
-        return service.getAllTasks();
+    public List<GeneralTaskDTO>getAllTasks(
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) List<String> partOfName,
+            @RequestParam(required = false) String direction
+    ){
+        return service.getAllTasks(sortBy, partOfName, direction);
     }
 
     @GetMapping("/{taskId}")
@@ -48,6 +52,7 @@ public class TaskController {
     public ResponseEntity<NewTaskDTO> updateTask(@PathVariable Integer taskId,@RequestBody NewTaskDTO newTaskDTO){
         return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO));
     }
+
 
 
 }

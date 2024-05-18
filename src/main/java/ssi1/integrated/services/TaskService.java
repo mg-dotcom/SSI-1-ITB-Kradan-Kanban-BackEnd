@@ -3,6 +3,7 @@ package ssi1.integrated.services;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,6 +15,8 @@ import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,12 +34,39 @@ public class TaskService {
     private ModelMapper modelMapper;
 
 
-    public List<GeneralTaskDTO> getAllTasks() {
-        return taskRepository.findAll().stream()
+    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> partOfName, String direction) {
+        if (sortBy == null || sortBy.isEmpty()) {
+            sortBy = "id"; // Replace with a default name
+        }
+        // Fallback to default direction if direction is null
+        if (direction == null || direction.isEmpty()) {
+            direction = "asc"; // Default direction
+
+        }
+
+        Sort.Order sortOrder = new Sort.Order(
+                direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
+                sortBy
+        );
+
+        Sort sort = Sort.by(sortOrder);
+
+        if (partOfName == null) {
+            return taskRepository.getAllBy(sort).stream()
+                    .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
+                    .collect(Collectors.toList());
+        }
+
+        return taskRepository.findByStatusContains(sort, partOfName).stream()
                 .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());
     }
-
+//    public List<GeneralTaskDTO>  sortingAllTasks(String sortBy){
+//        List<GeneralTaskDTO> allStatusName=taskRepository.findAll(Sort.by(sortBy)).stream()
+//                .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
+//                .collect(Collectors.toList());
+//        return allStatusName;
+//    }
 
     public Task getTaskById(Integer taskId){
         return taskRepository.findById(taskId).orElseThrow(

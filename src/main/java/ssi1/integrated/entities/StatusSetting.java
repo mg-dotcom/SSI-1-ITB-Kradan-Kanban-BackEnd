@@ -22,4 +22,6 @@ public class StatusSetting {
 
     @Column
     private Integer maximumTask;
+
+
 }

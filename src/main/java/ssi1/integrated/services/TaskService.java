@@ -80,7 +80,6 @@ public class TaskService {
         if (statusSetting.getLimitMaximumTask()) {
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
             if (noOfTasks > statusSetting.getMaximumTask()) {
-                System.out.println("sssss");
                 throw new LimitationException("the status has reached the limit");
             }
         }
@@ -94,11 +93,20 @@ public class TaskService {
 
     @Transactional
     public NewTaskDTO updateTask(Integer taskId, NewTaskDTO inputTask) {
+        StatusSetting statusSetting = statusSettingRepository.findById(1).orElseThrow(
+                () -> new ItemNotFoundException("NOT FOUND THIS KANBAN ID")
+        );
         Boolean isExistingTask = taskRepository.existsById(taskId);
         if (!isExistingTask) {
             throw new ItemNotFoundException("NOT FOUND");
         }
         Status status = statusService.getStatusById(inputTask.getStatus());
+        if(statusSetting.getLimitMaximumTask()){
+            int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
+            if (noOfTasks > statusSetting.getMaximumTask()) {
+                throw new LimitationException("the status has reached the limit");
+            }
+        }
         Task task = modelMapper.map(inputTask, Task.class);
         task.setStatus(status);
         task.setId(taskId);

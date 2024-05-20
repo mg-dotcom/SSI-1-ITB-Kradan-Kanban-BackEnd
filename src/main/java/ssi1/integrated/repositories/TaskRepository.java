@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task,Integer> {
     List<Task> findByStatusId(Integer statusId);
-    @Query("SELECT t FROM Task t WHERE t.status.id IN :statusId")
-    List<Task> findByStatusContains(Sort sortBy,List<Integer> statusId);
+    @Query("SELECT t FROM Task t WHERE t.status.name IN :statusName")
+    List<Task> findByStatusContains(Sort sortBy,List<String> statusName);
 
 
 

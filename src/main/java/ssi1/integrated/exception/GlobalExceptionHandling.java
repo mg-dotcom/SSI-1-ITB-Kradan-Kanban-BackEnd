@@ -48,9 +48,9 @@ public class GlobalExceptionHandling {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler(LimitationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseLimitation> handleTaskLimitationException(BadRequestException exception, WebRequest request) {
+    public ResponseEntity<ErrorResponseLimitation> handleTaskLimitationException(BadRequestException exception) {
         ErrorResponseLimitation errorResponseLimitation = new ErrorResponseLimitation(
                 "status",
                 exception.getMessage());

@@ -33,16 +33,12 @@ public class TaskService {
     private StatusRepository statusRepository;
     @Autowired
     private StatusSettingRepository statusSettingRepository;
-
     @Autowired
     private StatusService statusService;
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> statusName, String direction) {
-        if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "createdOn"; // Replace with a default name
-        }
+    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<Integer> filterStatuses, String direction) {
 
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
@@ -51,15 +47,13 @@ public class TaskService {
 
         Sort sort = Sort.by(sortOrder);
 
-        if (statusName == null) {
+        if (filterStatuses == null) {
             return taskRepository.getAllBy(sort).stream()
                     .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                     .collect(Collectors.toList());
         }
 
-
-
-        return taskRepository.findByStatusContains(sort, statusName).stream()
+        return taskRepository.findByStatusId(sort, filterStatuses).stream()
                 .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());
 

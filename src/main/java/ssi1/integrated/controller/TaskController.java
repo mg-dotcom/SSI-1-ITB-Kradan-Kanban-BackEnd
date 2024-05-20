@@ -26,11 +26,11 @@ public class TaskController {
 
     @GetMapping("")
     public List<GeneralTaskDTO>getAllTasks(
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) List<String> partOfName,
-            @RequestParam(required = false) String direction
+            @RequestParam(required = false,defaultValue = "createdOn") String sortBy,
+            @RequestParam(required = false) List<Integer> statusId,
+            @RequestParam(required = false,defaultValue = "") String direction
     ){
-        return service.getAllTasks(sortBy, partOfName, direction);
+        return service.getAllTasks(sortBy, statusId, direction);
     }
 
     @GetMapping("/{taskId}")
@@ -52,7 +52,5 @@ public class TaskController {
     public ResponseEntity<NewTaskDTO> updateTask(@PathVariable Integer taskId,@RequestBody NewTaskDTO newTaskDTO){
         return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO));
     }
-
-
 
 }

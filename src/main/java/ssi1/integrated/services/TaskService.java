@@ -34,16 +34,15 @@ public class TaskService {
     private ModelMapper modelMapper;
 
 
-    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> partOfName, String direction) {
+    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<Integer> statusId, String direction) {
         if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = "id"; // Replace with a default name
+            sortBy = "createdOn"; // Replace with a default name
         }
         // Fallback to default direction if direction is null
-        if (direction == null || direction.isEmpty()) {
-            direction = "asc"; // Default direction
-
-        }
-
+//        if (direction == null || direction.isEmpty()) {
+//            direction = ""; // Default direction
+//
+//        }
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
                 sortBy
@@ -51,13 +50,13 @@ public class TaskService {
 
         Sort sort = Sort.by(sortOrder);
 
-        if (partOfName == null) {
+        if (statusId == null) {
             return taskRepository.getAllBy(sort).stream()
                     .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                     .collect(Collectors.toList());
         }
 
-        return taskRepository.findByStatusContains(sort, partOfName).stream()
+        return taskRepository.findByStatusContains(sort, statusId).stream()
                 .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());
     }

@@ -27,10 +27,10 @@ public class TaskController {
     @GetMapping("")
     public List<GeneralTaskDTO>getAllTasks(
             @RequestParam(required = false,defaultValue = "createdOn") String sortBy,
-            @RequestParam(required = false) List<String> statusName,
+            @RequestParam(required = false) List<String> filterStatuses,
             @RequestParam(required = false,defaultValue = "") String direction
     ){
-        return service.getAllTasks(sortBy, statusName, direction);
+        return service.getAllTasks(sortBy, filterStatuses, direction);
     }
 
     @GetMapping("/{taskId}")

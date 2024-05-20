@@ -37,4 +37,16 @@ public class GlobalExceptionHandling {
                 request.getDescription(false));
         return new ResponseEntity<>(errorResponse, HttpStatus.METHOD_NOT_ALLOWED);
     }
+
+    @ExceptionHandler(MethodNotAllowedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handle(MethodNotAllowedException exception, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.METHOD_NOT_ALLOWED.value(),
+                exception.getReason(),
+                request.getDescription(false));
+        return new ResponseEntity<>(errorResponse, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+
 }

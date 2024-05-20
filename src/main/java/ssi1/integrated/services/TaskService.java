@@ -11,9 +11,11 @@ import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Status;
+import ssi1.integrated.entities.StatusSetting;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
+import ssi1.integrated.repositories.StatusSettingRepository;
 import ssi1.integrated.repositories.TaskRepository;
 
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ public class TaskService {
     private TaskRepository taskRepository;
     @Autowired
     private StatusRepository statusRepository;
+    @Autowired
+    private StatusSettingRepository statusSettingRepository;
 
     @Autowired
     private StatusService statusService;
@@ -75,12 +79,23 @@ public class TaskService {
 
     @Transactional
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask) {
+        StatusSetting statusSetting=statusSettingRepository.findById(1).orElseThrow(
+                ()->new ItemNotFoundException("NOT FOUND THIS KANBAN ID")
+        );
         Status status = statusRepository.findById(newTask.getStatus())
                 .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        Task task = modelMapper.map(newTask, Task.class);
-        task.setStatus(status);
-        Task insertedTask = taskRepository.save(task);
-        return modelMapper.map(insertedTask, GeneralTaskDTO.class);
+        if(statusSetting.getLimitMaximumTask()){
+            int noOfTasks=taskRepository.findByStatusId(status.getId()).size();
+            if(noOfTasks>statusSetting.getMaximumTask()){
+                throw new StatusLimitReachedException("status", "the status has reached the limit");
+            }
+        }else {
+
+            Task task = modelMapper.map(newTask, Task.class);
+            task.setStatus(status);
+            Task insertedTask = taskRepository.save(task);
+            return modelMapper.map(insertedTask, GeneralTaskDTO.class);
+        }
     }
 
     @Transactional

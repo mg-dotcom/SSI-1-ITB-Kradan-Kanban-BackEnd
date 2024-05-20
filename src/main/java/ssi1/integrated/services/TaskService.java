@@ -12,6 +12,7 @@ import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.Task;
+import ssi1.integrated.exception.BadRequestException;
 import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
@@ -33,16 +34,11 @@ public class TaskService {
     @Autowired
     private ModelMapper modelMapper;
 
-
     public List<GeneralTaskDTO> getAllTasks(String sortBy, List<Integer> statusId, String direction) {
         if (sortBy == null || sortBy.isEmpty()) {
             sortBy = "createdOn"; // Replace with a default name
         }
-        // Fallback to default direction if direction is null
-//        if (direction == null || direction.isEmpty()) {
-//            direction = ""; // Default direction
-//
-//        }
+
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
                 sortBy
@@ -56,16 +52,12 @@ public class TaskService {
                     .collect(Collectors.toList());
         }
 
+
         return taskRepository.findByStatusContains(sort, statusId).stream()
                 .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
                 .collect(Collectors.toList());
+
     }
-//    public List<GeneralTaskDTO>  sortingAllTasks(String sortBy){
-//        List<GeneralTaskDTO> allStatusName=taskRepository.findAll(Sort.by(sortBy)).stream()
-//                .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
-//                .collect(Collectors.toList());
-//        return allStatusName;
-//    }
 
     public Task getTaskById(Integer taskId){
         return taskRepository.findById(taskId).orElseThrow(

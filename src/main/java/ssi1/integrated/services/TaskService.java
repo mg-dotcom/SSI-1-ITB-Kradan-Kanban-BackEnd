@@ -38,7 +38,7 @@ public class TaskService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<Integer> filterStatuses, String direction) {
+    public List<TaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction) {
 
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
@@ -49,16 +49,22 @@ public class TaskService {
 
         if (filterStatuses == null) {
             return taskRepository.getAllBy(sort).stream()
-                    .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
+                    .map(task -> convertTaskToTaskDTO(task))
                     .collect(Collectors.toList());
         }
 
         return taskRepository.findByStatusId(sort, filterStatuses).stream()
-                .map(task -> modelMapper.map(task, GeneralTaskDTO.class))
+                .map(task -> convertTaskToTaskDTO(task))
                 .collect(Collectors.toList());
 
     }
 
+    private TaskDTO convertTaskToTaskDTO(Task task){
+        String statusName = task.getStatus().getName();
+        TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
+        taskDTO.setStatus(statusName);
+        return taskDTO;
+    }
     public Task getTaskById(Integer taskId) {
         return taskRepository.findById(taskId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")

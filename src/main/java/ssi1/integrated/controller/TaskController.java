@@ -25,9 +25,9 @@ public class TaskController {
     private TaskService service;
 
     @GetMapping("")
-    public List<GeneralTaskDTO>getAllTasks(
+    public List<TaskDTO>getAllTasks(
             @RequestParam(required = false,defaultValue = "createdOn") String sortBy,
-            @RequestParam(required = false) List<Integer> filterStatuses,
+            @RequestParam(required = false) List<String> filterStatuses,
             @RequestParam(required = false,defaultValue = "asc") String direction
     ){
         return service.getAllTasks(sortBy, filterStatuses, direction);

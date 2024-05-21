@@ -100,8 +100,10 @@ public class StatusService {
         );
 
         if (statusSetting.getLimitMaximumTask()) {
-            int noOfTasks = taskRepository.findByStatusId(newStatusId).size();
-            if (noOfTasks > statusSetting.getMaximumTask()) {
+            int noOfOldTasks = taskRepository.findByStatusId(statusId).size();
+            int noOfNewTasks=taskRepository.findByStatusId(newStatusId).size();
+            
+            if (noOfOldTasks+noOfNewTasks > statusSetting.getMaximumTask()) {
                 throw new LimitationException("the destination status cannot be over limit after transfer");
             }
         }

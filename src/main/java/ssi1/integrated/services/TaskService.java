@@ -80,7 +80,7 @@ public class TaskService {
                 .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
         if (statusSetting.getLimitMaximumTask()) {
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
-            if (noOfTasks > statusSetting.getMaximumTask()) {
+            if (noOfTasks >= statusSetting.getMaximumTask()) {
                 throw new LimitationException("the status has reached the limit");
             }
         }
@@ -104,7 +104,7 @@ public class TaskService {
         Status status = statusService.getStatusById(inputTask.getStatus());
         if(statusSetting.getLimitMaximumTask()){
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
-            if (noOfTasks > statusSetting.getMaximumTask()) {
+            if (noOfTasks >= statusSetting.getMaximumTask()) {
                 throw new LimitationException("the status has reached the limit");
             }
         }

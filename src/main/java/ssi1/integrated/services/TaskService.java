@@ -81,7 +81,8 @@ public class TaskService {
         if (statusSetting.getLimitMaximumTask()&& !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())) {
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
-            if (noOfTasks > statusSetting.getMaximumTask()) {
+            System.out.println(noOfTasks);
+            if (noOfTasks >= statusSetting.getMaximumTask()) {
                 throw new LimitationException("the status has reached the limit");
             }
         }
@@ -106,7 +107,7 @@ public class TaskService {
         if(statusSetting.getLimitMaximumTask()&& !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())){
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
-            if (noOfTasks > statusSetting.getMaximumTask()) {
+            if (noOfTasks >= statusSetting.getMaximumTask()) {
                 throw new LimitationException("the status has reached the limit");
             }
         }

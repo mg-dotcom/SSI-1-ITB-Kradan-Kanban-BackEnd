@@ -1,16 +1,12 @@
 package ssi1.integrated.controller;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.EditLimitDTO;
-import ssi1.integrated.dtos.GeneralTaskDTO;
-import ssi1.integrated.dtos.LimitStatusDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.StatusSetting;
-import ssi1.integrated.exception.ItemNotFoundException;
 import ssi1.integrated.repositories.StatusSettingRepository;
 import ssi1.integrated.services.StatusService;
 import org.springframework.http.HttpStatus;

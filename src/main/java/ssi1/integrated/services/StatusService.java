@@ -11,11 +11,7 @@ import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.StatusSetting;
 import ssi1.integrated.entities.Task;
 import ssi1.integrated.exception.ItemNotFoundException;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import ssi1.integrated.exception.LimitationException;
 import ssi1.integrated.repositories.StatusRepository;
@@ -34,12 +30,6 @@ public class StatusService {
     private StatusSettingService statusSettingService;
     @Autowired
     private ModelMapper modelMapper;
-
-    @Autowired
-    private ListMapper listMapper;
-
-
-
 
     public List<Status> getAllStatus() {
         return statusRepository.findAll();
@@ -103,10 +93,11 @@ public class StatusService {
             int noOfOldTasks = taskRepository.findByStatusId(statusId).size();
             int noOfNewTasks=taskRepository.findByStatusId(newStatusId).size();
             
-            if (noOfOldTasks+noOfNewTasks > statusSetting.getMaximumTask()) {
+            if (noOfOldTasks + noOfNewTasks > statusSetting.getMaximumTask()) {
                 throw new LimitationException("the destination status cannot be over limit after transfer");
             }
         }
+
         List<Task> tasks = taskRepository.findByStatusId(statusId);
         for (Task task:tasks){
             task.setStatus(newStatus);

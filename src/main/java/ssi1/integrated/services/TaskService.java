@@ -65,6 +65,7 @@ public class TaskService {
         taskDTO.setStatus(statusName);
         return taskDTO;
     }
+
     public Task getTaskById(Integer taskId) {
         return taskRepository.findById(taskId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")
@@ -76,12 +77,13 @@ public class TaskService {
         StatusSetting statusSetting = statusSettingRepository.findById(1).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND THIS KANBAN ID")
         );
+
         Status status = statusRepository.findById(newTask.getStatus())
                 .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
-        if (statusSetting.getLimitMaximumTask()&& !"No Status".equals(status.getName())
+
+        if (statusSetting.getLimitMaximumTask() && !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())) {
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
-            System.out.println(noOfTasks);
             if (noOfTasks >= statusSetting.getMaximumTask()) {
                 throw new LimitationException("the status has reached the limit");
             }
@@ -104,7 +106,7 @@ public class TaskService {
             throw new ItemNotFoundException("NOT FOUND");
         }
         Status status = statusService.getStatusById(inputTask.getStatus());
-        if(statusSetting.getLimitMaximumTask()&& !"No Status".equals(status.getName())
+        if(statusSetting.getLimitMaximumTask() && !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())){
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
             if (noOfTasks >= statusSetting.getMaximumTask()) {

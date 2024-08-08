@@ -1,5 +1,6 @@
 package ssi1.integrated.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,12 +53,12 @@ public class StatusController {
     }
 
     @PutMapping("/{statusId}")
-    public ResponseEntity<Status> updateStatus(@PathVariable Integer statusId, @RequestBody(required = false) Status updateStatus){
-        return ResponseEntity.ok(statusService.updateStatus(statusId,updateStatus));
+    public ResponseEntity<NewStatusDTO> updateStatus( @PathVariable Integer statusId,@Valid @RequestBody NewStatusDTO updateStatus) {
+        return ResponseEntity.ok(statusService.updateStatus(statusId, updateStatus));
     }
 
     @PostMapping("")
-    public ResponseEntity<NewStatusDTO> addStatus(@RequestBody NewStatusDTO newStatusDTO){
+    public ResponseEntity<NewStatusDTO> addStatus(@Valid @RequestBody NewStatusDTO newStatusDTO){
         NewStatusDTO createdStatus = statusService.insertNewStatus(newStatusDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
     }

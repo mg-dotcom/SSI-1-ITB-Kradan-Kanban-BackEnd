@@ -1,25 +1,26 @@
 package ssi1.integrated.dtos;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 
-
+@Data
 @Getter
 @Setter
-
 public class NewStatusDTO {
     private Integer id;
     @NotNull
     @NotEmpty
-    @Size(max = 50)
+    @Size(max = 50, message = "size must be between 0 and 50")
     private String name;
     @NotEmpty
-    @Size(max = 200)
+    @Size(max = 200, message = "size must be between 0 and 200")
     private String description;
     private String statusColor;
 

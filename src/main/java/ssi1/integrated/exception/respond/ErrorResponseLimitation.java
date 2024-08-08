@@ -1,4 +1,4 @@
-package ssi1.integrated.exception;
+package ssi1.integrated.exception.respond;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

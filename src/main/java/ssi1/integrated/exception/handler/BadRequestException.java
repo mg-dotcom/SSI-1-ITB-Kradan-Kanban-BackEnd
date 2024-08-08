@@ -1,4 +1,4 @@
-package ssi1.integrated.exception;
+package ssi1.integrated.exception.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;

@@ -1,19 +1,16 @@
 package ssi1.integrated.services;
 import jakarta.transaction.Transactional;
-import org.apache.el.util.ReflectionUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.*;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.StatusSetting;
 import ssi1.integrated.entities.Task;
-import ssi1.integrated.exception.ItemNotFoundException;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
 import java.util.List;
 
-import ssi1.integrated.exception.LimitationException;
+import ssi1.integrated.exception.handler.LimitationException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
 
@@ -43,28 +40,36 @@ public class StatusService {
 
     }
 
+
+
     @Transactional
-    public Status updateStatus(Integer statusId, Status newStatus) {
-        if (statusId.equals(1)||newStatus.getName() == null || newStatus.getName().isBlank()) {
+    public NewStatusDTO updateStatus(Integer statusId, NewStatusDTO newStatus) {
+        if (statusId.equals(1) || newStatus.getName() == null || newStatus.getName().isBlank()) {
             throw new IllegalArgumentException("Updating status with ID 1 is not allowed");
         }
+
         Status toBeUpdateStatus = statusRepository.findById(statusId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")
         );
+
         toBeUpdateStatus.setName(newStatus.getName());
         toBeUpdateStatus.setDescription(newStatus.getDescription());
+
         if (newStatus.getStatusColor() == null || newStatus.getStatusColor().isEmpty()) {
             toBeUpdateStatus.setStatusColor("#CCCCCC");
-        } else toBeUpdateStatus.setStatusColor(newStatus.getStatusColor());
-        Status updatedStatus = statusRepository.save(toBeUpdateStatus);
-        return updatedStatus;
-    }
+        } else {
+            toBeUpdateStatus.setStatusColor(newStatus.getStatusColor());
+        }
 
+        Status updatedStatus = statusRepository.save(toBeUpdateStatus);
+
+        NewStatusDTO mappedStatus = modelMapper.map(updatedStatus, NewStatusDTO.class);
+        return mappedStatus;
+    }
 
     @Transactional
     public NewStatusDTO insertNewStatus(NewStatusDTO newStatusDTO) {
         Status status = modelMapper.map(newStatusDTO, Status.class);
-
         Status insertedStatus = statusRepository.save(status);
         NewStatusDTO mappedStatus = modelMapper.map(insertedStatus, NewStatusDTO.class);
         return mappedStatus;

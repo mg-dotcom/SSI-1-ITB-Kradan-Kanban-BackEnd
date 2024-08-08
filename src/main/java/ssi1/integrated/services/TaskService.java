@@ -4,23 +4,19 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.StatusSetting;
 import ssi1.integrated.entities.Task;
-import ssi1.integrated.exception.BadRequestException;
-import ssi1.integrated.exception.ItemNotFoundException;
-import ssi1.integrated.exception.LimitationException;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
+import ssi1.integrated.exception.handler.LimitationException;
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.StatusSettingRepository;
 import ssi1.integrated.repositories.TaskRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

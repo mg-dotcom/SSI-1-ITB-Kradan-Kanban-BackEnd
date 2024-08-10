@@ -40,7 +40,4 @@ public class Status {
     @JsonIgnore
     @OneToMany(mappedBy="status")
     private List<Task> tasks;
-
-
-
 }

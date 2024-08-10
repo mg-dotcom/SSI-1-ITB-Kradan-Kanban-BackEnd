@@ -5,14 +5,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
-
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorResponseLimitation {
+public class LimitationRespond {
     private final String field;
     private final String message;
 }

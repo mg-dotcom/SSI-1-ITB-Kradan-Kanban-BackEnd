@@ -7,10 +7,12 @@ import ssi1.integrated.dtos.*;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.StatusSetting;
 import ssi1.integrated.entities.Task;
+import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import java.util.List;
 
 import ssi1.integrated.exception.handler.LimitationException;
+
 import ssi1.integrated.repositories.StatusRepository;
 import ssi1.integrated.repositories.TaskRepository;
 
@@ -37,32 +39,27 @@ public class StatusService {
         return statusRepository.findById(statusId).orElseThrow(
                 ()->new ItemNotFoundException("NOT FOUND")
         );
-
     }
 
 
-
     @Transactional
-    public NewStatusDTO updateStatus(Integer statusId, NewStatusDTO newStatus) {
-        if (statusId.equals(1) || newStatus.getName() == null || newStatus.getName().isBlank()) {
-            throw new IllegalArgumentException("Updating status with ID 1 is not allowed");
+    public NewStatusDTO updateStatus(Integer statusId, NewStatusDTO updateStatusDTO) {
+        Status status = getStatusById(statusId);
+        if (statusId.equals(1) || statusId.equals(7)) {
+            throw new BadRequestException(status.getName() + " cannot be modified.");
         }
 
-        Status toBeUpdateStatus = statusRepository.findById(statusId).orElseThrow(
-                () -> new ItemNotFoundException("NOT FOUND")
-        );
-
-        toBeUpdateStatus.setName(newStatus.getName());
-        toBeUpdateStatus.setDescription(newStatus.getDescription());
-
-        if (newStatus.getStatusColor() == null || newStatus.getStatusColor().isEmpty()) {
-            toBeUpdateStatus.setStatusColor("#CCCCCC");
+        if (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty()) {
+            status.setStatusColor("#CCCCCC");
         } else {
-            toBeUpdateStatus.setStatusColor(newStatus.getStatusColor());
+            status.setStatusColor(updateStatusDTO.getStatusColor());
         }
 
-        Status updatedStatus = statusRepository.save(toBeUpdateStatus);
+        status.setName(updateStatusDTO.getName());
+        status.setDescription(updateStatusDTO.getDescription());
+        status.setStatusColor(updateStatusDTO.getStatusColor());
 
+        Status updatedStatus = statusRepository.save(status);
         NewStatusDTO mappedStatus = modelMapper.map(updatedStatus, NewStatusDTO.class);
         return mappedStatus;
     }
@@ -77,38 +74,52 @@ public class StatusService {
 
     @Transactional
     public Status deleteStatus(Integer statusId){
-        Status existingStatus=statusRepository.findById(statusId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
-        statusRepository.delete(existingStatus);
-        return existingStatus;
+        Status status = getStatusById(statusId);
 
+        if (statusId.equals(1) || statusId.equals(7)) {
+            throw new BadRequestException(status.getName() + " cannot be modified.");
+        }
+
+        if(status.getTasks().size() > 0){
+            transferStatus(statusId,null);
+        }
+
+        statusRepository.delete(status);
+        return status;
     }
 
     @Transactional
-    public Status transferStatus(Integer statusId,Integer newStatusId){
-        Status newStatus=statusRepository.findById(newStatusId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
-        StatusSetting statusSetting = statusSettingService.getStatusSettingById(1).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
+    public Status transferStatus(Integer statusId, Integer newStatusId) {
+        Status newStatus = statusRepository.findById(newStatusId).orElseThrow(
+                () -> new BadRequestException("The specified status for task transfer does not exist"));
 
-        if (statusSetting.getLimitMaximumTask()) {
-            int noOfOldTasks = taskRepository.findByStatusId(statusId).size();
-            int noOfNewTasks=taskRepository.findByStatusId(newStatusId).size();
-            
-            if (noOfOldTasks + noOfNewTasks > statusSetting.getMaximumTask()) {
-                throw new LimitationException("the destination status cannot be over limit after transfer");
+        if (newStatusId != null) {
+            if (statusId.equals(newStatusId)) {
+                throw new BadRequestException("Destination status for task transfer must be different from current status.");
             }
+
+            StatusSetting statusSetting = statusSettingService.getStatusSettingById(1).orElseThrow(
+                    () -> new ItemNotFoundException("NOT FOUND"));
+
+            if (statusSetting.getLimitMaximumTask()) {
+                int noOfOldTasks = taskRepository.findByStatusId(statusId).size();
+                int noOfNewTasks = taskRepository.findByStatusId(newStatusId).size();
+
+                if (noOfOldTasks + noOfNewTasks > statusSetting.getMaximumTask()) {
+                    throw new LimitationException("The destination status cannot be over limit after transfer.");
+                }
+            }
+
+            List<Task> tasks = taskRepository.findByStatusId(statusId);
+            for (Task task : tasks) {
+                task.setStatus(newStatus);
+            }
+            taskRepository.saveAll(tasks);
+            statusRepository.deleteById(statusId);
+        } else {
+            throw new BadRequestException("Destination status for task transfer not specified.");
         }
 
-        List<Task> tasks = taskRepository.findByStatusId(statusId);
-        for (Task task:tasks){
-            task.setStatus(newStatus);
-        }
-
-        statusRepository.deleteById(statusId);
         return newStatus;
     }
 

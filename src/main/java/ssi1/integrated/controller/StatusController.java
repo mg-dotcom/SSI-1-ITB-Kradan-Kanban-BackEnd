@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import ssi1.integrated.dtos.EditLimitDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.entities.Status;
@@ -44,6 +45,7 @@ public class StatusController {
 
     @PatchMapping("/{statusSettingId}/maximum-task")
     public StatusSetting updateStatusSetting(@PathVariable Integer statusSettingId,@RequestBody(required = false)  EditLimitDTO updateStatusSetting) {
+
         return statusSettingService.updateStatusSetting(statusSettingId, updateStatusSetting);
     }
 
@@ -53,7 +55,7 @@ public class StatusController {
     }
 
     @PutMapping("/{statusId}")
-    public ResponseEntity<NewStatusDTO> updateStatus( @PathVariable Integer statusId,@Valid @RequestBody NewStatusDTO updateStatus) {
+    public ResponseEntity<NewStatusDTO> updateStatus(@PathVariable Integer statusId,@Valid @RequestBody NewStatusDTO updateStatus) {
         return ResponseEntity.ok(statusService.updateStatus(statusId, updateStatus));
     }
 
@@ -69,7 +71,8 @@ public class StatusController {
     }
 
     @DeleteMapping("/{statusId}/{newStatusId}")
-    public ResponseEntity<Status> transfer(@PathVariable Integer statusId,@PathVariable Integer newStatusId){
+    public ResponseEntity<Status> transfer(@PathVariable Integer statusId,  @PathVariable Integer newStatusId) {
+
         return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
     }
 

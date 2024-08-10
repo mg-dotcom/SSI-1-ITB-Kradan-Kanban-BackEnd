@@ -3,22 +3,18 @@ package ssi1.integrated.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ssi1.integrated.exception.handler.BadRequestException;
-import ssi1.integrated.exception.handler.ItemNotFoundException;
-import ssi1.integrated.exception.handler.LimitationException;
-import ssi1.integrated.exception.handler.MethodNotAllowedException;
+import ssi1.integrated.exception.handler.*;
 import ssi1.integrated.exception.respond.ErrorResponse;
-import ssi1.integrated.exception.respond.ErrorResponseLimitation;
+import ssi1.integrated.exception.respond.LimitationRespond;
 
-import java.util.List;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandling {
@@ -53,32 +49,42 @@ public class GlobalExceptionHandling {
     }
 
     @ExceptionHandler(LimitationException.class)
-    public ResponseEntity<ErrorResponseLimitation> handleLimitationException(LimitationException exception) {
-        ErrorResponseLimitation errorResponseLimitation = new ErrorResponseLimitation(
+    public ResponseEntity<LimitationRespond> handleLimitationException(LimitationException exception) {
+        LimitationRespond limitationRespond = new LimitationRespond(
                 "status",
                 exception.getMessage());
-        return new ResponseEntity<>(errorResponseLimitation, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(limitationRespond, HttpStatus.BAD_REQUEST);
     }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation error. Check 'errors' field for details.", request.getDescription(false));
-        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+        for (FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
             errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(HttpClientErrorException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handleHttpClientErrorException(HttpClientErrorException exception,WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                exception.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex,WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception,WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
                 "Invalid filter parameter", request.getDescription(false));
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
 
 }

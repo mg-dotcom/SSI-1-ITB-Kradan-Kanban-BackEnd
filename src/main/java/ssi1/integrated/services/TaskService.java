@@ -1,6 +1,7 @@
 package ssi1.integrated.services;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -11,6 +12,7 @@ import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.entities.Status;
 import ssi1.integrated.entities.StatusSetting;
 import ssi1.integrated.entities.Task;
+import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.exception.handler.LimitationException;
 import ssi1.integrated.repositories.StatusRepository;
@@ -75,7 +77,7 @@ public class TaskService {
         );
 
         Status status = statusRepository.findById(newTask.getStatus())
-                .orElseThrow(() -> new ItemNotFoundException("NOT FOUND"));
+                .orElseThrow(() -> new BadRequestException("status does not exist"));
 
         if (statusSetting.getLimitMaximumTask() && !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())) {
@@ -101,7 +103,8 @@ public class TaskService {
         if (!isExistingTask) {
             throw new ItemNotFoundException("NOT FOUND");
         }
-        Status status = statusService.getStatusById(inputTask.getStatus());
+        Status status = statusRepository.findById(inputTask.getStatus())
+                .orElseThrow(() -> new BadRequestException("status does not exist"));
         if(statusSetting.getLimitMaximumTask() && !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())){
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();

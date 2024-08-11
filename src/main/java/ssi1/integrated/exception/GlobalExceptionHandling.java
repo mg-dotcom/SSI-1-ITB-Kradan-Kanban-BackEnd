@@ -43,8 +43,11 @@ public class GlobalExceptionHandling {
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException exception, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                exception.getReason(),
+                "Validation error. Check 'errors' field for details.",
                 request.getDescription(false));
+
+        errorResponse.addValidationError("status", exception.getReason());
+
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 

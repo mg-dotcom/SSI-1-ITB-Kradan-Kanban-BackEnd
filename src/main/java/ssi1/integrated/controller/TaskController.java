@@ -1,5 +1,6 @@
 package ssi1.integrated.controller;
 
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,7 @@ public class TaskController {
     }
 
     @PostMapping("")
-    public ResponseEntity<GeneralTaskDTO> addTask(@RequestBody NewTaskDTO newTaskDTO){
+    public ResponseEntity<GeneralTaskDTO> addTask(@Valid @RequestBody NewTaskDTO newTaskDTO){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO));
     }
 
@@ -49,7 +50,7 @@ public class TaskController {
     }
 
     @PutMapping("/{taskId}")
-    public ResponseEntity<NewTaskDTO> updateTask(@PathVariable Integer taskId,@RequestBody NewTaskDTO newTaskDTO){
+    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO){
         return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO));
     }
 

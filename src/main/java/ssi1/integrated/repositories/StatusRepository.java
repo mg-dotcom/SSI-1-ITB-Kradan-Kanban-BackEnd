@@ -7,6 +7,7 @@ import ssi1.integrated.entities.Status;
 @Repository
 public interface StatusRepository extends JpaRepository<Status, Integer> {
 
+    boolean existsByName(String name);
 }
 
 

@@ -21,7 +21,6 @@ public class NewStatusDTO {
     private String description;
     private String statusColor;
 
-
     public void setName(String name) {
         if (name == null ) {
             throw new BadRequestException("Name must not be null");

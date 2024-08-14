@@ -1,7 +1,6 @@
 package ssi1.integrated.services;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -9,15 +8,15 @@ import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
-import ssi1.integrated.entities.Status;
-import ssi1.integrated.entities.StatusSetting;
-import ssi1.integrated.entities.Task;
+import ssi1.integrated.board.entities.Status;
+import ssi1.integrated.board.entities.StatusSetting;
+import ssi1.integrated.board.entities.Task;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.exception.handler.LimitationException;
-import ssi1.integrated.repositories.StatusRepository;
-import ssi1.integrated.repositories.StatusSettingRepository;
-import ssi1.integrated.repositories.TaskRepository;
+import ssi1.integrated.board.repositories.StatusRepository;
+import ssi1.integrated.board.repositories.StatusSettingRepository;
+import ssi1.integrated.board.repositories.TaskRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;

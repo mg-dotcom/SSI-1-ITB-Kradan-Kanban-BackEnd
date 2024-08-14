@@ -1,4 +1,4 @@
-package ssi1.integrated.entities;
+package ssi1.integrated.board.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;

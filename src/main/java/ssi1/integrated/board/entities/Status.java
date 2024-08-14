@@ -1,14 +1,10 @@
-package ssi1.integrated.entities;
+package ssi1.integrated.board.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.NullSerializer;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import ssi1.integrated.dtos.TaskDTO;
 
 import java.time.ZonedDateTime;
 import java.util.List;

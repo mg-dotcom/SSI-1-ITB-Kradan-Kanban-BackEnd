@@ -1,11 +1,9 @@
-package ssi1.integrated.repositories;
+package ssi1.integrated.board.repositories;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import ssi1.integrated.dtos.TaskDTO;
-import ssi1.integrated.entities.Task;
+import ssi1.integrated.board.entities.Task;
 
 import java.util.List;
 

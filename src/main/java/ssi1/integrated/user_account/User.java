@@ -7,6 +7,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity

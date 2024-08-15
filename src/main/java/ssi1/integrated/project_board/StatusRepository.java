@@ -1,8 +1,8 @@
-package ssi1.integrated.repositories;
+package ssi1.integrated.project_board;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ssi1.integrated.entities.Status;
+import ssi1.integrated.project_board.Status;
 
 @Repository
 public interface StatusRepository extends JpaRepository<Status, Integer> {

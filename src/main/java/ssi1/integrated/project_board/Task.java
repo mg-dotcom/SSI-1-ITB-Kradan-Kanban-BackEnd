@@ -1,6 +1,5 @@
-package ssi1.integrated.entities;
+package ssi1.integrated.project_board;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +13,7 @@ import java.time.ZonedDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "task")
+@Table(name = "task",schema = "integrated1")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

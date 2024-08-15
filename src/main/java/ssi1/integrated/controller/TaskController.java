@@ -1,7 +1,6 @@
 package ssi1.integrated.controller;
 
 import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
-import ssi1.integrated.entities.Status;
-import ssi1.integrated.entities.Task;
+import ssi1.integrated.project_board.Task;
 import ssi1.integrated.services.TaskService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 

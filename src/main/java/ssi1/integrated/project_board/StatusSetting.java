@@ -1,4 +1,4 @@
-package ssi1.integrated.entities;
+package ssi1.integrated.project_board;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import org.springframework.data.repository.cdi.Eager;
 @Setter
 @ToString
 @Entity
-@Table(name = "status_setting")
+@Table(name = "status_setting",schema = "integrated1")
 public class StatusSetting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

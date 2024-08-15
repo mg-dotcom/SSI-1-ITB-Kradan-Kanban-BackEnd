@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
+<<<<<<< HEAD
 import ssi1.integrated.board.entities.Status;
 import ssi1.integrated.board.entities.StatusSetting;
 import ssi1.integrated.board.entities.Task;
@@ -17,6 +18,17 @@ import ssi1.integrated.exception.handler.LimitationException;
 import ssi1.integrated.board.repositories.StatusRepository;
 import ssi1.integrated.board.repositories.StatusSettingRepository;
 import ssi1.integrated.board.repositories.TaskRepository;
+=======
+import ssi1.integrated.project_board.Status;
+import ssi1.integrated.project_board.StatusSetting;
+import ssi1.integrated.project_board.Task;
+import ssi1.integrated.exception.handler.BadRequestException;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
+import ssi1.integrated.exception.handler.LimitationException;
+import ssi1.integrated.project_board.StatusRepository;
+import ssi1.integrated.project_board.StatusSettingRepository;
+import ssi1.integrated.project_board.TaskRepository;
+>>>>>>> pbi15-bi
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -3,9 +3,15 @@ package ssi1.integrated.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.EditLimitDTO;
+<<<<<<< HEAD
 import ssi1.integrated.board.entities.StatusSetting;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.board.repositories.StatusSettingRepository;
+=======
+import ssi1.integrated.project_board.StatusSetting;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
+import ssi1.integrated.project_board.StatusSettingRepository;
+>>>>>>> pbi15-bi
 
 import java.util.Optional;
 

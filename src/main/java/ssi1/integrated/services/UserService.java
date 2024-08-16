@@ -26,7 +26,7 @@ public class UserService {
 //    }
 
     public UserDTO getUser(String userName){
-        User user=userRepository.findByUsername(userName);
+        User user=userRepository.findByUsername(userName).orElseThrow();
         return modelMapper.map(user, UserDTO.class);
     }
 

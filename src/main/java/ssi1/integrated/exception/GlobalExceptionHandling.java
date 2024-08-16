@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,8 +14,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import ssi1.integrated.exception.handler.*;
 import ssi1.integrated.exception.respond.ErrorResponse;
 import ssi1.integrated.exception.respond.LimitationRespond;
-
-import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandling {
@@ -89,5 +88,14 @@ public class GlobalExceptionHandling {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException exception) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Username or Password is incorrect",
+                "Authentication failed"
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
 }

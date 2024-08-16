@@ -11,15 +11,14 @@ import org.hibernate.annotations.ColumnDefault;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users",schema = "user_account")
+@Table(name = "users",schema = "itbkk_shared")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String oid;
-    private String name;
     private String username;
-    private String email;
     private String password;
+    private String email;
     @ColumnDefault("STUDENT")
     private String role;
 }

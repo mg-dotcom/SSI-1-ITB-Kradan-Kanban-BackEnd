@@ -4,28 +4,18 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.*;
-<<<<<<< HEAD
-import ssi1.integrated.board.entities.Status;
-import ssi1.integrated.board.entities.StatusSetting;
-import ssi1.integrated.board.entities.Task;
-=======
 import ssi1.integrated.project_board.Status;
 import ssi1.integrated.project_board.StatusSetting;
 import ssi1.integrated.project_board.Task;
->>>>>>> pbi15-bi
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import java.util.List;
 
 import ssi1.integrated.exception.handler.LimitationException;
 
-<<<<<<< HEAD
-import ssi1.integrated.board.repositories.StatusRepository;
-import ssi1.integrated.board.repositories.TaskRepository;
-=======
 import ssi1.integrated.project_board.StatusRepository;
 import ssi1.integrated.project_board.TaskRepository;
->>>>>>> pbi15-bi
+
 
 @Service
 public class StatusService {

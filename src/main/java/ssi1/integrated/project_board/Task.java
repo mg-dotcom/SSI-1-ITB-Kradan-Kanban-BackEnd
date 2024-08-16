@@ -1,8 +1,6 @@
-<<<<<<<< HEAD:src/main/java/ssi1/integrated/board/entities/Task.java
-package ssi1.integrated.board.entities;
-========
+
 package ssi1.integrated.project_board;
->>>>>>>> pbi15-bi:src/main/java/ssi1/integrated/project_board/Task.java
+
 
 import jakarta.persistence.*;
 import lombok.Getter;

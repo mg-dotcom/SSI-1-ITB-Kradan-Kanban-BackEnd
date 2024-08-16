@@ -8,11 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
-<<<<<<< HEAD
-import ssi1.integrated.board.entities.Task;
-=======
 import ssi1.integrated.project_board.Task;
->>>>>>> pbi15-bi
 import ssi1.integrated.services.TaskService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 

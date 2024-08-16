@@ -6,15 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.EditLimitDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
-<<<<<<< HEAD
-import ssi1.integrated.board.entities.Status;
-import ssi1.integrated.board.entities.StatusSetting;
-import ssi1.integrated.board.repositories.StatusSettingRepository;
-=======
 import ssi1.integrated.project_board.Status;
 import ssi1.integrated.project_board.StatusSetting;
 import ssi1.integrated.project_board.StatusSettingRepository;
->>>>>>> pbi15-bi
 import ssi1.integrated.services.StatusService;
 import org.springframework.http.HttpStatus;
 import ssi1.integrated.services.StatusSettingService;

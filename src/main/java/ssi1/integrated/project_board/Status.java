@@ -1,6 +1,4 @@
 package ssi1.integrated.project_board;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

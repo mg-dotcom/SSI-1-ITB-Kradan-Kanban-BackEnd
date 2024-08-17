@@ -16,7 +16,7 @@ package ssi1.integrated.controller;
 public class AuthenticationController {
     private final AuthenticationService service;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<Object> authenticate(
             @RequestBody AuthenticationRequest request
     ) {

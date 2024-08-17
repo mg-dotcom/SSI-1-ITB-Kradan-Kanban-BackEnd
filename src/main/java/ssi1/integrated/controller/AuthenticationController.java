@@ -20,6 +20,6 @@ public class AuthenticationController {
     public ResponseEntity<Object> authenticate(
             @RequestBody AuthenticationRequest request
     ) {
-        return ResponseEntity.ok(service.authenticationResponse(request));
+        return ResponseEntity.ok(service.authenticate(request));
     }
 }

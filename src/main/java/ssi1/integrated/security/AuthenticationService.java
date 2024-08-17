@@ -16,7 +16,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
-    public Object authenticationResponse(AuthenticationRequest request){
+    public Object authenticate(AuthenticationRequest request){
         System.out.println("Before auth");
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

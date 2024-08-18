@@ -1,7 +1,12 @@
 package ssi1.integrated.controller;
 
         import lombok.RequiredArgsConstructor;
+        import org.springframework.http.HttpStatus;
         import org.springframework.http.ResponseEntity;
+        import org.springframework.security.authentication.AuthenticationManager;
+        import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+        import org.springframework.security.core.Authentication;
+        import org.springframework.security.core.context.SecurityContextHolder;
         import org.springframework.web.bind.annotation.PostMapping;
         import org.springframework.web.bind.annotation.RequestBody;
         import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,15 +16,24 @@ package ssi1.integrated.controller;
         import ssi1.integrated.security.dtos.AuthenticationResponse;
 
 @RestController
-@RequestMapping("/login")
-@RequiredArgsConstructor
+@RequestMapping("/api/auth")
+//@RequiredArgsConstructor
 public class AuthenticationController {
-    private final AuthenticationService service;
+//    private final AuthenticationService service;
+    private final AuthenticationManager authenticationManager;
 
-    @PostMapping("")
-    public ResponseEntity<Object> authenticate(
+    public AuthenticationController(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> authenticate(
             @RequestBody AuthenticationRequest request
     ) {
-        return ResponseEntity.ok(service.authenticate(request));
+        Authentication authentication=authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword()
+        ));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return new ResponseEntity<>("User login successful", HttpStatus.OK);
     }
 }

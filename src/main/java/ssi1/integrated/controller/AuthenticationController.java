@@ -1,5 +1,6 @@
 package ssi1.integrated.controller;
 
+        import jakarta.validation.Valid;
         import org.springframework.http.HttpStatus;
         import org.springframework.http.ResponseEntity;
         import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +20,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<String> authenticate(
-            @RequestBody AuthenticationRequest request
+            @Valid @RequestBody AuthenticationRequest request
     ) {
         service.authenticate(request);
         return new ResponseEntity<>("User login successful", HttpStatus.OK);

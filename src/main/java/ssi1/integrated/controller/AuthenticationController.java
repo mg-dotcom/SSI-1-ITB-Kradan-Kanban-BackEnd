@@ -10,7 +10,7 @@ package ssi1.integrated.controller;
         import ssi1.integrated.security.dtos.AuthenticationResponse;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5174","http://ip23ssi1.sit.kmutt.ac.th","http://intproj23.sit.kmutt.ac.th"})
+@CrossOrigin(origins = {"http://localhost:5174","http://ip23ssi1.sit.kmutt.ac.th","http://intproj23.sit.kmutt.ac.th","http://localhost:5173"})
 @RequestMapping("/login")
 @RequiredArgsConstructor
 public class AuthenticationController {

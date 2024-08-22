@@ -45,10 +45,10 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO updateStatus(Integer statusId, NewStatusDTO updateStatusDTO) {
-        if (statusRepository.existsByName(updateStatusDTO.getName())) {
+        Status status = getStatusById(statusId);
+        if (status.getName() == updateStatusDTO.getName()){
             throw new BadRequestException("Status name must be unique");
         }
-        Status status = getStatusById(statusId);
         if (statusId.equals(1) || statusId.equals(7)) {
             throw new BadRequestException(status.getName() + " cannot be modified.");
         }

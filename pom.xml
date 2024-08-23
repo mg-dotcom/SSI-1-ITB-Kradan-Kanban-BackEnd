@@ -133,6 +133,7 @@
                 </configuration>
             </plugin>
         </plugins>
+        <finalName>ITB-kanban-api</finalName>
     </build>
 
 </project>

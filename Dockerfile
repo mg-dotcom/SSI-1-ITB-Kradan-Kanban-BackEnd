@@ -1,20 +1,12 @@
-FROM openjdk:17-alpine AS build
+FROM maven:3.8.3-openjdk-17-slim AS builder
 WORKDIR /app
-COPY ./mvnw .
-COPY ./.mvn .mvn
-COPY ./pom.xml .
-RUN ./mvnw dependency:go-offline
-COPY ./src src
-RUN ./mvnw install -DskipTests
-RUN mkdir -p target/extracted && java -Djarmode=layertools -jar target/*.jar extract --destination target/extracted
+COPY ./pom.xml /app/
+RUN mvn -B dependency:go-offline
+COPY ./src /app/src
+RUN mvn -B clean package -DskipTests
 
-FROM openjdk:17-jdk-alpine AS run
-VOLUME /tmp
-ARG EXTRACTED=/app/target/extracted
-COPY --from=build ${EXTRACTED}/dependencies/ ./
-COPY --from=build ${EXTRACTED}/spring-boot-loader/ ./
-COPY --from=build ${EXTRACTED}/snapshot-dependencies/ ./
-COPY --from=build ${EXTRACTED}/application/ ./
-ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
-
+FROM openjdk:17-jdk-alpine
+WORKDIR /app
+COPY --from=builder /app/target/ITB-kanban-api.jar /app/
 EXPOSE 8080
+ENTRYPOINT ["java","-jar","/app/ITB-kanban-api.jar"]

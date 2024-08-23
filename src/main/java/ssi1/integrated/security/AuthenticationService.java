@@ -23,10 +23,10 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request){
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getUsername(),
+                request.getUserName(),
                 request.getPassword()
         ));
-        var user = userRepository.findByUsername(request.getUsername())
+        var user = userRepository.findByUsername(request.getUserName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
 

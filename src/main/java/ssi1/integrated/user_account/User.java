@@ -32,10 +32,10 @@ public class User implements UserDetails {
     @ColumnDefault("STUDENT")
     private Role role;
 
-    @OneToOne
-    @JoinColumn(name = "id")
-    @JsonIgnore
-    private Board board;
+//    @OneToOne
+//    @JoinColumn(name = "id")
+//    @JsonIgnore
+//    private Board board;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

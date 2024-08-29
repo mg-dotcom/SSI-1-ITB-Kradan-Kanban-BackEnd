@@ -17,7 +17,8 @@ public class Board {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
-    @OneToOne(mappedBy = "board")
+    private String user_oid;
+    @OneToOne(mappedBy = "oid")
     @JsonIgnore
     private User user;
 }

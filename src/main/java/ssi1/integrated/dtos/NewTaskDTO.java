@@ -15,11 +15,9 @@ public class NewTaskDTO {
     @Size(max = 100, message = "size must be between 0 and 100")
     private String title;
 
-    @NotEmpty(message = "Description must not be empty")
     @Size(max = 500, message = "size must be between 0 and 500")
     private String description;
 
-    @NotEmpty(message = "Assignees must not be empty")
     @Size(max = 30, message = "size must be between 0 and 30")
     private String assignees;
 

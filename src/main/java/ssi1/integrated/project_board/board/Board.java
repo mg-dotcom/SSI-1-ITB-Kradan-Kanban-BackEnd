@@ -1,4 +1,4 @@
-package ssi1.integrated.project_board;
+package ssi1.integrated.project_board.board;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -18,7 +18,4 @@ public class Board {
     private Integer id;
     private String name;
     private String user_oid;
-    @OneToOne(mappedBy = "oid")
-    @JsonIgnore
-    private User user;
 }

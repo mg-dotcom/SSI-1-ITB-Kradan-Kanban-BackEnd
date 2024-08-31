@@ -4,17 +4,17 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.*;
-import ssi1.integrated.project_board.Status;
-import ssi1.integrated.project_board.StatusSetting;
-import ssi1.integrated.project_board.Task;
+import ssi1.integrated.project_board.status.Status;
+import ssi1.integrated.project_board.statusSetting.StatusSetting;
+import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import java.util.List;
 
 import ssi1.integrated.exception.handler.LimitationException;
 
-import ssi1.integrated.project_board.StatusRepository;
-import ssi1.integrated.project_board.TaskRepository;
+import ssi1.integrated.project_board.status.StatusRepository;
+import ssi1.integrated.project_board.task.TaskRepository;
 
 
 @Service

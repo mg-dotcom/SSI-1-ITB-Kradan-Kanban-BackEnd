@@ -1,10 +1,10 @@
-package ssi1.integrated.project_board;
+package ssi1.integrated.project_board.task;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import ssi1.integrated.project_board.Task;
+import ssi1.integrated.project_board.task.Task;
 
 import java.util.List;
 

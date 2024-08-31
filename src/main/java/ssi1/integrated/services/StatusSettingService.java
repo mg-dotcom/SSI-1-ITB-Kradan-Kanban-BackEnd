@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.EditLimitDTO;
 
-import ssi1.integrated.project_board.StatusSetting;
+import ssi1.integrated.project_board.statusSetting.StatusSetting;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
-import ssi1.integrated.project_board.StatusSettingRepository;
+import ssi1.integrated.project_board.statusSetting.StatusSettingRepository;
 
 
 import java.util.Optional;

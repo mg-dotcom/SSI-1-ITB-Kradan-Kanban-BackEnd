@@ -1,5 +1,6 @@
 package ssi1.integrated.security;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         userName = jwtService.extractUsername(jwt); // Extract from JWT token
 
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // user not auth yet
 
@@ -52,5 +54,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+    public JwtPayload getJwtPayload(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            return jwtService.extractPayload(jwt); // Assuming JwtService has the extractPayload method
+        }
+        return null;
     }
 }

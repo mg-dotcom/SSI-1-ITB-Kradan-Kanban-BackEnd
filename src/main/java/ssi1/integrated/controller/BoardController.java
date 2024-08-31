@@ -1,10 +1,8 @@
 package ssi1.integrated.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.services.BoardService;
 
@@ -21,5 +19,10 @@ public class BoardController {
     public List<Board>getAllBoards(){
         System.out.println("get all board");
         return boardService.getAllBoards();
+    }
+
+    @PostMapping("")
+    public BoardDTO createBoard(@RequestBody String name){
+        return boardService.createBoard(name);
     }
 }

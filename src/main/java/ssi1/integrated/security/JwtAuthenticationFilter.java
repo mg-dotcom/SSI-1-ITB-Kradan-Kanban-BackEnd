@@ -1,11 +1,14 @@
 package ssi1.integrated.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,@NonNull HttpServletResponse response,@NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request //
+            ,@NonNull HttpServletResponse response
+            ,@NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userName;
@@ -33,13 +38,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         jwt = authHeader.substring(7);
-        userName = jwtService.extractUsername(jwt); // Extract from JWT token
+        try {
+            userName = jwtService.extractUsername(jwt);
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        } catch (JwtException e) { // Catches malformed and tampered JWTs
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // user not auth yet
 
-        if (userName != null && authentication == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
+        if (userName != null && authentication == null) { // when the Authentication is null means that the user not authenticated yet!
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName); //check form the Database
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

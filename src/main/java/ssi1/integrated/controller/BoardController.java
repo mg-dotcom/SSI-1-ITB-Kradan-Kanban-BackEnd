@@ -1,6 +1,8 @@
 package ssi1.integrated.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
@@ -23,12 +25,12 @@ public class BoardController {
     }
 
     @PostMapping("")
-    public BoardDTO createBoard(@RequestBody CreateBoardDTO boardDTO){
-        return boardService.createBoard(boardDTO.getName());
+    public ResponseEntity<BoardDTO> createBoard(@RequestBody CreateBoardDTO boardDTO){
+        return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(boardDTO.getName()));
     }
 
-    @GetMapping("/{baordId}")
-    public BoardDTO getBoardDetail(@PathVariable Integer baordId){
-        return boardService.getBoardDetail(baordId);
+    @GetMapping("/{boardId}")
+    public BoardDTO getBoardDetail(@PathVariable Integer boardId){
+        return boardService.getBoardDetail(boardId);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
@@ -39,13 +40,44 @@ public class BoardService {
     }
 
     public BoardDTO createBoard(String boardName){
+        // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtAuthenticationFilter.getJwtPayload(request);
-        Board newBoard=modelMapper.map(boardName,Board.class);
-        BoardDTO boardDTO=modelMapper.map(newBoard,BoardDTO.class);
-        Optional<User> user=userRepository.findByOid(jwtPayload.getOid());
-        System.out.println(user);
+
+        if (jwtPayload == null) {
+            // Handle the case where the JWT payload is null, e.g., return an error or throw an exception
+            throw new IllegalStateException("JWT Payload is null");
+        }
+
+        // Find the user associated with the OID from the JWT payload
+        Optional<User> user = userRepository.findByOid(jwtPayload.getOid());
+        UserDTO userDTO=modelMapper.map(user,UserDTO.class);
+        if (user.isEmpty()) {
+            // Handle the case where the user is not found
+            throw new IllegalStateException("User not found");
+        }
+
+        // Create a new Board object and set its name and user
+        Board newBoard = new Board();
+        newBoard.setName(boardName);
+        newBoard.setUser_oid(user.get().getOid());
+
+        // Save the new board to the repository
         boardRepository.save(newBoard);
+
+        // Convert the Board entity to a BoardDTO
+        BoardDTO boardDTO = modelMapper.map(newBoard, BoardDTO.class);
+        boardDTO.setOwner(userDTO);
+
         return boardDTO;
 
+    }
+
+    public BoardDTO getBoardDetail(Integer boardId){
+        Optional<Board> board =boardRepository.findById(boardId);
+        Optional<User> user =userRepository.findByOid(board.get().getUser_oid());
+        UserDTO userDTO=modelMapper.map(user,UserDTO.class);
+        BoardDTO boardDTO=modelMapper.map(board, BoardDTO.class);
+        boardDTO.setOwner(userDTO);
+        return boardDTO;
     }
 }

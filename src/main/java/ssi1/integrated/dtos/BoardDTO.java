@@ -9,5 +9,5 @@ import ssi1.integrated.user_account.UserDTO;
 public class BoardDTO {
     private Integer id;
     private String name;
-    private UserDTO user;
+    private UserDTO owner;
 }

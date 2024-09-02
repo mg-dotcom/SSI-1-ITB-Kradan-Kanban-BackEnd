@@ -61,6 +61,8 @@ public class BoardService {
         Board newBoard = new Board();
         newBoard.setName(boardName);
         newBoard.setUser_oid(user.get().getOid());
+        newBoard.setMaximumTask(10);
+        newBoard.setLimitMaximumTask(true);
 
         // Save the new board to the repository
         boardRepository.save(newBoard);

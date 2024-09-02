@@ -16,12 +16,14 @@ import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_ALPHABET;
 @Setter
 @ToString
 @Entity
-@Table(name = "board",schema = "integrated1")
+@Table(name = "board",schema = "integrated2")
 public class Board {
     @Id
     private String id;
     private String name;
     private String user_oid;
+    private Boolean limitMaximumTask;
+    private Integer maximumTask;
 
     @PrePersist
     public void generateId() {

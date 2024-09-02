@@ -1,29 +1,38 @@
-package ssi1.integrated.project_board;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
+package ssi1.integrated.project_board.task;
+
+
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ssi1.integrated.project_board.status.Status;
 
 import java.time.ZonedDateTime;
-import java.util.List;
+
 
 @Getter
 @Setter
 @ToString
 @Entity
-@Table(name = "status",schema = "integrated1")
-public class Status {
+@Table(name = "task",schema = "integrated1")
+public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "statusId")
+    @Column(name="taskId", nullable = false ,unique = true)
     private Integer id;
-    @Column(name = "statusName",unique = true,nullable = false)
-    private String name;
-    @Column(name = "statusDescription")
+    @Column(name="taskTitle")
+    private String title;
+    @Column(name="taskDescription")
     private String description;
-    private String statusColor;
+    @Column(name="taskAssignees")
+    private String assignees;
 
+    @ManyToOne
+    @JoinColumn(name="statusId", nullable = false)
+    private Status status;
 
     @CreationTimestamp
     @Column(name="createdOn",  nullable = false, updatable = false ,insertable = false )
@@ -32,7 +41,5 @@ public class Status {
     @Column(name="updatedOn" ,nullable = false,insertable = false)
     private ZonedDateTime updatedOn;
 
-    @JsonIgnore
-    @OneToMany(mappedBy="status")
-    private List<Task> tasks;
+
 }

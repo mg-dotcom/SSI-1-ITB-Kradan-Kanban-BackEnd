@@ -5,6 +5,9 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
+
+import io.jsonwebtoken.Claims;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -65,6 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // user not auth yet
 
@@ -95,4 +99,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
     }
 
+    public JwtPayload getJwtPayload(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            return jwtService.extractPayload(jwt); // Assuming JwtService has the extractPayload method
+        }
+        return null;
+    }
 }

@@ -9,15 +9,15 @@ import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 
-import ssi1.integrated.project_board.Status;
-import ssi1.integrated.project_board.StatusSetting;
-import ssi1.integrated.project_board.Task;
+import ssi1.integrated.project_board.status.Status;
+import ssi1.integrated.project_board.statusSetting.StatusSetting;
+import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.exception.handler.LimitationException;
-import ssi1.integrated.project_board.StatusRepository;
-import ssi1.integrated.project_board.StatusSettingRepository;
-import ssi1.integrated.project_board.TaskRepository;
+import ssi1.integrated.project_board.status.StatusRepository;
+import ssi1.integrated.project_board.statusSetting.StatusSettingRepository;
+import ssi1.integrated.project_board.task.TaskRepository;
 
 
 import java.util.List;

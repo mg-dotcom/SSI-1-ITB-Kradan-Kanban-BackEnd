@@ -1,12 +1,10 @@
 package ssi1.integrated.project_board.board;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ssi1.integrated.user_account.User;
 
 import java.util.Random;
 

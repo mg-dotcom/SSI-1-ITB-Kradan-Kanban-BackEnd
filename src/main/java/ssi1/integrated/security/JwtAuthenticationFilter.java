@@ -1,7 +1,10 @@
 package ssi1.integrated.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,8 +20,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ssi1.integrated.exception.respond.ErrorResponse;
 
 import java.io.IOException;
+
 
 @Component
 @RequiredArgsConstructor
@@ -28,23 +33,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request //
-            ,@NonNull HttpServletResponse response
-            ,@NonNull FilterChain filterChain) throws ServletException, IOException {
+            , @NonNull HttpServletResponse response
+            , @NonNull FilterChain filterChain) throws ServletException, IOException {
+        if (request.getRequestURI().equals("/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userName;
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
         jwt = authHeader.substring(7);
+
         try {
             userName = jwtService.extractUsername(jwt);
-        } catch (ExpiredJwtException e) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        }catch (SignatureException e) { // Catches malformed and tampered JWTs
+            sendErrorResponse(response, "Token is tempered", request);
+            return;}
+        catch (MalformedJwtException e) {
+            sendErrorResponse(response, "Malformed jwt token", request);
             return;
+        } catch (ExpiredJwtException e) {
+            sendErrorResponse(response, "Token is expired", request);
+            return;
+
         } catch (JwtException e) { // Catches malformed and tampered JWTs
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            sendErrorResponse(response, "Invalid token", request);
             return;
         }
 
@@ -66,4 +83,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request) throws IOException {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                message,
+                request.getRequestURI()
+        );
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json");
+        response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
+    }
+
 }

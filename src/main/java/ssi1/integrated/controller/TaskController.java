@@ -49,7 +49,7 @@ public class TaskController {
     }
 
     @PutMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<NewTaskDTO> updateTask(@Valid@PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO,@PathVariable String boardId){
+    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO,@PathVariable String boardId){
         return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO,boardId));
     }
 

@@ -21,4 +21,6 @@ public interface TaskRepository extends JpaRepository<Task,Integer> {
     @Query("SELECT t FROM Task t WHERE t.id = :taskId AND t.board.id = :boardId")
     Task findByStatusIdAndBoardId(Integer taskId,String boardId);
 
+    Task findByIdAndBoardId(Integer taskId,String boardId);
+
 }

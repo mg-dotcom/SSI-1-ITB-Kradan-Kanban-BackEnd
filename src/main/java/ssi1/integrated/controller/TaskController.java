@@ -39,18 +39,18 @@ public class TaskController {
     }
 
     @PostMapping("/{boardId}/tasks")
-    public ResponseEntity<GeneralTaskDTO> addTask(@RequestBody NewTaskDTO newTaskDTO, @PathVariable String boardId){
+    public ResponseEntity<GeneralTaskDTO> addTask(@Valid@RequestBody NewTaskDTO newTaskDTO, @PathVariable String boardId){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO,boardId));
     }
 
-//    @DeleteMapping("/{taskId}")
-//    public ResponseEntity<TaskDTO> deleteTask(@PathVariable Integer taskId) {
-//       return ResponseEntity.ok(service.removeTask(taskId));
-//    }
-//
-//    @PutMapping("/{taskId}")
-//    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO){
-//        return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO));
-//    }
+    @DeleteMapping("/{boardId}/tasks/{taskId}")
+    public ResponseEntity<TaskDTO> deleteTask(@PathVariable Integer taskId,@PathVariable String boardId) {
+       return ResponseEntity.ok(service.removeTask(taskId,boardId));
+    }
+
+    @PutMapping("/{boardId}/tasks/{taskId}")
+    public ResponseEntity<NewTaskDTO> updateTask(@Valid@PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO,@PathVariable String boardId){
+        return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO,boardId));
+    }
 
 }

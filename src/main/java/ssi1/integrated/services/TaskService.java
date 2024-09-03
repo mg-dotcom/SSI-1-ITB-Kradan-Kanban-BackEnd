@@ -50,13 +50,12 @@ public class TaskService {
 
         Sort sort = Sort.by(sortOrder);
 
-        List<Task> allTasks=taskRepository.findByBoard_Id(boardId);
         if (filterStatuses == null) {
-            List<Task> allTaskSorted= taskRepository.getAllBy(sort,allTasks);
+            List<Task> allTaskSorted= taskRepository.getAllSortBy(sort,boardId);
             return listMapper.mapList(allTaskSorted, TaskDTO.class);
         }
 
-        return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses,allTasks), TaskDTO.class);
+        return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses,boardId), TaskDTO.class);
 
     }
 //    public List<TaskDTO> getAllTask(String boardId) {
@@ -64,12 +63,6 @@ public class TaskService {
 //        return listMapper.mapList(allTasks, TaskDTO.class);
 //    }
 
-//    private TaskDTO convertTaskToTaskDTO(Task task) {
-//        String statusName = task.getStatus().getName();
-//        TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
-//        taskDTO.setStatus(statusName);
-//        return taskDTO;
-//    }
 
     public Task getTaskById(Integer taskId,String boardId) {
 

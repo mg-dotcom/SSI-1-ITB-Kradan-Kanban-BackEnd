@@ -41,42 +41,40 @@ public class TaskService {
     @Autowired
     private ListMapper listMapper;
 
-    //    public List<TaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction,String boardId) {
-//
-//        Sort.Order sortOrder = new Sort.Order(
-//                direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-//                sortBy
-//        );
-//
-//        Sort sort = Sort.by(sortOrder);
-//
-//        if (filterStatuses == null) {
-//            return taskRepository.getAllBy(sort).stream()
-//                    .map(task -> convertTaskToTaskDTO(task))
-//                    .collect(Collectors.toList());
-//        }
-//
-//        return taskRepository.findByStatusId(sort, filterStatuses).stream()
-//                .map(task -> convertTaskToTaskDTO(task))
-//                .collect(Collectors.toList());
-//
-//    }
-    public List<TaskDTO> getAllTask(String boardId) {
-        List<Task> allTasks=taskRepository.findByBoard_Id(boardId);
-        return listMapper.mapList(allTasks, TaskDTO.class);
-    }
+        public List<TaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction,String boardId) {
 
-    private TaskDTO convertTaskToTaskDTO(Task task) {
-        String statusName = task.getStatus().getName();
-        TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
-        taskDTO.setStatus(statusName);
-        return taskDTO;
-    }
-
-    public Task getTaskById(Integer taskId) {
-        return taskRepository.findById(taskId).orElseThrow(
-                () -> new ItemNotFoundException("NOT FOUND")
+        Sort.Order sortOrder = new Sort.Order(
+                direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
+                sortBy
         );
+
+        Sort sort = Sort.by(sortOrder);
+
+        List<Task> allTasks=taskRepository.findByBoard_Id(boardId);
+        if (filterStatuses == null) {
+            List<Task> allTaskSorted= taskRepository.getAllBy(sort,allTasks);
+            return listMapper.mapList(allTaskSorted, TaskDTO.class);
+        }
+
+        return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses,allTasks), TaskDTO.class);
+
+    }
+//    public List<TaskDTO> getAllTask(String boardId) {
+//        List<Task> allTasks=taskRepository.findByBoard_Id(boardId);
+//        return listMapper.mapList(allTasks, TaskDTO.class);
+//    }
+
+//    private TaskDTO convertTaskToTaskDTO(Task task) {
+//        String statusName = task.getStatus().getName();
+//        TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
+//        taskDTO.setStatus(statusName);
+//        return taskDTO;
+//    }
+
+    public Task getTaskById(Integer taskId,String boardId) {
+
+        return taskRepository.findByStatusIdAndBoardId(taskId,boardId);
+
     }
 
 //    @Transactional
@@ -134,16 +132,16 @@ public class TaskService {
 //        return updatedTaskDTO;
 //    }
 
-    @Transactional
-    public TaskDTO removeTask(Integer taskId) {
-        Boolean isExistingTask = taskRepository.existsById(taskId);
-        if (!isExistingTask) {
-            throw new ItemNotFoundException("NOT FOUND");
-        }
-        Task task = getTaskById(taskId);
-        TaskDTO deletedTask = modelMapper.map(task, TaskDTO.class);
-        taskRepository.delete(task);
-        return deletedTask;
-    }
+//    @Transactional
+//    public TaskDTO removeTask(Integer taskId) {
+//        Boolean isExistingTask = taskRepository.existsById(taskId);
+//        if (!isExistingTask) {
+//            throw new ItemNotFoundException("NOT FOUND");
+//        }
+//        Task task = getTaskById(taskId);
+//        TaskDTO deletedTask = modelMapper.map(task, TaskDTO.class);
+//        taskRepository.delete(task);
+//        return deletedTask;
+//    }
 
 }

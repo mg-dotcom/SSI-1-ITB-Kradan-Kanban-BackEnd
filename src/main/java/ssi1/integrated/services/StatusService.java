@@ -26,8 +26,8 @@ public class StatusService {
     @Autowired
     private TaskRepository taskRepository;
 
-    @Autowired
-    private StatusSettingService statusSettingService;
+//    @Autowired
+//    private StatusSettingService statusSettingService;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -79,55 +79,55 @@ public class StatusService {
         return mappedStatus;
     }
 
-    @Transactional
-    public Status deleteStatus(Integer statusId){
-        Status status = getStatusById(statusId);
+//    @Transactional
+//    public Status deleteStatus(Integer statusId){
+//        Status status = getStatusById(statusId);
+//
+//        if (statusId.equals(1) || statusId.equals(7)) {
+//            throw new BadRequestException(status.getName() + " cannot be modified.");
+//        }
+//
+//        if(status.getTasks().size() > 0){
+//            transferStatus(statusId,null);
+//        }
+//
+//        statusRepository.delete(status);
+//        return status;
+//    }
 
-        if (statusId.equals(1) || statusId.equals(7)) {
-            throw new BadRequestException(status.getName() + " cannot be modified.");
-        }
-
-        if(status.getTasks().size() > 0){
-            transferStatus(statusId,null);
-        }
-
-        statusRepository.delete(status);
-        return status;
-    }
-
-    @Transactional
-    public Status transferStatus(Integer statusId, Integer newStatusId) {
-        Status newStatus = statusRepository.findById(newStatusId).orElseThrow(
-                () -> new BadRequestException("The specified status for task transfer does not exist"));
-
-        if (newStatusId != null) {
-            if (statusId.equals(newStatusId)) {
-                throw new BadRequestException("Destination status for task transfer must be different from current status.");
-            }
-
-            StatusSetting statusSetting = statusSettingService.getStatusSettingById(1).orElseThrow(
-                    () -> new ItemNotFoundException("NOT FOUND"));
-
-            if (statusSetting.getLimitMaximumTask()) {
-                int noOfOldTasks = taskRepository.findByStatusId(statusId).size();
-                int noOfNewTasks = taskRepository.findByStatusId(newStatusId).size();
-
-                if (noOfOldTasks + noOfNewTasks > statusSetting.getMaximumTask()) {
-                    throw new LimitationException("The destination status cannot be over limit after transfer.");
-                }
-            }
-
-            List<Task> tasks = taskRepository.findByStatusId(statusId);
-            for (Task task : tasks) {
-                task.setStatus(newStatus);
-            }
-            taskRepository.saveAll(tasks);
-            statusRepository.deleteById(statusId);
-        } else {
-            throw new BadRequestException("Destination status for task transfer not specified.");
-        }
-
-        return newStatus;
-    }
+//    @Transactional
+//    public Status transferStatus(Integer statusId, Integer newStatusId) {
+//        Status newStatus = statusRepository.findById(newStatusId).orElseThrow(
+//                () -> new BadRequestException("The specified status for task transfer does not exist"));
+//
+//        if (newStatusId != null) {
+//            if (statusId.equals(newStatusId)) {
+//                throw new BadRequestException("Destination status for task transfer must be different from current status.");
+//            }
+//
+//            StatusSetting statusSetting = statusSettingService.getStatusSettingById(1).orElseThrow(
+//                    () -> new ItemNotFoundException("NOT FOUND"));
+//
+//            if (statusSetting.getLimitMaximumTask()) {
+//                int noOfOldTasks = taskRepository.findByStatusId(statusId).size();
+//                int noOfNewTasks = taskRepository.findByStatusId(newStatusId).size();
+//
+//                if (noOfOldTasks + noOfNewTasks > statusSetting.getMaximumTask()) {
+//                    throw new LimitationException("The destination status cannot be over limit after transfer.");
+//                }
+//            }
+//
+//            List<Task> tasks = taskRepository.findByStatusId(statusId);
+//            for (Task task : tasks) {
+//                task.setStatus(newStatus);
+//            }
+//            taskRepository.saveAll(tasks);
+//            statusRepository.deleteById(statusId);
+//        } else {
+//            throw new BadRequestException("Destination status for task transfer not specified.");
+//        }
+//
+//        return newStatus;
+//    }
 
 }

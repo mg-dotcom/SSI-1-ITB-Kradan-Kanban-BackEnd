@@ -21,6 +21,10 @@ public class ApplicationConfig {
     public ModelMapper modelMapper(){
         return new ModelMapper();
     }
+    @Bean
+    public ListMapper listMapper(){
+        return ListMapper.getInstance();
+    }
     private final UserRepository userRepository;
 
     @Bean

@@ -3,11 +3,13 @@ package ssi1.integrated.project_board.task;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.status.Status;
 
 import java.time.ZonedDateTime;
@@ -17,7 +19,7 @@ import java.time.ZonedDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "task",schema = "integrated1")
+@Table(name = "task",schema = "integrated2")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,6 +42,11 @@ public class Task {
     @UpdateTimestamp
     @Column(name="updatedOn" ,nullable = false,insertable = false)
     private ZonedDateTime updatedOn;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "boardId", nullable = false)
+    private Board board;
 
 
 }

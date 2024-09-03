@@ -56,7 +56,7 @@ public class BoardService {
         // Create a new Board object and set its name and user
         Board newBoard = new Board();
         newBoard.setName(boardName);
-        newBoard.setUser_oid(user.get().getOid());
+        newBoard.setUserOid(user.get().getOid());
         newBoard.setMaximumTask(10);
         newBoard.setLimitMaximumTask(true);
 
@@ -78,7 +78,7 @@ public class BoardService {
 
     public BoardDTO getBoardDetail(String boardId) {
         Optional<Board> board = boardRepository.findById(boardId);
-        Optional<User> user = userRepository.findByOid(board.get().getUser_oid());
+        Optional<User> user = userRepository.findByOid(board.get().getUserOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
         boardDTO.setOwner(userDTO);

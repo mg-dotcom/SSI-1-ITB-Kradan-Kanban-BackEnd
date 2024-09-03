@@ -64,16 +64,16 @@ public class StatusController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
     }
 
-    @DeleteMapping("/{statusId}")
-    public Status deleteStatus(@PathVariable Integer statusId){
-        return statusService.deleteStatus(statusId);
-    }
-
-    @DeleteMapping("/{statusId}/{newStatusId}")
-    public ResponseEntity<Status> transfer(@PathVariable Integer statusId,  @PathVariable Integer newStatusId) {
-
-        return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
-    }
+//    @DeleteMapping("/{statusId}")
+//    public Status deleteStatus(@PathVariable Integer statusId){
+//        return statusService.deleteStatus(statusId);
+//    }
+//
+//    @DeleteMapping("/{statusId}/{newStatusId}")
+//    public ResponseEntity<Status> transfer(@PathVariable Integer statusId,  @PathVariable Integer newStatusId) {
+//
+//        return ResponseEntity.ok(statusService.transferStatus(statusId,newStatusId));
+//    }
 
 
 }

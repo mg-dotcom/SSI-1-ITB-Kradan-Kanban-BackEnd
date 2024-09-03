@@ -19,7 +19,7 @@ public class Board {
     @Id
     private String id;
     private String name;
-    private String user_oid;
+    private String userOid;
     private Boolean limitMaximumTask;
     private Integer maximumTask;
 

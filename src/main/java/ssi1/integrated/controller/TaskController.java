@@ -1,8 +1,12 @@
 package ssi1.integrated.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ssi1.integrated.dtos.GeneralTaskDTO;
+import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.services.TaskService;
@@ -19,11 +23,6 @@ public class TaskController {
     @Autowired
     private TaskService service;
 
-//    @GetMapping("/{boardId}/tasks")
-//    public List<TaskDTO> getAllTasks(@PathVariable String boardId){
-//        return service.getAllTask(boardId);
-//    }
-
     @GetMapping("/{boardId}/tasks")
     public List<TaskDTO>getAllTasks(
             @RequestParam(required = false,defaultValue = "createdOn") String sortBy,
@@ -35,15 +34,15 @@ public class TaskController {
     }
 
     @GetMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<Task> getTaskById(@PathVariable String boardId,@PathVariable Integer taskId){
+    public ResponseEntity<TaskDTO> getTaskById(@PathVariable String boardId,@PathVariable Integer taskId){
         return ResponseEntity.ok(service.getTaskById(taskId,boardId));
     }
 
-//    @PostMapping("")
-//    public ResponseEntity<GeneralTaskDTO> addTask(@Valid @RequestBody NewTaskDTO newTaskDTO){
-//        return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO));
-//    }
-//
+    @PostMapping("/{boardId}/tasks")
+    public ResponseEntity<GeneralTaskDTO> addTask(@RequestBody NewTaskDTO newTaskDTO, @PathVariable String boardId){
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO,boardId));
+    }
+
 //    @DeleteMapping("/{taskId}")
 //    public ResponseEntity<TaskDTO> deleteTask(@PathVariable Integer taskId) {
 //       return ResponseEntity.ok(service.removeTask(taskId));

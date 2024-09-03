@@ -48,5 +48,4 @@ public class Task {
     @JoinColumn(name = "boardId", nullable = false)
     private Board board;
 
-
 }

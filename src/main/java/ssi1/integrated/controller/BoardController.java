@@ -34,4 +34,9 @@ public class BoardController {
     public BoardDTO getBoardDetail(@PathVariable String boardId){
         return boardService.getBoardDetail(boardId);
     }
+
+    @GetMapping("/user")
+    public Board getBoardByUser(){
+        return boardService.getBoardByUserOid();
+    }
 }

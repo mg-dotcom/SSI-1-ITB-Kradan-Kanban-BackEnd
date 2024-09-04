@@ -37,6 +37,20 @@ public class BoardService {
         return boardRepository.findAll();
     }
 
+    public Board getBoardByUserOid(){
+        // Extract the JWT payload from the request
+        JwtPayload jwtPayload = jwtAuthenticationFilter.getJwtPayload(request);
+
+        if (jwtPayload == null) {
+            // Handle the case where the JWT payload is null, e.g., return an error or throw an exception
+            throw new IllegalStateException("JWT Payload is null");
+        }
+
+        // Find the user associated with the OID from the JWT payload
+        User user = userRepository.findByOid(jwtPayload.getOid()).orElseThrow();
+        return boardRepository.findByUserOid(user.getOid());
+    }
+
     public BoardDTO createBoard(CreateBoardDTO createBoardDTO) {
         // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtAuthenticationFilter.getJwtPayload(request);

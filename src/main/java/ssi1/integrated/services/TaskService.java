@@ -13,13 +13,11 @@ import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.status.Status;
-import ssi1.integrated.project_board.statusSetting.StatusSetting;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.exception.handler.LimitationException;
 import ssi1.integrated.project_board.status.StatusRepository;
-import ssi1.integrated.project_board.statusSetting.StatusSettingRepository;
 import ssi1.integrated.project_board.task.TaskRepository;
 
 

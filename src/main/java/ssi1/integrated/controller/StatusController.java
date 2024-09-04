@@ -33,8 +33,8 @@ public class StatusController {
 
 
     @GetMapping("/{boardId}/status")
-    public List<Status> getAllStatus(){
-        return  statusService.getAllStatus();
+    public List<Status> getAllStatus(@PathVariable String boardId){
+        return  statusService.getAllStatus(boardId);
     }
 
 
@@ -55,16 +55,16 @@ public class StatusController {
 //        return statusService.getStatusById(statusId);
 //    }
 //
-//    @PutMapping("/{statusId}")
-//    public ResponseEntity<NewStatusDTO> updateStatus(@PathVariable Integer statusId,@Valid @RequestBody NewStatusDTO updateStatus) {
-//        return ResponseEntity.ok(statusService.updateStatus(statusId, updateStatus));
-//    }
+    @PutMapping("/{boardId}/{statusId}/status")
+    public ResponseEntity<NewStatusDTO> updateStatus(@PathVariable String boardId,@PathVariable Integer statusId,@Valid @RequestBody NewStatusDTO updateStatus) {
+        return ResponseEntity.ok(statusService.updateStatus(boardId,statusId, updateStatus));
+    }
 //
-//    @PostMapping("")
-//    public ResponseEntity<NewStatusDTO> addStatus(@Valid @RequestBody NewStatusDTO newStatusDTO){
-//        NewStatusDTO createdStatus = statusService.insertNewStatus(newStatusDTO);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
-//    }
+    @PostMapping("/{boardId}/status")
+    public ResponseEntity<NewStatusDTO> addStatus(@PathVariable String boardId,@Valid @RequestBody NewStatusDTO newStatusDTO){
+        NewStatusDTO createdStatus = statusService.insertNewStatus(boardId,newStatusDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
+    }
 
 //    @DeleteMapping("/{statusId}")
 //    public Status deleteStatus(@PathVariable Integer statusId){

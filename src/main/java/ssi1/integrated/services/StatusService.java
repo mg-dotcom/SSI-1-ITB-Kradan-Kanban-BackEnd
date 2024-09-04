@@ -1,23 +1,21 @@
 package ssi1.integrated.services;
+
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ssi1.integrated.dtos.*;
-import ssi1.integrated.project_board.board.Board;
-import ssi1.integrated.project_board.board.BoardRepository;
-import ssi1.integrated.project_board.status.Status;
-import ssi1.integrated.project_board.statusSetting.StatusSetting;
-import ssi1.integrated.project_board.task.Task;
+import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
-import java.util.List;
-import java.util.Optional;
-
-import ssi1.integrated.exception.handler.LimitationException;
-
+import ssi1.integrated.project_board.board.BoardRepository;
+import ssi1.integrated.project_board.board_status.BoardStatus;
+import ssi1.integrated.project_board.board_status.BoardStatusRepository;
+import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.TaskRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -27,59 +25,67 @@ public class StatusService {
     private StatusRepository statusRepository;
 
     @Autowired
+    private BoardStatusService boardStatusService;
+
+    @Autowired
     private TaskRepository taskRepository;
 
     @Autowired
     private BoardRepository boardRepository;
 
     @Autowired
+    private BoardStatusRepository boardStatusRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     public List<Status> getAllStatus(String boardId) {
-        Optional<Board> board = boardRepository.findById(boardId);
-        return statusRepository.findAll();
-
+        List<BoardStatus> foundedBoardStatus = boardStatusRepository.findByBoardId(boardId);//List of the boardStatus by using board id
+        return foundedBoardStatus.stream().map(BoardStatus::getStatus).collect(Collectors.toList());
     }
 
-    public Status getStatusById(Integer statusId){
-        return statusRepository.findById(statusId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
-        );
+    public Status getStatusById(String boardId, Integer statusId) {
+        return getAllStatus(boardId).stream()
+                .filter(status -> status.getId().equals(statusId))
+                .findFirst()
+                .orElseThrow(() -> new ItemNotFoundException("Status Not Found"));
     }
 
     @Transactional
-    public NewStatusDTO updateStatus(Integer statusId, NewStatusDTO updateStatusDTO) {
-        Status status = getStatusById(statusId);
-        if (status.getName() == updateStatusDTO.getName()){
+    public NewStatusDTO updateStatus(String boardId,Integer statusId, NewStatusDTO updateStatusDTO) {
+        boolean existStatus = getAllStatus(boardId).stream().anyMatch(status -> status.getName().equals(updateStatusDTO.getName()));
+        if (existStatus) {
             throw new BadRequestException("Status name must be unique");
         }
-        if (statusId.equals(1) || statusId.equals(7)) {
-            throw new BadRequestException(status.getName() + " cannot be modified.");
+        if (statusId.equals(1)) {
+            throw new BadRequestException("This status cannot be modified.");
         }
+        Status toUpdateStatus = statusRepository.findById(statusId)
+                .orElseThrow(() -> new ItemNotFoundException("Status not found"));
 
         if (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty()) {
-            status.setStatusColor("#CCCCCC");
+            toUpdateStatus.setStatusColor("#CCCCCC");
         } else {
-            status.setStatusColor(updateStatusDTO.getStatusColor());
+            toUpdateStatus.setStatusColor(updateStatusDTO.getStatusColor());
         }
-
-        status.setName(updateStatusDTO.getName());
-        status.setDescription(updateStatusDTO.getDescription());
-        status.setStatusColor(updateStatusDTO.getStatusColor());
-
-        Status updatedStatus = statusRepository.save(status);
+        toUpdateStatus.setName(updateStatusDTO.getName());
+        toUpdateStatus.setDescription(updateStatusDTO.getDescription());
+        Status updatedStatus = statusRepository.save(toUpdateStatus);
+        boardStatusService.addStatusBoard(updatedStatus.getId(),boardId);
         NewStatusDTO mappedStatus = modelMapper.map(updatedStatus, NewStatusDTO.class);
         return mappedStatus;
     }
 
     @Transactional
-    public NewStatusDTO insertNewStatus(NewStatusDTO newStatusDTO) {
-        if (statusRepository.existsByName(newStatusDTO.getName())) {
+    public NewStatusDTO insertNewStatus(String boardId, NewStatusDTO newStatusDTO) {
+        boolean existStatus = getAllStatus(boardId).stream().anyMatch(status -> status.getName().equals(newStatusDTO.getName()));
+        if (existStatus) {
             throw new BadRequestException("Status name must be unique");
         }
         Status status = modelMapper.map(newStatusDTO, Status.class);
         Status insertedStatus = statusRepository.save(status);
         NewStatusDTO mappedStatus = modelMapper.map(insertedStatus, NewStatusDTO.class);
+        boardStatusService.addStatusBoard(mappedStatus.getId(),boardId);
         return mappedStatus;
     }
 

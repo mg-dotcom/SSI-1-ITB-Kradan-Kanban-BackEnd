@@ -27,7 +27,7 @@ public class BoardController {
 
     @PostMapping("")
     public ResponseEntity<BoardDTO> createBoard(@Valid @RequestBody CreateBoardDTO boardDTO){
-        return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(boardDTO.getName()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(boardDTO));
     }
 
     @GetMapping("/{boardId}")

@@ -4,17 +4,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ssi1.integrated.dtos.EditLimitDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.project_board.status.Status;
-import ssi1.integrated.project_board.statusSetting.StatusSetting;
-import ssi1.integrated.project_board.statusSetting.StatusSettingRepository;
 import ssi1.integrated.services.StatusService;
 import org.springframework.http.HttpStatus;
-import ssi1.integrated.services.StatusSettingService;
-
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 
@@ -25,28 +20,22 @@ public class StatusController {
     @Autowired
     private StatusService statusService;
 
-    @Autowired
-    private StatusSettingService statusSettingService;
-
-    @Autowired
-    private StatusSettingRepository statusSettingRepository;
-
 
     @GetMapping("")
     public List<Status> getAllStatus(){
         return  statusService.getAllStatus();
     }
 
-    @GetMapping("/{statusSettingId}/maximum-task")
-    public Optional<StatusSetting> getStatusSetting(@PathVariable Integer statusSettingId){
-        return statusSettingService.getStatusSettingById(statusSettingId);
-    }
-
-    @PatchMapping("/{statusSettingId}/maximum-task")
-    public StatusSetting updateStatusSetting(@PathVariable Integer statusSettingId,@RequestBody(required = false)  EditLimitDTO updateStatusSetting) {
-
-        return statusSettingService.updateStatusSetting(statusSettingId, updateStatusSetting);
-    }
+//    @GetMapping("/{statusSettingId}/maximum-task")
+//    public Optional<StatusSetting> getStatusSetting(@PathVariable Integer statusSettingId){
+//        return statusSettingService.getStatusSettingById(statusSettingId);
+//    }
+//
+//    @PatchMapping("/{statusSettingId}/maximum-task")
+//    public StatusSetting updateStatusSetting(@PathVariable Integer statusSettingId,@RequestBody(required = false)  EditLimitDTO updateStatusSetting) {
+//
+//        return statusSettingService.updateStatusSetting(statusSettingId, updateStatusSetting);
+//    }
 
     @GetMapping("/{statusId}")
     public Status getStatusById(@PathVariable Integer statusId){

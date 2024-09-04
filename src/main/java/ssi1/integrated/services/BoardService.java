@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.BoardDTO;
+import ssi1.integrated.dtos.CreateBoardDTO;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.security.JwtAuthenticationFilter;
@@ -36,7 +37,7 @@ public class BoardService {
         return boardRepository.findAll();
     }
 
-    public BoardDTO createBoard(String boardName) {
+    public BoardDTO createBoard(CreateBoardDTO createBoardDTO) {
         // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtAuthenticationFilter.getJwtPayload(request);
 
@@ -46,19 +47,17 @@ public class BoardService {
         }
 
         // Find the user associated with the OID from the JWT payload
-        Optional<User> user = userRepository.findByOid(jwtPayload.getOid());
+        User user = userRepository.findByOid(jwtPayload.getOid()).orElseThrow();
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
-        if (user.isEmpty()) {
-            // Handle the case where the user is not found
-            throw new IllegalStateException("User not found");
-        }
 
         // Create a new Board object and set its name and user
         Board newBoard = new Board();
-        newBoard.setName(boardName);
-        newBoard.setUserOid(user.get().getOid());
+        newBoard.setName(createBoardDTO.getName());
+        newBoard.setUserOid(user.getOid());
         newBoard.setMaximumTask(10);
         newBoard.setLimitMaximumTask(true);
+        newBoard.setEmoji(createBoardDTO.getEmoji());
+        newBoard.setColor(createBoardDTO.getColor());
 
         // Save the new board to the repository
         boardRepository.save(newBoard);

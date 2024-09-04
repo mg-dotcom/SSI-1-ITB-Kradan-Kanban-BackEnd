@@ -13,4 +13,6 @@ public class CreateBoardDTO {
     @NotEmpty
     @Size(max = 120, message = "size must be between 0 and 120")
     private String name;
+    private String emoji;
+    private String color;
 }

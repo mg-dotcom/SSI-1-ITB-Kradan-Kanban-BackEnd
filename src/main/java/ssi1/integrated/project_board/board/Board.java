@@ -20,6 +20,8 @@ public class Board {
     private String id;
     private String name;
     private String userOid;
+    private String emoji;
+    private String color;
     private Boolean limitMaximumTask;
     private Integer maximumTask;
 

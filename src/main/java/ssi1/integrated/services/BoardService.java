@@ -1,15 +1,18 @@
 package ssi1.integrated.services;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.security.JwtAuthenticationFilter;
 import ssi1.integrated.security.JwtPayload;
+import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserDTO;
 import ssi1.integrated.user_account.UserRepository;
@@ -18,50 +21,36 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class BoardService {
-    @Autowired
     private BoardRepository boardRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
+    private UserService userService;
     private ModelMapper modelMapper;
-    @Autowired
-    JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
-    private HttpServletRequest request;
-    @Autowired
     private BoardStatusService boardStatusService;
+    private JwtService jwtService;
 
 
     public List<Board> getAllBoards() {
         return boardRepository.findAll();
     }
 
-    public Board getBoardByUserOid(){
-        // Extract the JWT payload from the request
-        JwtPayload jwtPayload = jwtAuthenticationFilter.getJwtPayload(request);
+    public List<Board> getAllBoards(String token){
+        JwtPayload jwtPayload = jwtService.extractPayload(token);
 
         if (jwtPayload == null) {
-            // Handle the case where the JWT payload is null, e.g., return an error or throw an exception
             throw new IllegalStateException("JWT Payload is null");
         }
 
-        // Find the user associated with the OID from the JWT payload
-        User user = userRepository.findByOid(jwtPayload.getOid()).orElseThrow();
+        User user = userService.getUserByOid(jwtPayload.getOid());
         return boardRepository.findByUserOid(user.getOid());
     }
 
-    public BoardDTO createBoard(CreateBoardDTO createBoardDTO) {
+    public BoardDTO createBoard(String token,CreateBoardDTO createBoardDTO) {
         // Extract the JWT payload from the request
-        JwtPayload jwtPayload = jwtAuthenticationFilter.getJwtPayload(request);
-
-        if (jwtPayload == null) {
-            // Handle the case where the JWT payload is null, e.g., return an error or throw an exception
-            throw new IllegalStateException("JWT Payload is null");
-        }
+        JwtPayload jwtPayload = jwtService.extractPayload(token);
 
         // Find the user associated with the OID from the JWT payload
-        User user = userRepository.findByOid(jwtPayload.getOid()).orElseThrow();
+        User user = userService.getUserByOid(jwtPayload.getOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
 
         // Create a new Board object and set its name and user
@@ -90,11 +79,22 @@ public class BoardService {
     }
 
     public BoardDTO getBoardDetail(String boardId) {
-        Optional<Board> board = boardRepository.findById(boardId);
-        Optional<User> user = userRepository.findByOid(board.get().getUserOid());
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+        User user = userService.getUserByOid(board.getUserOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
         boardDTO.setOwner(userDTO);
         return boardDTO;
+    }
+
+    public String deleteBoard(String boardId){
+        boardRepository.findById(boardId).orElseThrow(
+                ()-> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        boardRepository.deleteById(boardId);
+        return "BOARD ID "+boardId+" DELETED";
     }
 }

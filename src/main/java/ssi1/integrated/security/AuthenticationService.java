@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.security.dtos.AuthenticationRequest;
 import ssi1.integrated.security.dtos.AuthenticationResponse;
+import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
 
 @Service
@@ -26,8 +27,8 @@ public class AuthenticationService {
                 request.getUserName(),
                 request.getPassword()
         ));
-        var user = userRepository.findByUsername(request.getUserName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByUsername(request.getUserName());
+
 
 
         var jwtToken = jwtService.generateToken(user);

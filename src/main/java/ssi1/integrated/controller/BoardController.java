@@ -19,15 +19,21 @@ public class BoardController {
     @Autowired
     private BoardService boardService;
 
-    @GetMapping("")
+    @GetMapping("/all")
     public List<Board>getAllBoards(){
-        System.out.println("get all board");
         return boardService.getAllBoards();
     }
 
     @PostMapping("")
-    public ResponseEntity<BoardDTO> createBoard(@Valid @RequestBody CreateBoardDTO boardDTO){
-        return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(boardDTO));
+    public ResponseEntity<BoardDTO> createBoard(@RequestHeader (name="Authorization")String token,@Valid @RequestBody CreateBoardDTO boardDTO){
+        String jwtToken = token.startsWith("Bearer ") ? token.substring(7) : token;
+        return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(jwtToken,boardDTO));
+    }
+
+    @GetMapping("")
+    public List<Board> getBoardByUser(@RequestHeader (name="Authorization")String token){
+        String jwtToken = token.startsWith("Bearer ") ? token.substring(7) : token;
+        return boardService.getAllBoards(jwtToken);
     }
 
     @GetMapping("/{boardId}")
@@ -35,8 +41,9 @@ public class BoardController {
         return boardService.getBoardDetail(boardId);
     }
 
-    @GetMapping("/user")
-    public Board getBoardByUser(){
-        return boardService.getBoardByUserOid();
+    @DeleteMapping("/{boardId}")
+    public String deleteBoard(@PathVariable String boardId){
+        return boardService.deleteBoard(boardId);
     }
+
 }

@@ -62,7 +62,7 @@ public class TaskService {
 
 
     public TaskDTO getTaskById(Integer taskId, String boardId) {
-        Task task = taskRepository.findByStatusIdAndBoardId(taskId, boardId);
+        Task task = taskRepository.findByIdAndBoardId(taskId, boardId);
         TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
         taskDTO.setStatus(task.getStatus().getName());
         return taskDTO;

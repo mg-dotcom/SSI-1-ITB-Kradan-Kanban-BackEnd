@@ -101,6 +101,8 @@ public class StatusService {
         if (!taskList.isEmpty()){
             transferStatus(boardId, statusId,null);
         }
+        Integer toDeleteBoardStatus = boardStatusRepository.findBoardStatusByBoard_IdAndStatus_Id(boardId,statusId).getId();
+        boardStatusRepository.deleteById(toDeleteBoardStatus);
         statusRepository.delete(toDeleteStatus);
         return toDeleteStatus;
     }

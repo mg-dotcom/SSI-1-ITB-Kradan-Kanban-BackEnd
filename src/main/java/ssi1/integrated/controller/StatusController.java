@@ -56,7 +56,6 @@ public class StatusController {
     }
     @DeleteMapping("/{boardId}/{statusId}/{newStatusId}")
     public ResponseEntity<Status> transfer(@PathVariable String boardId,@PathVariable Integer statusId,  @PathVariable Integer newStatusId) {
-
         return ResponseEntity.ok(statusService.transferStatus(boardId,statusId,newStatusId));
     }
 

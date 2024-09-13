@@ -38,4 +38,5 @@ public class BoardStatusService {
         newBoardStatus.setStatus(status.get());
         return boardStatusRepository.save(newBoardStatus);
     }
+
 }

@@ -7,4 +7,8 @@ import java.util.List;
 public interface BoardStatusRepository extends JpaRepository<BoardStatus, Integer> {
 
     List<BoardStatus> findByBoardId(String boardId);
+
+    List<BoardStatus> findBoardStatusByStatusId(Integer statusId);
+
+    BoardStatus findBoardStatusByBoard_IdAndStatus_Id(String boardId,Integer statusId);
 }

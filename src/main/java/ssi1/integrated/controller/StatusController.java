@@ -31,7 +31,7 @@ public class StatusController {
 
     @GetMapping("/{boardId}")
     public List<Status> getAllStatus(@PathVariable String boardId){
-        return  statusService.getAllStatus(boardId);
+        return statusService.getAllStatus(boardId);
     }
 
     @GetMapping("/{boardId}/{statusId}")

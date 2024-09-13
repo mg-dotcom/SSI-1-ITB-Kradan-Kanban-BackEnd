@@ -41,7 +41,8 @@ public class StatusService {
     private ModelMapper modelMapper;
 
     public List<Status> getAllStatus(String boardId) {
-        List<BoardStatus> foundedBoardStatus = boardStatusRepository.findByBoardId(boardId);//List of the boardStatus by using board id
+        List<BoardStatus> foundedBoardStatus = boardStatusRepository.findByBoardId(boardId);
+        System.out.println(foundedBoardStatus.toString());
         return foundedBoardStatus.stream().map(BoardStatus::getStatus).collect(Collectors.toList());
     }
 

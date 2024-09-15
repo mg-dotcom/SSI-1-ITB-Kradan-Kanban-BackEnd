@@ -1,5 +1,6 @@
 package ssi1.integrated.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.project_board.board.Board;
@@ -25,17 +26,22 @@ public class BoardStatusService {
         return boardStatusRepository.findAll();
     }
 
-    public BoardStatus addStatusBoard(Integer statusId,String boardId){
+    public void addStatusBoard(Integer statusId,String boardId){
         Optional<Status> status=statusRepository.findById(statusId);
-        Optional<Board> board=boardRepository.findById(boardId);
+        Board board=boardRepository.findById(boardId).orElseThrow();
 
-        if (status.isEmpty() || board.isEmpty()) {
+        if (status.isEmpty()) {
             throw new IllegalStateException("Status or Board not found");
         }
 
         BoardStatus newBoardStatus=new BoardStatus();
-        newBoardStatus.setBoard(board.get());
+        newBoardStatus.setBoard(board);
         newBoardStatus.setStatus(status.get());
-        return boardStatusRepository.save(newBoardStatus);
+        boardStatusRepository.save(newBoardStatus);
     }
+    @Transactional
+    public void deleteStatusBoard(String boardId){
+        boardStatusRepository.deleteBoardStatusByBoardId(boardId);
+    }
+
 }

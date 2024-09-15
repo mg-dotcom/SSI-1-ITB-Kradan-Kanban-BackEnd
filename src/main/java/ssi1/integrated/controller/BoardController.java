@@ -19,6 +19,7 @@ public class BoardController {
     @Autowired
     private BoardService boardService;
 
+
     @GetMapping("/all")
     public List<Board>getAllBoards(){
         return boardService.getAllBoards();
@@ -43,6 +44,7 @@ public class BoardController {
 
     @DeleteMapping("/{boardId}")
     public String deleteBoard(@PathVariable String boardId){
+
         return boardService.deleteBoard(boardId);
     }
 

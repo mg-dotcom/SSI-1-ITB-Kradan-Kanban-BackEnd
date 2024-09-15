@@ -10,7 +10,6 @@ import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.project_board.board.Board;
-import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.exception.handler.BadRequestException;
@@ -18,13 +17,7 @@ import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.exception.handler.LimitationException;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.TaskRepository;
-
-
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 
 @Service
 public class TaskService {
@@ -33,9 +26,7 @@ public class TaskService {
     @Autowired
     private StatusRepository statusRepository;
     @Autowired
-    private StatusService statusService;
-    @Autowired
-    private BoardRepository boardRepository;
+    private BoardService boardService;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
@@ -73,18 +64,18 @@ public class TaskService {
         Status status = statusRepository.findById(newTask.getStatus())
                 .orElseThrow(() -> new BadRequestException("status does not exist"));
 
-        Optional<Board> board = boardRepository.findById(boardId);
-        if (board.get().getLimitMaximumTask() && !"No Status".equals(status.getName())
+        Board board = boardService.getBoardById(boardId);
+        if (board.getLimitMaximumTask() && !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())) {
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
-            if (noOfTasks >= board.get().getMaximumTask()) {
+            if (noOfTasks >= board.getMaximumTask()) {
                 throw new LimitationException("the status has reached the limit");
             }
         }
 
         Task task = modelMapper.map(newTask, Task.class);
         task.setStatus(status);
-        task.setBoard(board.get());
+        task.setBoard(board);
         Task insertedTask = taskRepository.save(task);
         return modelMapper.map(insertedTask, GeneralTaskDTO.class);
 
@@ -92,8 +83,7 @@ public class TaskService {
 
     @Transactional
     public NewTaskDTO updateTask(Integer taskId, NewTaskDTO inputTask, String boardId) {
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new ItemNotFoundException("Board with id " + boardId + " not found"));
+        Board board = boardService.getBoardById(boardId);
 
         boolean isExistingTask = taskRepository.existsById(taskId);
         if (!isExistingTask) {

@@ -97,4 +97,10 @@ public class BoardService {
         boardRepository.deleteById(boardId);
         return "BOARD ID "+boardId+" DELETED";
     }
+
+    public Board getBoardById(String boardId){
+        return boardRepository.findById(boardId).orElseThrow(
+                ()-> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+    }
 }

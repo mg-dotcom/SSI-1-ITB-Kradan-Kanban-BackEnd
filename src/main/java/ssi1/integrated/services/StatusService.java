@@ -73,7 +73,6 @@ public class StatusService {
         toUpdateStatus.setName(updateStatusDTO.getName());
         toUpdateStatus.setDescription(updateStatusDTO.getDescription());
         Status updatedStatus = statusRepository.save(toUpdateStatus);
-        boardStatusService.addStatusBoard(updatedStatus.getId(), boardId);
         NewStatusDTO mappedStatus = modelMapper.map(updatedStatus, NewStatusDTO.class);
         return mappedStatus;
     }
@@ -97,10 +96,6 @@ public class StatusService {
         if (statusId.equals(1)) {
             throw new BadRequestException(toDeleteStatus.getName() + " cannot be delete.");
         }
-        List<Task> taskList = taskRepository.findByStatusIdAndBoardId(statusId, boardId);
-        if (!taskList.isEmpty()){
-            transferStatus(boardId, statusId,null);
-        }
         Integer toDeleteBoardStatus = boardStatusRepository.findBoardStatusByBoard_IdAndStatus_Id(boardId,statusId).getId();
         boardStatusRepository.deleteById(toDeleteBoardStatus);
         statusRepository.delete(toDeleteStatus);
@@ -108,20 +103,20 @@ public class StatusService {
     }
 
     @Transactional
-    public Status transferStatus(String boardId, Integer statusId, Integer newStatusId) {
-        Status newStatus = statusRepository.findById(newStatusId).orElseThrow(
+    public Status transferStatus(String boardId, Integer oldStatusId, Integer newStatusId) {
+        Status transferStatus = statusRepository.findById(newStatusId).orElseThrow(
                 () -> new BadRequestException("The specified status for task transfer does not exist"));
-        if (statusId.equals(newStatusId)) {
+        if (oldStatusId.equals(newStatusId)) {
             throw new BadRequestException("Destination status for task transfer must be different from current status.");
         }
-        List<Task> taskList = taskRepository.findByStatusIdAndBoardId(statusId, boardId);
+        List<Task> taskList = taskRepository.findByStatusIdAndBoardId(oldStatusId, boardId);
 
         for (Task task : taskList) {
-            task.setStatus(newStatus);
+            task.setStatus(transferStatus);
+            taskRepository.save(task);
         }
-        taskRepository.saveAll(taskList);
-        statusRepository.deleteById(statusId);
-        return newStatus;
+        deleteStatus(boardId,oldStatusId);
+        return transferStatus;
     }
 
 }

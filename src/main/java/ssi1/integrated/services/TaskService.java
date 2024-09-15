@@ -41,7 +41,7 @@ public class TaskService {
     @Autowired
     private ListMapper listMapper;
 
-    public List<TaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId) {
+    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId) {
 
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
@@ -52,19 +52,18 @@ public class TaskService {
 
         if (filterStatuses == null) {
             List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
-            return listMapper.mapList(allTaskSorted, TaskDTO.class);
+            return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
         }
 
-        return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), TaskDTO.class);
+        return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
 
     }
 
 
-    public TaskDTO getTaskById(Integer taskId, String boardId) {
+    public Task getTaskById(Integer taskId, String boardId) {
         Task task = taskRepository.findByStatusIdAndBoardId(taskId, boardId);
-        TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
-        taskDTO.setStatus(task.getStatus().getName());
-        return taskDTO;
+        task.setStatus(task.getStatus());
+        return task;
 
     }
 
@@ -93,7 +92,8 @@ public class TaskService {
 
     @Transactional
     public NewTaskDTO updateTask(Integer taskId, NewTaskDTO inputTask, String boardId) {
-        Optional<Board> board = boardRepository.findById(boardId);
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board with id " + boardId + " not found"));
 
         boolean isExistingTask = taskRepository.existsById(taskId);
         if (!isExistingTask) {
@@ -102,26 +102,27 @@ public class TaskService {
         Status status = statusRepository.findById(inputTask.getStatus())
                 .orElseThrow(() -> new BadRequestException("status does not exist"));
 
-        if (board.get().getLimitMaximumTask() && !"No Status".equals(status.getName())
+        if (board.getLimitMaximumTask() && !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())) {
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();
-            if (noOfTasks >= board.get().getMaximumTask()) {
+            if (noOfTasks >= board.getMaximumTask()) {
                 throw new LimitationException("the status has reached the limit");
             }
         }
-        Optional<Task> existingTask = taskRepository.findById(taskId);
-        existingTask.get().setTitle(inputTask.getTitle());
-        existingTask.get().setDescription(inputTask.getDescription());
-        existingTask.get().setAssignees(inputTask.getAssignees());
-        existingTask.get().setStatus(status);
-        existingTask.get().setBoard(board.get());
+        Task existingTask = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ItemNotFoundException("Task with id " + taskId + " not found"));
+        existingTask.setTitle(inputTask.getTitle());
+        existingTask.setDescription(inputTask.getDescription());
+        existingTask.setAssignees(inputTask.getAssignees());
+        existingTask.setStatus(status);
+        existingTask.setBoard(board);
 
         NewTaskDTO newTaskDTO=new NewTaskDTO();
-        newTaskDTO.setId(existingTask.get().getId());
-        newTaskDTO.setTitle(existingTask.get().getTitle());
-        newTaskDTO.setDescription(existingTask.get().getDescription());
-        newTaskDTO.setAssignees(existingTask.get().getAssignees());
-        newTaskDTO.setStatus(existingTask.get().getStatus().getId());
+        newTaskDTO.setId(existingTask.getId());
+        newTaskDTO.setTitle(existingTask.getTitle());
+        newTaskDTO.setDescription(existingTask.getDescription());
+        newTaskDTO.setAssignees(existingTask.getAssignees());
+        newTaskDTO.setStatus(existingTask.getStatus().getId());
         return newTaskDTO;
     }
 

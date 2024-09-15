@@ -24,7 +24,7 @@ public class TaskController {
     private TaskService service;
 
     @GetMapping("/{boardId}/tasks")
-    public List<TaskDTO>getAllTasks(
+    public List<GeneralTaskDTO>getAllTasks(
             @RequestParam(required = false,defaultValue = "createdOn") String sortBy,
             @RequestParam(required = false) List<String> filterStatuses,
             @RequestParam(required = false,defaultValue = "asc") String direction,
@@ -34,7 +34,7 @@ public class TaskController {
     }
 
     @GetMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<TaskDTO> getTaskById(@PathVariable String boardId,@PathVariable Integer taskId){
+    public ResponseEntity<Task> getTaskById(@PathVariable String boardId,@PathVariable Integer taskId){
         return ResponseEntity.ok(service.getTaskById(taskId,boardId));
     }
 

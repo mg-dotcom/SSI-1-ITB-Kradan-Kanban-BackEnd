@@ -9,6 +9,7 @@ import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.project_board.task.Task;
+import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.TaskService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
@@ -22,6 +23,8 @@ import java.util.List;
 public class TaskController {
     @Autowired
     private TaskService service;
+    @Autowired
+    private BoardService boardService;
 
     @GetMapping("/{boardId}/tasks")
     public List<GeneralTaskDTO>getAllTasks(
@@ -30,26 +33,31 @@ public class TaskController {
             @RequestParam(required = false,defaultValue = "asc") String direction,
             @PathVariable String boardId
     ){
+        boardService.getBoardById(boardId);
         return service.getAllTasks(sortBy, filterStatuses, direction,boardId);
     }
 
     @GetMapping("/{boardId}/tasks/{taskId}")
     public ResponseEntity<Task> getTaskById(@PathVariable Integer taskId,@PathVariable String boardId){
+        boardService.getBoardById(boardId);
         return ResponseEntity.ok(service.getTaskById(taskId,boardId));
     }
 
     @PostMapping("/{boardId}/tasks")
     public ResponseEntity<GeneralTaskDTO> addTask(@Valid@RequestBody NewTaskDTO newTaskDTO, @PathVariable String boardId){
+        boardService.getBoardById(boardId);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO,boardId));
     }
 
     @DeleteMapping("/{boardId}/tasks/{taskId}")
     public ResponseEntity<TaskDTO> deleteTask(@PathVariable Integer taskId,@PathVariable String boardId) {
+        boardService.getBoardById(boardId);
        return ResponseEntity.ok(service.removeTask(taskId,boardId));
     }
 
     @PutMapping("/{boardId}/tasks/{taskId}")
     public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO,@PathVariable String boardId){
+        boardService.getBoardById(boardId);
         return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO,boardId));
     }
 

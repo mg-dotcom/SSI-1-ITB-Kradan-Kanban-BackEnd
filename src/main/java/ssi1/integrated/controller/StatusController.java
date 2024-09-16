@@ -25,31 +25,37 @@ public class StatusController {
     private BoardService boardService;
     @GetMapping("/{boardId}/statuses")
     public List<Status> getAllStatus(@PathVariable String boardId){
+        boardService.getBoardById(boardId);
         return statusService.getAllStatus(boardId);
     }
 
     @GetMapping("/{boardId}/statuses/{statusId}")
     public Status getStatusById(@PathVariable String boardId,@PathVariable Integer statusId){
+        boardService.getBoardById(boardId);
         return statusService.getStatusById(boardId,statusId);
     }
 
     @PutMapping("/{boardId}/statuses/{statusId}")
     public ResponseEntity<NewStatusDTO> updateStatus(@PathVariable String boardId,@PathVariable Integer statusId,@Valid @RequestBody NewStatusDTO updateStatus) {
+        boardService.getBoardById(boardId);
         return ResponseEntity.ok(statusService.updateStatus(boardId,statusId, updateStatus));
     }
 
     @PostMapping("/{boardId}/statuses")
     public ResponseEntity<NewStatusDTO> addStatus(@PathVariable String boardId,@Valid @RequestBody NewStatusDTO newStatusDTO){
+        boardService.getBoardById(boardId);
         NewStatusDTO createdStatus = statusService.insertNewStatus(boardId,newStatusDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdStatus);
     }
 
     @DeleteMapping("/{boardId}/statuses/{statusId}")
     public Status deleteStatus(@PathVariable String boardId,@PathVariable Integer statusId){
+        boardService.getBoardById(boardId);
         return statusService.deleteStatus(boardId,statusId);
     }
     @DeleteMapping("/{boardId}/statuses/{statusId}/{newStatusId}")
     public ResponseEntity<Status> transfer(@PathVariable String boardId,@PathVariable Integer statusId,  @PathVariable Integer newStatusId) {
+        boardService.getBoardById(boardId);
         return ResponseEntity.ok(statusService.transferStatus(boardId,statusId,newStatusId));
     }
 

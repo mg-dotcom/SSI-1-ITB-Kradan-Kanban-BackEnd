@@ -28,7 +28,6 @@ public class BoardController {
     @PostMapping("")
     public ResponseEntity<BoardDTO> createBoard(@RequestHeader (name="Authorization")String token,@Valid @RequestBody CreateBoardDTO boardDTO){
         String jwtToken = token.startsWith("Bearer ") ? token.substring(7) : token;
-        
         return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(jwtToken,boardDTO));
     }
 

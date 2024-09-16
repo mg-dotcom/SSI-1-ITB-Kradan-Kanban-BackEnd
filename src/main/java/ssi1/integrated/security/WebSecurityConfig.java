@@ -19,21 +19,36 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class WebSecurityConfig {
+public class WebSecurityConfig{
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+//        httpSecurity
+//                .csrf(csrf -> csrf.disable())// ปิดการใช้งาน CSRF Protection
+//                .cors(Customizer.withDefaults())
+//                .authorizeHttpRequests(authorize -> authorize
+//                        .requestMatchers("/login").permitAll()  // อนุญาตการเข้าถึง URL ที่เฉพาะเจาะจง
+//                        .anyRequest().authenticated())  // ต้องมีการรับรองตัวตนสำหรับทุกคำขออื่น ๆ
+//                .sessionManagement(session ->
+//                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ตั้งค่าให้เป็น Stateless
+//                .authenticationProvider(authenticationProvider)
+//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+//        return httpSecurity.build();
         httpSecurity
-                .csrf(csrf -> csrf.disable())// ปิดการใช้งาน CSRF Protection
+                .csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login").permitAll()  // อนุญาตการเข้าถึง URL ที่เฉพาะเจาะจง
-                        .anyRequest().authenticated())  // ต้องมีการรับรองตัวตนสำหรับทุกคำขออื่น ๆ
+                        .requestMatchers("/login").permitAll() // Permit access to /login
+                        .anyRequest().authenticated()) // Require authentication for all other requests
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling
+                                .authenticationEntryPoint(jwtAuthenticationEntryPoint)) // Handle 401 Unauthorized responses
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ตั้งค่าให้เป็น Stateless
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Set session to stateless
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
@@ -50,4 +65,5 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

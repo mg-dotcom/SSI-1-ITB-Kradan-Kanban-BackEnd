@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ssi1.integrated.dtos.EditLimitDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.services.BoardService;
@@ -12,12 +11,11 @@ import ssi1.integrated.services.StatusService;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 
 @CrossOrigin(origins = {"http://localhost:5173","http://ip23ssi1.sit.kmutt.ac.th","http://intproj23.sit.kmutt.ac.th"})
-@RequestMapping("v3/status/boards")
+@RequestMapping("v3/boards")
 public class StatusController {
 
     @Autowired
@@ -25,10 +23,6 @@ public class StatusController {
 
     @Autowired
     private BoardService boardService;
-
-
-
-
     @GetMapping("/{boardId}/statuses")
     public List<Status> getAllStatus(@PathVariable String boardId){
         return statusService.getAllStatus(boardId);
@@ -39,7 +33,7 @@ public class StatusController {
         return statusService.getStatusById(boardId,statusId);
     }
 
-    @PutMapping("/{boardId}/{statusId}/statuses")
+    @PutMapping("/{boardId}/statuses/{statusId}")
     public ResponseEntity<NewStatusDTO> updateStatus(@PathVariable String boardId,@PathVariable Integer statusId,@Valid @RequestBody NewStatusDTO updateStatus) {
         return ResponseEntity.ok(statusService.updateStatus(boardId,statusId, updateStatus));
     }

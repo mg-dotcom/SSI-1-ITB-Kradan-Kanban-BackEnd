@@ -42,7 +42,6 @@ public class StatusService {
 
     public List<Status> getAllStatus(String boardId) {
         List<BoardStatus> foundedBoardStatus = boardStatusRepository.findByBoardId(boardId);
-        System.out.println(foundedBoardStatus.toString());
         return foundedBoardStatus.stream().map(BoardStatus::getStatus).collect(Collectors.toList());
     }
 

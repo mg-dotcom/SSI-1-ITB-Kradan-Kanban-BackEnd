@@ -115,7 +115,7 @@ public class StatusService {
     @Transactional
     public Status transferStatus(String boardId, Integer oldStatusId, Integer newStatusId) {
         Status transferStatus = statusRepository.findById(newStatusId).orElseThrow(
-                () -> new BadRequestException("The specified status for task transfer does not exist"));
+                () -> new ItemNotFoundException("The specified status for task transfer does not exist"));
         if (oldStatusId.equals(newStatusId)) {
             throw new BadRequestException("Destination status for task transfer must be different from current status.");
         }

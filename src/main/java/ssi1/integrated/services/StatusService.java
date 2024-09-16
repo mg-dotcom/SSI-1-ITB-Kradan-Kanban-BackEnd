@@ -58,7 +58,7 @@ public class StatusService {
         if (existStatus) {
             throw new BadRequestException("Status name must be unique");
         }
-        if (statusId.equals(1)) {
+        if (statusId.equals(1)||statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");
         }
         Status toUpdateStatus = statusRepository.findById(statusId)
@@ -92,7 +92,7 @@ public class StatusService {
     @Transactional
     public Status deleteStatus(String boardId,Integer statusId) {
         Status toDeleteStatus = statusRepository.findById(statusId).orElseThrow(() -> new BadRequestException("The specified status for delete doesn't exist"));
-        if (statusId.equals(1)) {
+        if (statusId.equals(1)||statusId.equals(4)) {
             throw new BadRequestException(toDeleteStatus.getName() + " cannot be delete.");
         }
         Integer toDeleteBoardStatus = boardStatusRepository.findBoardStatusByBoard_IdAndStatus_Id(boardId,statusId).getId();

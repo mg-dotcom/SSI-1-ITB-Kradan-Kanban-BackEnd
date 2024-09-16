@@ -28,7 +28,7 @@ public class StatusController {
         return statusService.getAllStatus(boardId);
     }
 
-    @GetMapping("/{boardId}/{statusId}/statuses")
+    @GetMapping("/{boardId}/statuses/{statusId}")
     public Status getStatusById(@PathVariable String boardId,@PathVariable Integer statusId){
         return statusService.getStatusById(boardId,statusId);
     }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.status.Status;
 

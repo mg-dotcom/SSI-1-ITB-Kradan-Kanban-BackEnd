@@ -18,9 +18,12 @@ public interface TaskRepository extends JpaRepository<Task,Integer> {
     @Query("SELECT t FROM Task t WHERE t.board.id IN :boardId")
     List<Task> findByBoard_Id(String boardId);
 
-    @Query("SELECT t FROM Task t WHERE t.id = :taskId AND t.board.id = :boardId")
-    Task findByStatusIdAndBoardId(Integer taskId,String boardId);
+    @Query("SELECT t FROM Task t WHERE t.status.id = :statusId AND t.board.id = :boardId")
+    List<Task> findByStatusIdAndBoardId(Integer statusId,String boardId);
 
     Task findByIdAndBoardId(Integer taskId,String boardId);
+
+
+
 
 }

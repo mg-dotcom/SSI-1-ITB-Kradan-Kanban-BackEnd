@@ -34,6 +34,6 @@ public class Status {
     private ZonedDateTime updatedOn;
 
     @JsonIgnore
-    @OneToMany(mappedBy="status")
+    @OneToMany(mappedBy="status", fetch = FetchType.EAGER)
     private List<Task> tasks;
 }

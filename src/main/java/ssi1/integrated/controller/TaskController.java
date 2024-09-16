@@ -34,7 +34,7 @@ public class TaskController {
     }
 
     @GetMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<Task> getTaskById(@PathVariable String boardId,@PathVariable Integer taskId){
+    public ResponseEntity<Task> getTaskById(@PathVariable Integer taskId,@PathVariable String boardId){
         return ResponseEntity.ok(service.getTaskById(taskId,boardId));
     }
 

@@ -50,19 +50,9 @@ public class TaskService {
 
     }
 
-//bi
-    public Task getTaskById(Integer taskId, String boardId) {
-        Task task = taskRepository.findByStatusIdAndBoardId(taskId, boardId);
-        task.setStatus(task.getStatus());
-        return task;
+    public Task getTaskById(Integer taskId,String boardId) {
+        return taskRepository.findByIdAndBoardId(taskId,boardId);
     }
-//Tew
-    // public TaskDTO getTaskById(Integer taskId, String boardId) {
-    //     Task task = taskRepository.findByIdAndBoardId(taskId, boardId);
-    //     TaskDTO taskDTO = modelMapper.map(task, TaskDTO.class);
-    //     taskDTO.setStatus(task.getStatus().getName());
-    //     return taskDTO;
-    // }
 
     @Transactional
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId) {

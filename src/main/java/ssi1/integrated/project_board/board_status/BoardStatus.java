@@ -7,6 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.status.Status;
+import ssi1.integrated.project_board.task.Task;
+
+import java.util.List;
 
 @Getter
 @Setter

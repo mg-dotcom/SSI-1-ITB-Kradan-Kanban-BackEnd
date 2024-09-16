@@ -91,14 +91,26 @@ public class StatusService {
     }
 
     @Transactional
-    public Status deleteStatus(String boardId,Integer statusId) {
-        Status toDeleteStatus = statusRepository.findById(statusId).orElseThrow(() -> new BadRequestException("The specified status for delete doesn't exist"));
-        if (statusId.equals(1)) {
-            throw new BadRequestException(toDeleteStatus.getName() + " cannot be delete.");
+    public Status deleteStatus(String boardId, Integer statusId) {
+        Status toDeleteStatus = statusRepository.findById(statusId)
+                .orElseThrow(() -> new BadRequestException("The specified status for delete doesn't exist"));
+        //Get speacific status
+        if (statusId.equals(1) || statusId.equals(4)) {
+            throw new BadRequestException(toDeleteStatus.getName() + " cannot be deleted.");
         }
-        Integer toDeleteBoardStatus = boardStatusRepository.findBoardStatusByBoard_IdAndStatus_Id(boardId,statusId).getId();
-        boardStatusRepository.deleteById(toDeleteBoardStatus);
-        statusRepository.delete(toDeleteStatus);
+        //validate status Id
+        List<Task> taskList = taskRepository.findByStatusIdAndBoardId(statusId, boardId);
+
+        if (taskList.isEmpty()) {
+            Integer toDeleteBoardStatus = boardStatusRepository.findBoardStatusByBoard_IdAndStatus_Id(boardId, statusId).getId();
+            boardStatusRepository.deleteById(toDeleteBoardStatus);
+
+            statusRepository.delete(toDeleteStatus);
+            return toDeleteStatus;
+        } else {
+            transferStatus(boardId, statusId, null);
+        }
+
         return toDeleteStatus;
     }
 

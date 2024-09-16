@@ -50,9 +50,11 @@ public class TaskService {
 
     }
 
+
     public Task getTaskById(Integer taskId,String boardId) {
         return taskRepository.findByIdAndBoardId(taskId,boardId);
     }
+
 
     @Transactional
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId) {

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
+import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
@@ -28,6 +29,7 @@ public class BoardService {
     private ModelMapper modelMapper;
     private BoardStatusService boardStatusService;
     private JwtService jwtService;
+    private StatusService statusService;
 
 
     public List<Board> getAllBoards() {
@@ -69,11 +71,32 @@ public class BoardService {
         BoardDTO boardDTO = modelMapper.map(newBoard, BoardDTO.class);
         boardDTO.setOwner(userDTO);
 
-        //set default status in every new board
-        boardStatusService.addStatusBoard(1, newBoard.getId());
-        boardStatusService.addStatusBoard(2, newBoard.getId());
-        boardStatusService.addStatusBoard(3, newBoard.getId());
-        boardStatusService.addStatusBoard(4, newBoard.getId());
+        //create default statuses
+        NewStatusDTO noStatus=new NewStatusDTO();
+        noStatus.setName("No Status");
+        noStatus.setDescription("A status has not been assigned");
+        noStatus.setStatusColor("#CCCCCC");
+
+        NewStatusDTO todo=new NewStatusDTO();
+        todo.setName("To do");
+        todo.setDescription("The task is included in the project");
+        todo.setStatusColor("#FFA500");
+
+        NewStatusDTO doing=new NewStatusDTO();
+        doing.setName("Doing");
+        doing.setDescription("The task is being worked on");
+        doing.setStatusColor("#FF9A00");
+
+        NewStatusDTO done=new NewStatusDTO();
+        done.setName("Done");
+        done.setDescription("The task has been completed");
+        done.setStatusColor("#008000");
+
+        statusService.insertNewStatus(newBoard.getId(), noStatus);
+        statusService.insertNewStatus(newBoard.getId(), todo);
+        statusService.insertNewStatus(newBoard.getId(), doing);
+        statusService.insertNewStatus(newBoard.getId(), done);
+
         return boardDTO;
 
     }

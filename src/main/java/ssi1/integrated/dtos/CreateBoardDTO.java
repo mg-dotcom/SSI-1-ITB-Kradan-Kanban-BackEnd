@@ -9,14 +9,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@NotNull
 public class CreateBoardDTO {
     @NotNull
     @NotEmpty
     @NotBlank(message = "Board name is required")
     @Size(max = 120, message = "size must be between 0 and 120")
     private String name;
-    @NotBlank(message = "Emoji is required")
     private String emoji;
-    @NotBlank(message = "Color is required")
     private String color;
 }

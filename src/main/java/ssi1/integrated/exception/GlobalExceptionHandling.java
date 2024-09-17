@@ -2,6 +2,7 @@ package ssi1.integrated.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.security.core.AuthenticationException;
@@ -97,5 +98,12 @@ public class GlobalExceptionHandling {
                 "Authentication failed"
         );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> handleMissingRequestBody(HttpMessageNotReadableException ex, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                "Body is missing", request.getDescription(false));
+        return new ResponseEntity<Object>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }

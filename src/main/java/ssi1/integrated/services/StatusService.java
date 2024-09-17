@@ -32,9 +32,6 @@ public class StatusService {
     private TaskRepository taskRepository;
 
     @Autowired
-    private BoardRepository boardRepository;
-
-    @Autowired
     private BoardStatusRepository boardStatusRepository;
 
     @Autowired
@@ -72,8 +69,7 @@ public class StatusService {
         toUpdateStatus.setName(updateStatusDTO.getName());
         toUpdateStatus.setDescription(updateStatusDTO.getDescription());
         Status updatedStatus = statusRepository.save(toUpdateStatus);
-        NewStatusDTO mappedStatus = modelMapper.map(updatedStatus, NewStatusDTO.class);
-        return mappedStatus;
+        return modelMapper.map(updatedStatus, NewStatusDTO.class);
     }
 
     @Transactional

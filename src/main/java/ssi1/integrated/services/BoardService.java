@@ -78,7 +78,7 @@ public class BoardService {
         noStatus.setStatusColor("#CCCCCC");
 
         NewStatusDTO todo=new NewStatusDTO();
-        todo.setName("To do");
+        todo.setName("To Do");
         todo.setDescription("The task is included in the project");
         todo.setStatusColor("#FFA500");
 

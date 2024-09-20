@@ -7,17 +7,12 @@ import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
-import ssi1.integrated.project_board.board.BoardRepository;
-import ssi1.integrated.project_board.board_status.BoardStatus;
-import ssi1.integrated.project_board.board_status.BoardStatusRepository;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task.TaskRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 @Service
 public class StatusService {
@@ -25,21 +20,14 @@ public class StatusService {
     @Autowired
     private StatusRepository statusRepository;
 
-//    @Autowired
-//    private BoardStatusService boardStatusService;
-
     @Autowired
     private TaskRepository taskRepository;
-
-    @Autowired
-    private BoardStatusRepository boardStatusRepository;
 
     @Autowired
     private ModelMapper modelMapper;
 
     public List<Status> getAllStatus(String boardId) {
-        List<BoardStatus> foundedBoardStatus = boardStatusRepository.findByBoardId(boardId);
-        return foundedBoardStatus.stream().map(BoardStatus::getStatus).collect(Collectors.toList());
+        return statusRepository.findByBoardId(boardId);
     }
 
     public Status getStatusById(String boardId, Integer statusId) {
@@ -95,9 +83,6 @@ public class StatusService {
         List<Task> taskList = taskRepository.findByStatusIdAndBoardId(statusId, boardId);
 
         if (taskList.isEmpty()) {
-            Integer toDeleteBoardStatus = boardStatusRepository.findBoardStatusByBoard_IdAndStatus_Id(boardId, statusId).getId();
-            boardStatusRepository.deleteById(toDeleteBoardStatus);
-
             statusRepository.delete(toDeleteStatus);
             return toDeleteStatus;
         } else {

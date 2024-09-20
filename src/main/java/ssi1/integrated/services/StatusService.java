@@ -25,8 +25,8 @@ public class StatusService {
     @Autowired
     private StatusRepository statusRepository;
 
-    @Autowired
-    private BoardStatusService boardStatusService;
+//    @Autowired
+//    private BoardStatusService boardStatusService;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -80,9 +80,8 @@ public class StatusService {
         }
         Status status = modelMapper.map(newStatusDTO, Status.class);
         Status insertedStatus = statusRepository.save(status);
-        NewStatusDTO mappedStatus = modelMapper.map(insertedStatus, NewStatusDTO.class);
-        boardStatusService.addStatusBoard(mappedStatus.getId(), boardId);
-        return mappedStatus;
+        //        boardStatusService.addStatusBoard(mappedStatus.getId(), boardId);
+        return modelMapper.map(insertedStatus, NewStatusDTO.class);
     }
 
     @Transactional

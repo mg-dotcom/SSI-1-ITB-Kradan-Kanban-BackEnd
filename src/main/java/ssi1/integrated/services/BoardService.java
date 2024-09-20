@@ -27,7 +27,7 @@ public class BoardService {
     private BoardRepository boardRepository;
     private UserService userService;
     private ModelMapper modelMapper;
-    private BoardStatusService boardStatusService;
+//    private BoardStatusService boardStatusService;
     private JwtService jwtService;
     private StatusService statusService;
 
@@ -123,7 +123,7 @@ public class BoardService {
                 ()-> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
-        boardStatusService.deleteStatusBoard(boardId);
+//        boardStatusService.deleteStatusBoard(boardId);
         boardRepository.deleteById(boardId);
         return "BOARD ID "+boardId+" DELETED";
     }

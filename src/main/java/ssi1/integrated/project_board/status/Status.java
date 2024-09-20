@@ -1,9 +1,11 @@
 package ssi1.integrated.project_board.status;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.task.Task;
 
 import java.time.ZonedDateTime;
@@ -32,6 +34,10 @@ public class Status {
     @UpdateTimestamp
     @Column(name="updatedOn" ,nullable = false,insertable = false)
     private ZonedDateTime updatedOn;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "boardId", nullable = false)
+    private Board board;
 
     @JsonIgnore
     @OneToMany(mappedBy="status", fetch = FetchType.EAGER)

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
+import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.Task;
@@ -25,6 +26,9 @@ public class StatusService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private BoardRepository boardRepository;
 
     public List<Status> getAllStatus(String boardId) {
         return statusRepository.findByBoardId(boardId);
@@ -67,8 +71,11 @@ public class StatusService {
             throw new BadRequestException("Status name must be unique");
         }
         Status status = modelMapper.map(newStatusDTO, Status.class);
+        status.setBoard(boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        ));
         Status insertedStatus = statusRepository.save(status);
-        //        boardStatusService.addStatusBoard(mappedStatus.getId(), boardId);
+
         return modelMapper.map(insertedStatus, NewStatusDTO.class);
     }
 

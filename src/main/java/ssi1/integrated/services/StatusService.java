@@ -3,6 +3,7 @@ package ssi1.integrated.services;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
@@ -31,7 +32,8 @@ public class StatusService {
     private BoardRepository boardRepository;
 
     public List<Status> getAllStatus(String boardId) {
-        return statusRepository.findByBoardId(boardId);
+        Sort sort = Sort.by(Sort.Direction.ASC, "id");
+        return statusRepository.findByBoardId(boardId, sort);
     }
 
     public Status getStatusById(String boardId, Integer statusId) {

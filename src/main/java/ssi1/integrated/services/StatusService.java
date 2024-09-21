@@ -45,10 +45,10 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO) {
-        boolean existStatus = getAllStatus(boardId).stream().anyMatch(status -> status.getName().equals(updateStatusDTO.getName()));
-        if (existStatus) {
-            throw new BadRequestException("Status name must be unique");
-        }
+//        boolean existStatus = getAllStatus(boardId).stream().anyMatch(status -> status.getName().equals(updateStatusDTO.getName()));
+//        if (existStatus) {
+//            throw new BadRequestException("Status name must be unique");
+//        }
         if (statusId.equals(1)||statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");
         }
@@ -72,6 +72,7 @@ public class StatusService {
         if (existStatus) {
             throw new BadRequestException("Status name must be unique");
         }
+
         Status status = modelMapper.map(newStatusDTO, Status.class);
         status.setBoard(boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)

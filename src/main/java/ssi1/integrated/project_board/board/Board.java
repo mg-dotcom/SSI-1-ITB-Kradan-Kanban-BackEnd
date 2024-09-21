@@ -24,6 +24,7 @@ public class Board {
     private String color;
     private Boolean limitMaximumTask;
     private Integer maximumTask;
+    private String visibility;
 
     @PrePersist
     public void generateId() {

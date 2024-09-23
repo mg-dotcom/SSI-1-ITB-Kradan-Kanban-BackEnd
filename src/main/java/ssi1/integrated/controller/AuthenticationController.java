@@ -18,7 +18,7 @@ package ssi1.integrated.controller;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authService;
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
     @PostMapping("")
     public ResponseEntity<AuthenticationResponse> authenticate(

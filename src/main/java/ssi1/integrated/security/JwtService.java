@@ -31,8 +31,11 @@ public class JwtService {
     @Value("${public.url}")
     private String publicKey;
 
-    @Value("${security.jwt.expiration-time}")
+    @Value("${security.jwt.access-token.expiration-time}")
     private long jwtExpiration;
+
+    @Value("${security.jwt.refresh-token.expiration-time}")
+    private long RefreshExpiration;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -52,6 +55,15 @@ public class JwtService {
         claims.put("oid", user.getOid());
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole());
+        return doGenerateToken(claims, user.getUsername());
+    }
+
+    public String generateRefreshToken(User user) {
+        Map<String, Object> claims = new LinkedHashMap<>();
+        claims.put("iss", publicKey);
+        claims.put("iat", new Date(System.currentTimeMillis()));
+        claims.put("exp", new Date(System.currentTimeMillis() + RefreshExpiration));
+        claims.put("oid", user.getOid());
         return doGenerateToken(claims, user.getUsername());
     }
 

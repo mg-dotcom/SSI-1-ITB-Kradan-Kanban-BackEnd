@@ -29,7 +29,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/token")
-    public AccessToken instantAccess(@RequestHeader(name = "refresh_token")String refreshToken){
+    public AccessToken instantAccess(@RequestHeader(name = "Authorization")String refreshToken){
         String jwtToken = refreshToken.startsWith("Bearer ") ? refreshToken.substring(7) : refreshToken;
         JwtPayload jwtPayload= jwtService.extractPayload(jwtToken);
         return authService.instantAccess(jwtPayload);

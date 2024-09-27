@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,10 +23,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ssi1.integrated.dtos.BoardDTO;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.exception.respond.ErrorResponse;
+import ssi1.integrated.project_board.board.Board;
+import ssi1.integrated.project_board.board.BoardRepository;
+import ssi1.integrated.project_board.board.Visibility;
+import ssi1.integrated.services.BoardService;
+import ssi1.integrated.user_account.User;
+import ssi1.integrated.user_account.UserRepository;
 
 import java.io.IOException;
+import java.util.List;
 
 
 @Component
@@ -33,6 +46,14 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    @Autowired
+    private BoardService boardService;
+    @Autowired
+    private BoardRepository boardRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request //
@@ -53,21 +74,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             userName = jwtService.extractUsername(jwt);
-        }catch (SignatureException e) { // Catches malformed and tampered JWTs
-            sendErrorResponse(response, "Token is tempered", request);
-            return;}
-        catch (MalformedJwtException e) {
-            sendErrorResponse(response, "Malformed jwt token", request);
+        } catch (SignatureException e) {
+            handleJwtException(response, request, "Token is tampered", HttpStatus.BAD_REQUEST);
+            return;
+        } catch (MalformedJwtException e) {
+            handleJwtException(response, request, "Malformed JWT token", HttpStatus.BAD_REQUEST);
             return;
         } catch (ExpiredJwtException e) {
-            sendErrorResponse(response, "Token is expired", request);
+            handleJwtException(response, request, "Token is expired", HttpStatus.UNAUTHORIZED);
             return;
-
-        } catch (JwtException e) { // Catches malformed and tampered JWTs
-            sendErrorResponse(response, "Invalid token", request);
+        } catch (JwtException e) {
+            handleJwtException(response, request, "Invalid token", HttpStatus.UNAUTHORIZED);
             return;
         }
-
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // user not auth yet
@@ -99,12 +118,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
     }
 
-    public JwtPayload getJwtPayload(HttpServletRequest request) {
-        final String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String jwt = authHeader.substring(7);
-            return jwtService.extractPayload(jwt); // Assuming JwtService has the extractPayload method
+
+    private void handleJwtException(HttpServletResponse response, HttpServletRequest request, String message, HttpStatus status) throws IOException {
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            // If it's a GET request, return a 400 Bad Request for specific exceptions
+            response.setStatus(HttpStatus.NOT_FOUND.value());
+        } else {
+            sendErrorResponse(response,message,request);
         }
-        return null;
     }
 }

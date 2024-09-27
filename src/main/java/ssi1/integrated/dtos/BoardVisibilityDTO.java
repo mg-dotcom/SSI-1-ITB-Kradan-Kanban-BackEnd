@@ -9,7 +9,10 @@ import ssi1.integrated.project_board.board.Visibility;
 @Getter
 @Setter
 public class BoardVisibilityDTO {
-
     @NotNull(message = "Visibility cannot be null")
-    private Visibility visibility;
+    private Visibility visibility = Visibility.PRIVATE;
+
+    public void setVisibility(Visibility visibility) {
+        this.visibility = (visibility == null) ? Visibility.PRIVATE : visibility;
+    }
 }

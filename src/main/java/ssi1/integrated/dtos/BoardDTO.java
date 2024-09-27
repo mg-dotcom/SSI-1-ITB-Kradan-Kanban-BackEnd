@@ -16,7 +16,11 @@ public class BoardDTO {
     @NotEmpty
     @Size(max = 120, message = "size must be between 0 and 120")
     private String name;
+    @NotNull(message = "Visibility cannot be null")
     private Visibility visibility;
     private UserDTO owner;
 
+    public void setVisibility(Visibility visibility) {
+        this.visibility = (visibility == null) ? Visibility.PRIVATE : visibility;
+    }
 }

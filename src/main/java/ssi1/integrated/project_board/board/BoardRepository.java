@@ -7,9 +7,14 @@ import ssi1.integrated.dtos.BoardVisibilityDTO;
 import java.util.List;
 
 public interface BoardRepository extends JpaRepository<Board,String> {
-    List<Board> findByUserOid(String userOid);
+    List<Board> findAllByUserOid (String userOid);
+
+
+    Board findByUserOid (String userOid);
 
     @Query("SELECT b.visibility FROM Board b WHERE b.id = :boardId")
     Visibility findVisibilityByBoardId(String boardId);
+
+
 
 }

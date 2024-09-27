@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
 
         try {
-            userName = jwtService.extractSub(jwt);
+            userName = jwtService.extractUsername(jwt);
         }catch (SignatureException e) { // Catches malformed and tampered JWTs
             sendErrorResponse(response, "Token is tempered", request);
             return;}

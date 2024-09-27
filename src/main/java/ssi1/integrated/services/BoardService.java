@@ -4,11 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.dtos.BoardVisibilityDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
+import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
@@ -104,24 +106,28 @@ public class BoardService {
     }
 
     public BoardDTO getBoardDetail(String boardId, String jwtToken) {
+        //Find board
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
-        Visibility visibility = boardRepository.findVisibilityByBoardId(boardId);
-        Boolean isPublic = visibility == Visibility.PUBLIC;
-        String userName = jwtService.extractSub(jwtToken);
-        System.out.println(userName);
-        System.out.println("Vis :" + isPublic);
-//
-//        if(board && (isPublic || )){
-//
-//        }
         User user = userService.getUserByOid(board.getUserOid());
+        Visibility visibility = boardRepository.findVisibilityByBoardId(boardId);
+        String tokenUsername = jwtService.extractUsername(jwtToken);
+
+        boolean isOwner = user.getUsername().equals(tokenUsername);
+        boolean isPublic = (visibility == Visibility.PUBLIC);
+
+        //Can't access board
+        if(board != null && !(isOwner || isPublic)){
+            throw new ForbiddenException();
+        }
+
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
         boardDTO.setOwner(userDTO);
         return boardDTO;
+
     }
 
     public BoardVisibilityDTO changeVisibility(String boardId, BoardVisibilityDTO visibility){

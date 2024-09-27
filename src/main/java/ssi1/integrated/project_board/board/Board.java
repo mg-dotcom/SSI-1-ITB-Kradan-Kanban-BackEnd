@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Random;
 
@@ -24,6 +25,9 @@ public class Board {
     private String color;
     private Boolean limitMaximumTask;
     private Integer maximumTask;
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("PRIVATE")
+    private Visibility visibility;
 
     @PrePersist
     public void generateId() {

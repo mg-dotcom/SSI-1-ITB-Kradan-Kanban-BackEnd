@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
+import ssi1.integrated.exception.handler.StatusNotFoundException;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
@@ -40,7 +41,7 @@ public class StatusService {
         return getAllStatus(boardId).stream()
                 .filter(status -> status.getId().equals(statusId))
                 .findFirst()
-                .orElseThrow(() -> new ItemNotFoundException("Status Not Found"));
+                .orElseThrow(() -> new StatusNotFoundException("Status id '" + statusId + "' NOT FOUND"));
     }
 
     @Transactional

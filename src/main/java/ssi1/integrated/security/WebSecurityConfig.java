@@ -27,17 +27,6 @@ public class WebSecurityConfig{
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity
-//                .csrf(csrf -> csrf.disable())// ปิดการใช้งาน CSRF Protection
-//                .cors(Customizer.withDefaults())
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/login").permitAll()  // อนุญาตการเข้าถึง URL ที่เฉพาะเจาะจง
-//                        .anyRequest().authenticated())  // ต้องมีการรับรองตัวตนสำหรับทุกคำขออื่น ๆ
-//                .sessionManagement(session ->
-//                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ตั้งค่าให้เป็น Stateless
-//                .authenticationProvider(authenticationProvider)
-//                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-//        return httpSecurity.build();
         httpSecurity
                 .csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .cors(Customizer.withDefaults())

@@ -6,11 +6,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.BoardDTO;
+import ssi1.integrated.dtos.BoardVisibilityDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
+import ssi1.integrated.project_board.board.Visibility;
+import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.security.JwtAuthenticationFilter;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
@@ -100,15 +103,34 @@ public class BoardService {
 
     }
 
-    public BoardDTO getBoardDetail(String boardId) {
+    public BoardDTO getBoardDetail(String boardId, String jwtToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
+
+        Visibility visibility = boardRepository.findVisibilityByBoardId(boardId);
+        Boolean isPublic = visibility == Visibility.PUBLIC;
+        String userName = jwtService.extractSub(jwtToken);
+        System.out.println(userName);
+        System.out.println("Vis :" + isPublic);
+//
+//        if(board && (isPublic || )){
+//
+//        }
         User user = userService.getUserByOid(board.getUserOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
         boardDTO.setOwner(userDTO);
         return boardDTO;
+    }
+
+    public BoardVisibilityDTO changeVisibility(String boardId, BoardVisibilityDTO visibility){
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+        board.setVisibility(visibility.getVisibility());
+        Board updatedboard =  boardRepository.save(board);
+        return modelMapper.map(updatedboard, BoardVisibilityDTO.class);
     }
 
     public Board getBoardById(String boardId){

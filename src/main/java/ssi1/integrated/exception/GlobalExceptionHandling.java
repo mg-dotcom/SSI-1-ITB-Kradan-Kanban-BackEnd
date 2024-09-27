@@ -45,9 +45,7 @@ public class GlobalExceptionHandling {
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation error. Check 'errors' field for details.",
                 request.getDescription(false));
-
         errorResponse.addValidationError("status", exception.getReason());
-
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -106,4 +104,14 @@ public class GlobalExceptionHandling {
                 "Body is missing", request.getDescription(false));
         return new ResponseEntity<Object>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(StatusNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleStatusNotFound(StatusNotFoundException exception) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                exception.getMessage(),
+                null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
 }

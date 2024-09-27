@@ -6,8 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.BoardDTO;
+import ssi1.integrated.dtos.BoardVisibilityDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
 import ssi1.integrated.project_board.board.Board;
+import ssi1.integrated.project_board.board.BoardRepository;
+import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.services.BoardService;
 
 import java.util.List;
@@ -18,6 +21,9 @@ import java.util.List;
 public class BoardController {
     @Autowired
     private BoardService boardService;
+
+    @Autowired
+    private BoardRepository boardRepository;
 
 
     @GetMapping("/all")
@@ -38,14 +44,25 @@ public class BoardController {
     }
 
     @GetMapping("/{boardId}")
-    public BoardDTO getBoardDetail(@PathVariable String boardId){
-        return boardService.getBoardDetail(boardId);
+    public BoardDTO getBoardDetail(@PathVariable String boardId, @RequestHeader(name = "Authorization")String accessToken){
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        return boardService.getBoardDetail(boardId, jwtToken);
     }
 
     @DeleteMapping("/{boardId}")
     public String deleteBoard(@PathVariable String boardId){
-
         return boardService.deleteBoard(boardId);
     }
 
+    @PatchMapping("/{boardId}")
+    public ResponseEntity<BoardVisibilityDTO> setBoardVisibility(
+            @PathVariable String boardId,
+            @RequestBody @Valid BoardVisibilityDTO boardVisibilityDTO) {
+        return ResponseEntity.ok(boardService.changeVisibility(boardId,boardVisibilityDTO));
+    }
+
+    @GetMapping("/visibility/{boardId}")
+    public Visibility getBoardVisibility(@PathVariable String boardId){
+        return boardRepository.findVisibilityByBoardId(boardId);
+    }
 }

@@ -116,7 +116,6 @@ public class GlobalExceptionHandling {
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException exception, WebRequest request) {
-        System.out.println("ForbiddenException caught: " + exception.getMessage());
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.FORBIDDEN.value(),
                 exception.getMessage(),

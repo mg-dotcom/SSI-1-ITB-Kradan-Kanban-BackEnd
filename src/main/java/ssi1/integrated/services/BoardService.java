@@ -1,12 +1,9 @@
 package ssi1.integrated.services;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.BoardDTO;
@@ -21,15 +18,12 @@ import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.TaskRepository;
-import ssi1.integrated.security.JwtAuthenticationFilter;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserDTO;
-import ssi1.integrated.user_account.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -60,9 +54,9 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardDTO createBoard(String token,CreateBoardDTO createBoardDTO) {
+    public BoardDTO createBoard(String jwtToken,CreateBoardDTO createBoardDTO) {
         // Extract the JWT payload from the request
-        JwtPayload jwtPayload = jwtService.extractPayload(token);
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
 
         // Find the user associated with the OID from the JWT payload
         User user = userService.getUserByOid(jwtPayload.getOid());
@@ -106,10 +100,10 @@ public class BoardService {
         done.setDescription("The task has been completed");
         done.setStatusColor("#008000");
 
-        statusService.insertNewStatus(newBoard.getId(), noStatus);
-        statusService.insertNewStatus(newBoard.getId(), todo);
-        statusService.insertNewStatus(newBoard.getId(), doing);
-        statusService.insertNewStatus(newBoard.getId(), done);
+        statusService.insertNewStatus(newBoard.getId(), noStatus,jwtToken);
+        statusService.insertNewStatus(newBoard.getId(), todo, jwtToken);
+        statusService.insertNewStatus(newBoard.getId(), doing, jwtToken);
+        statusService.insertNewStatus(newBoard.getId(), done, jwtToken);
 
         return boardDTO;
 
@@ -122,7 +116,7 @@ public class BoardService {
 
         // Can't access board
         if (jwtToken == null || !authorizationResult.isOwner() && !authorizationResult.isPublic()) {
-            throw new ForbiddenException();
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
         User user = userService.getUserByOid(board.getUserOid());
@@ -143,14 +137,14 @@ public class BoardService {
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
-        } else if (jwtToken != null && board == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Board not found with BOARD ID: " + boardId);
         }
 
+        //Can't access board
         if (!authorizationResult.isOwner()) {
-            throw new ForbiddenException();
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
+        //Not in enum
         Visibility visibilityStatus = visibility.getVisibility();
 
         if (visibilityStatus != Visibility.PUBLIC && visibilityStatus != Visibility.PRIVATE) {
@@ -178,7 +172,7 @@ public class BoardService {
 
         //Can't access board
         if (!authorizationResult.isOwner()) {
-            throw new ForbiddenException();
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
         deleteBoard(boardId);

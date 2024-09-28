@@ -9,7 +9,6 @@ import ssi1.integrated.project_board.board.Board;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BoardAuthorizationResult {
-
     private  boolean isOwner;
     private  boolean isPublic;
 }

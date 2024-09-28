@@ -47,21 +47,24 @@ public class TaskController {
     }
 
     @PostMapping("/{boardId}/tasks")
-    public ResponseEntity<GeneralTaskDTO> addTask(@Valid@RequestBody NewTaskDTO newTaskDTO, @PathVariable String boardId){
+    public ResponseEntity<GeneralTaskDTO> addTask(@Valid@RequestBody NewTaskDTO newTaskDTO, @PathVariable String boardId,  @RequestHeader(name = "Authorization")String accessToken){
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO,boardId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO,boardId,jwtToken));
     }
 
     @DeleteMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<TaskDTO> deleteTask(@PathVariable Integer taskId,@PathVariable String boardId) {
+    public ResponseEntity<TaskDTO> deleteTask(@PathVariable Integer taskId,@PathVariable String boardId,@RequestHeader(name = "Authorization")String accessToken) {
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
-       return ResponseEntity.ok(service.removeTask(taskId,boardId));
+       return ResponseEntity.ok(service.removeTask(taskId,boardId,jwtToken));
     }
 
     @PutMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO,@PathVariable String boardId){
+    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO,@PathVariable String boardId, @RequestHeader(name = "Authorization")String accessToken){
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
-        return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO,boardId));
+        return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO,boardId,jwtToken));
     }
 
 }

@@ -36,9 +36,12 @@ import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.services.BoardService;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
+import ssi1.integrated.utils.UriExtractor;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Component
@@ -88,6 +91,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // user not auth yet
 
@@ -107,24 +111,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request) throws IOException {
+    private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request, HttpStatus status) throws IOException {
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.UNAUTHORIZED.value(),
+                status.value(), // Use the status passed as an argument
                 message,
                 request.getRequestURI()
         );
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(status.value()); // Set the response status to the provided status
         response.setContentType("application/json");
         response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
     }
 
-
     private void handleJwtException(HttpServletResponse response, HttpServletRequest request, String message, HttpStatus status) throws IOException {
         if ("GET".equalsIgnoreCase(request.getMethod())) {
-            // If it's a GET request, return a 400 Bad Request for specific exceptions
-            response.setStatus(HttpStatus.NOT_FOUND.value());
+            String uri = request.getRequestURI();
+            String boardId = UriExtractor.extractBoardId(uri);
+
+            // Check if the board exists
+            if (boardService.boardExists(boardId)) {
+                sendErrorResponse(response, "Access denied to board: " + boardId, request, HttpStatus.FORBIDDEN);
+            } else {
+                sendErrorResponse(response, "Board not found: " + boardId, request, HttpStatus.NOT_FOUND);
+            }
         } else {
-            sendErrorResponse(response,message,request);
+            // For non-GET requests, send the error response with the provided message and status
+            sendErrorResponse(response, message, request, status);
         }
     }
+
+
+
 }

@@ -23,6 +23,7 @@ public class StatusController {
 
     @Autowired
     private BoardService boardService;
+
     @GetMapping("/{boardId}/statuses")
     public List<Status> getAllStatus(@PathVariable String boardId,   @RequestHeader(name = "Authorization")String accessToken){
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;

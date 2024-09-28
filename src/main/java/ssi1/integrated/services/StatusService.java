@@ -42,8 +42,6 @@ public class StatusService {
     private JwtService jwtService;
     @Autowired
     private UserService userService;
-    @Autowired
-    private BoardService boardService;
 
     public List<Status> getAllStatus(String boardId, String jwtToken) {
         BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
@@ -190,8 +188,8 @@ public class StatusService {
     }
 
     public BoardAuthorizationResult authorizeBoardReadAccess(String boardId, String jwtToken) {
-        Board board = boardService.getBoardById(boardId);
-
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
         // If the board is public, return immediately allowing access
         if (board.getVisibility() == Visibility.PUBLIC) {
             return new BoardAuthorizationResult(false, true);  // Public board, ownership doesn't matter
@@ -208,8 +206,8 @@ public class StatusService {
     }
 
     public BoardAuthorizationResult authorizeBoardModifyAccess(String boardId, String jwtToken) {
-        Board board = boardService.getBoardById(boardId);
-
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
         User user = userService.getUserByOid(board.getUserOid());
         Visibility visibilityByBoardId = boardRepository.findVisibilityByBoardId(boardId);
         String tokenUsername = jwtService.extractUsername(jwtToken);

@@ -52,7 +52,10 @@ public class TaskService {
 
 
     public Task getTaskById(Integer taskId,String boardId) {
-        return taskRepository.findByIdAndBoardId(taskId,boardId);
+        Task task=taskRepository.findById(taskId).orElseThrow(
+                ()->new ItemNotFoundException("NOT FOUND")
+        );
+        return taskRepository.findByIdAndBoardId(task.getId(),boardId);
     }
 
 
@@ -111,6 +114,7 @@ public class TaskService {
         newTaskDTO.setDescription(existingTask.getDescription());
         newTaskDTO.setAssignees(existingTask.getAssignees());
         newTaskDTO.setStatus(existingTask.getStatus().getId());
+        newTaskDTO.setStatusName(status.getName());
         return newTaskDTO;
     }
 

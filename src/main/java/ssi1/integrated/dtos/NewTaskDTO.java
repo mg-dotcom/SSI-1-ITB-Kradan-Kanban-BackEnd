@@ -22,6 +22,7 @@ public class NewTaskDTO {
     private String assignees;
 
     private Integer status;
+    private String statusName;
 
     public void setTitle(String title){
         if (title != null) {

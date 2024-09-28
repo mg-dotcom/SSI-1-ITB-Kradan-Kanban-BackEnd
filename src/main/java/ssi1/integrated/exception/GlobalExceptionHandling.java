@@ -106,17 +106,22 @@ public class GlobalExceptionHandling {
     }
 
     @ExceptionHandler(StatusNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleStatusNotFound(StatusNotFoundException exception) {
+    public ResponseEntity<ErrorResponse> handleStatusNotFound(StatusNotFoundException exception, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 exception.getMessage(),
-                null);
+                request.getDescription(false));
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<Void> handleForbiddenException(ForbiddenException exception) {
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException exception, WebRequest request) {
+        System.out.println("ForbiddenException caught: " + exception.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                exception.getMessage(),
+                request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
 }

@@ -31,16 +31,19 @@ public class TaskController {
             @RequestParam(required = false,defaultValue = "createdOn") String sortBy,
             @RequestParam(required = false) List<String> filterStatuses,
             @RequestParam(required = false,defaultValue = "asc") String direction,
-            @PathVariable String boardId
+            @PathVariable String boardId,
+            @RequestHeader(name = "Authorization")String accessToken
     ){
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
-        return service.getAllTasks(sortBy, filterStatuses, direction,boardId);
+        return service.getAllTasks(sortBy, filterStatuses, direction,boardId, jwtToken);
     }
 
     @GetMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Integer taskId,@PathVariable String boardId){
+    public ResponseEntity<Task> getTaskById(@PathVariable Integer taskId,@PathVariable String boardId,  @RequestHeader(name = "Authorization")String accessToken){
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
-        return ResponseEntity.ok(service.getTaskById(taskId,boardId));
+        return ResponseEntity.ok(service.getTaskById(taskId,boardId,jwtToken));
     }
 
     @PostMapping("/{boardId}/tasks")

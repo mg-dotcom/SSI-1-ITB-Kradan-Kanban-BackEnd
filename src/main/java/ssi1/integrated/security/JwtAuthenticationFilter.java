@@ -78,10 +78,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             userName = jwtService.extractUsername(jwt);
         } catch (SignatureException e) {
-            handleJwtException(response, request, "Token is tampered", HttpStatus.BAD_REQUEST);
+            handleJwtException(response, request, "Token is tampered", HttpStatus.UNAUTHORIZED);
             return;
         } catch (MalformedJwtException e) {
-            handleJwtException(response, request, "Malformed JWT token", HttpStatus.BAD_REQUEST);
+            handleJwtException(response, request, "Malformed JWT token", HttpStatus.UNAUTHORIZED);
             return;
         } catch (ExpiredJwtException e) {
             handleJwtException(response, request, "Token is expired", HttpStatus.UNAUTHORIZED);
@@ -129,9 +129,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Check if the board exists
             if (boardService.boardExists(boardId)) {
-                sendErrorResponse(response, "Access denied to board: " + boardId, request, HttpStatus.FORBIDDEN);
+                sendErrorResponse(response, "Access denied to board with BOARD ID: " + boardId, request, HttpStatus.FORBIDDEN);
             } else {
-                sendErrorResponse(response, "Board not found: " + boardId, request, HttpStatus.NOT_FOUND);
+                sendErrorResponse(response, "Board not found with BOARD ID: " + boardId, request, HttpStatus.NOT_FOUND);
             }
         } else {
             // For non-GET requests, send the error response with the provided message and status

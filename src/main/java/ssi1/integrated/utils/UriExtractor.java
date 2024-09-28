@@ -7,7 +7,7 @@ public class UriExtractor {
         if (parts.length > 1) {
             return parts[1].split("/")[0]; // Get the first part after the board segment
         }
-        return null; 
+        return null;
     }
 
     // Method to extract the task ID from the URI

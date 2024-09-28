@@ -14,13 +14,13 @@ package ssi1.integrated.controller;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:5174","http://ip23ssi1.sit.kmutt.ac.th","http://intproj23.sit.kmutt.ac.th","http://localhost:5173"})
-@RequestMapping("/login")
+@RequestMapping("")
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authService;
     private final JwtService jwtService;
 
-    @PostMapping("")
+    @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @Valid @RequestBody AuthenticationRequest request
     ) {

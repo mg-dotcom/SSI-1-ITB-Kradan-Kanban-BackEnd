@@ -51,7 +51,7 @@ public class TaskService {
         BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
 
         // Can't access board
-        if (jwtToken == null || !authorizationResult.isOwner() && !authorizationResult.isPublic()) {
+        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
@@ -77,7 +77,7 @@ public class TaskService {
         BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
 
         // Can't access board
-        if (jwtToken == null || !authorizationResult.isOwner() && !authorizationResult.isPublic()) {
+        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 

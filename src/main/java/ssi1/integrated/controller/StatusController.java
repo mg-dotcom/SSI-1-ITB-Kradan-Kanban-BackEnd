@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.NewStatusDTO;
+import ssi1.integrated.project_board.board.Board;
+import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.StatusService;
@@ -25,17 +27,35 @@ public class StatusController {
     private BoardService boardService;
 
     @GetMapping("/{boardId}/statuses")
-    public List<Status> getAllStatus(@PathVariable String boardId,   @RequestHeader(name = "Authorization")String accessToken){
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        boardService.getBoardById(boardId);
-        return statusService.getAllStatus(boardId,jwtToken);
+    public ResponseEntity<List<Status>> getAllStatus(@PathVariable String boardId,  @RequestHeader(name = "Authorization", required = false)String accessToken){
+        Board board = boardService.getBoardById(boardId);
+
+        if (accessToken == null && board.getVisibility() == Visibility.PUBLIC) {
+            return ResponseEntity.ok(statusService.getAllStatus(boardId,null));
+        }
+
+        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+            String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+            return ResponseEntity.ok(statusService.getAllStatus(boardId,jwtToken));
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @GetMapping("/{boardId}/statuses/{statusId}")
-    public Status getStatusById(@PathVariable String boardId,@PathVariable Integer statusId,  @RequestHeader(name = "Authorization")String accessToken){
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        boardService.getBoardById(boardId);
-        return statusService.getStatusById(boardId,statusId,jwtToken);
+    public ResponseEntity<Status> getStatusById(@PathVariable String boardId,@PathVariable Integer statusId,  @RequestHeader(name = "Authorization", required = false)String accessToken){
+        Board board = boardService.getBoardById(boardId);
+
+        if (accessToken == null && board.getVisibility() == Visibility.PUBLIC) {
+            return ResponseEntity.ok(statusService.getStatusById(boardId,statusId,null));
+        }
+
+        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+            String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+            return ResponseEntity.ok((statusService.getStatusById(boardId,statusId,jwtToken)));
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PutMapping("/{boardId}/statuses/{statusId}")

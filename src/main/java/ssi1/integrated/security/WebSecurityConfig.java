@@ -31,14 +31,10 @@ public class WebSecurityConfig{
                 .csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login").permitAll() // Permit access to /login
+                        .requestMatchers("/login", "/v3/**").permitAll() // Permit access to /login
                         .anyRequest().authenticated()) // Require authentication for all other requests
-                .exceptionHandling(exceptionHandling ->
-                        exceptionHandling
-                                .authenticationEntryPoint(jwtAuthenticationEntryPoint)) // Handle 401 Unauthorized responses
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Set session to stateless
-                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }

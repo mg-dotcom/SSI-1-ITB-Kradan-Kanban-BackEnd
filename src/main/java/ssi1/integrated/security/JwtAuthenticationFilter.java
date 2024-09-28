@@ -66,32 +66,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        
+
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userName;
+        String userName = null;
+        String jwt = null;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
+            if (request.getMethod().matches("POST|PUT|DELETE|PATCH")) {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                return;
+            }
+        } else {
+            jwt = authHeader.substring(7);
+            try {
+                userName = jwtService.extractUsername(jwt);
+            } catch (SignatureException e) {
+                handleJwtException(response, request, "Token is tampered", HttpStatus.UNAUTHORIZED);
+                return;
+            } catch (MalformedJwtException e) {
+                handleJwtException(response, request, "Malformed JWT token", HttpStatus.UNAUTHORIZED);
+                return;
+            } catch (ExpiredJwtException e) {
+                handleJwtException(response, request, "Token is expired", HttpStatus.UNAUTHORIZED);
+                return;
+            } catch (JwtException e) {
+                handleJwtException(response, request, "Invalid token", HttpStatus.UNAUTHORIZED);
+                return;
+            }
         }
-        jwt = authHeader.substring(7);
-
-        try {
-            userName = jwtService.extractUsername(jwt);
-        } catch (SignatureException e) {
-            handleJwtException(response, request, "Token is tampered", HttpStatus.UNAUTHORIZED);
-            return;
-        } catch (MalformedJwtException e) {
-            handleJwtException(response, request, "Malformed JWT token", HttpStatus.UNAUTHORIZED);
-            return;
-        } catch (ExpiredJwtException e) {
-            handleJwtException(response, request, "Token is expired", HttpStatus.UNAUTHORIZED);
-            return;
-        } catch (JwtException e) {
-            handleJwtException(response, request, "Invalid token", HttpStatus.UNAUTHORIZED);
-            return;
-        }
-
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // user not auth yet

@@ -60,9 +60,20 @@ public class BoardController {
     }
 
     @GetMapping("/{boardId}")
-    public ResponseEntity<BoardDTO> getBoardDetail(@PathVariable String boardId, @RequestHeader(name = "Authorization")String accessToken){
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return ResponseEntity.ok(boardService.getBoardDetail(boardId, jwtToken));
+    public ResponseEntity<BoardDTO> getBoardDetail(
+            @PathVariable String boardId,
+            @RequestHeader(name = "Authorization", required = false) String accessToken) {
+        Board board = boardService.getBoardById(boardId);
+
+        if (accessToken == null && board.getVisibility() == Visibility.PUBLIC) {
+            return ResponseEntity.ok(boardService.getBoardDetail(boardId, null));
+        }
+
+        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+            String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+            return ResponseEntity.ok(boardService.getBoardDetail(boardId, jwtToken));
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @DeleteMapping("/{boardId}")

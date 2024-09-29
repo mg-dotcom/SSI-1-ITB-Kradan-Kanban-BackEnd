@@ -57,11 +57,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserRepository userRepository;
 
-
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request //
-            , @NonNull HttpServletResponse response
-            , @NonNull FilterChain filterChain) throws ServletException, IOException {
+        protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                        @NonNull HttpServletResponse response,
+                                        @NonNull FilterChain filterChain) throws ServletException, IOException {
         if (request.getRequestURI().equals("/login")) {
             filterChain.doFilter(request, response);
             return;
@@ -70,7 +69,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         String userName = null;
         String jwt = null;
+        String uri = request.getRequestURI();
+        String boardId = UriExtractor.extractBoardId(uri);
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if ("GET".equalsIgnoreCase(request.getMethod()) && boardService.boardExists(boardId)) {
+                Board board = boardService.getBoardById(boardId);
+                if (board.getVisibility() == Visibility.PUBLIC) {
+                    filterChain.doFilter(request, response); // Public access granted
+                    return;
+                } else {
+                    sendErrorResponse(response, "Access denied to private board with ID: " + boardId, request, HttpStatus.FORBIDDEN);
+                    return;
+                }
+            }
             if (request.getMethod().matches("POST|PUT|DELETE|PATCH")) {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return;
@@ -79,27 +91,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             jwt = authHeader.substring(7);
             try {
                 userName = jwtService.extractUsername(jwt);
-            } catch (SignatureException e) {
-                handleJwtException(response, request, "Token is tampered", HttpStatus.UNAUTHORIZED);
-                return;
-            } catch (MalformedJwtException e) {
-                handleJwtException(response, request, "Malformed JWT token", HttpStatus.UNAUTHORIZED);
-                return;
-            } catch (ExpiredJwtException e) {
-                handleJwtException(response, request, "Token is expired", HttpStatus.UNAUTHORIZED);
-                return;
             } catch (JwtException e) {
-                handleJwtException(response, request, "Invalid token", HttpStatus.UNAUTHORIZED);
-                return;
+                if (request.getMethod().matches("POST|PUT|DELETE|PATCH")) {
+                    sendErrorResponse(response, e.getMessage(), request, HttpStatus.UNAUTHORIZED);
+                    return;
+                }
             }
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // user not auth yet
-
-        if (userName != null && authentication == null) { // when the Authentication is null means that the user not authenticated yet!
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName); //check form the Database
-
+        if (userName != null && authentication == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -110,37 +112,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+
         filterChain.doFilter(request, response);
     }
 
-    private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request, HttpStatus status) throws IOException {
-        ErrorResponse errorResponse = new ErrorResponse(
-                status.value(), // Use the status passed as an argument
-                message,
-                request.getRequestURI()
-        );
-        response.setStatus(status.value()); // Set the response status to the provided status
-        response.setContentType("application/json");
-        response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
-    }
-
-    private void handleJwtException(HttpServletResponse response, HttpServletRequest request, String message, HttpStatus status) throws IOException {
-        if ("GET".equalsIgnoreCase(request.getMethod())) {
-            String uri = request.getRequestURI();
-            String boardId = UriExtractor.extractBoardId(uri);
-
-            // Check if the board exists
-            if (boardService.boardExists(boardId)) {
-                sendErrorResponse(response, "Access denied to board with BOARD ID: " + boardId, request, HttpStatus.FORBIDDEN);
-            } else {
-                sendErrorResponse(response, "Board not found with BOARD ID: " + boardId, request, HttpStatus.NOT_FOUND);
-            }
-        } else {
-            // For non-GET requests, send the error response with the provided message and status
-            sendErrorResponse(response, message, request, status);
+        private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request, HttpStatus status) throws IOException {
+            ErrorResponse errorResponse = new ErrorResponse(status.value(), message, request.getRequestURI());
+            response.setStatus(status.value());
+            response.setContentType("application/json");
+            response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
         }
     }
 
-
-
-}

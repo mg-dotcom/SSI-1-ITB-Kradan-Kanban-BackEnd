@@ -107,13 +107,13 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO insertNewStatus(String boardId, NewStatusDTO newStatusDTO, String jwtToken) {
+        if(newStatusDTO==null){
+            throw new BadRequestException("Invalid NewStatusDTO value");
+        }
+        
         boolean existStatus = getAllStatus(boardId,jwtToken).stream().anyMatch(status -> status.getName().equals(newStatusDTO.getName()));
         if (existStatus) {
             throw new BadRequestException("Status name must be unique");
-        }
-
-        if(newStatusDTO==null){
-            throw new BadRequestException("Invalid NewStatusDTO value");
         }
 
         BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);

@@ -58,7 +58,7 @@ public class BoardService {
     @Transactional
     public BoardDTO createBoard(String jwtToken,CreateBoardDTO createBoardDTO) {
         if(createBoardDTO==null){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid board create body");
+            throw new BadRequestException("Invalid board create body");
         }
 
         // Extract the JWT payload from the request

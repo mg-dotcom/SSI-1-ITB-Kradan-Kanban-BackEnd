@@ -101,11 +101,16 @@ public class TaskService {
     @Transactional
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId,String jwtToken) {
         BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-        Board board = boardService.getBoardById(boardId);
+        Board board=boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
         Visibility visibility=board.getVisibility();
         //TC4
-
         if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
+
+        if(visibility==Visibility.PUBLIC && !authorizationResult.isOwner()){
             throw new ForbiddenException(boardId+" this board id is private");
         }
 

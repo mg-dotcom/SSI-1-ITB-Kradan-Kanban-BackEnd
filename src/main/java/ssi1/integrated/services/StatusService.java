@@ -84,6 +84,10 @@ public class StatusService {
             throw new ForbiddenException(boardId+" this board id is private");
         }
 
+        if(visibility==Visibility.PUBLIC && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
+
         if(updateStatusDTO==null){
             throw new BadRequestException("Invalid NewStatusDTO value");
         }
@@ -126,6 +130,9 @@ public class StatusService {
         if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
             throw new ForbiddenException(boardId+" this board id is private");
         }
+        if(visibility==Visibility.PUBLIC && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
         if(newStatusDTO==null){
             throw new BadRequestException("Invalid NewStatusDTO value");
         }
@@ -165,6 +172,9 @@ public class StatusService {
         //TC4
         System.out.println("Owner "+authorizationResult.isOwner());
         if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
+        if(visibility==Visibility.PUBLIC && !authorizationResult.isOwner()){
             throw new ForbiddenException(boardId+" this board id is private");
         }
 

@@ -16,6 +16,9 @@ public interface StatusRepository extends JpaRepository<Status, Integer> {
     boolean existsByName(String name);
     List<Status> findByBoardId(String boardId, Sort sort);
     List<Status> findByBoardId(String boardId);
+
+    // Method to delete all statuses by boardId
+    void deleteByBoardId(String boardId);
 }
 
 

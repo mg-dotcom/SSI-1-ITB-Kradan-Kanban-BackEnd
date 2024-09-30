@@ -4,15 +4,23 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
+import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
+import ssi1.integrated.exception.handler.StatusNotFoundException;
+import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
+import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task.TaskRepository;
+import ssi1.integrated.security.JwtService;
+import ssi1.integrated.user_account.User;
 
 import java.util.List;
 
@@ -30,30 +38,56 @@ public class StatusService {
 
     @Autowired
     private BoardRepository boardRepository;
+    @Autowired
+    private JwtService jwtService;
+    @Autowired
+    private UserService userService;
 
-    public List<Status> getAllStatus(String boardId) {
+    public List<Status> getAllStatus(String boardId, String jwtToken) {
+        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+
+        // Can't access board
+        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         return statusRepository.findByBoardId(boardId, sort);
     }
 
-    public Status getStatusById(String boardId, Integer statusId) {
-        return getAllStatus(boardId).stream()
+
+    public Status getStatusById(String boardId, Integer statusId, String jwtToken) {
+        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+
+        // Can't access board
+        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+        return getAllStatus(boardId, jwtToken).stream()
                 .filter(status -> status.getId().equals(statusId))
                 .findFirst()
-                .orElseThrow(() -> new ItemNotFoundException("Status Not Found"));
+                .orElseThrow(() -> new StatusNotFoundException("Status not found with STATUS ID: " + statusId));
     }
 
     @Transactional
-    public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO) {
-//        boolean existStatus = getAllStatus(boardId).stream().anyMatch(status -> status.getName().equals(updateStatusDTO.getName()));
-//        if (existStatus) {
-//            throw new BadRequestException("Status name must be unique");
-//        }
+    public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO, String jwtToken) {
+        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+        }
+
+        //Can't access board
+        if (!authorizationResult.isOwner()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
         if (statusId.equals(1)||statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");
         }
         Status toUpdateStatus = statusRepository.findById(statusId)
-                .orElseThrow(() -> new ItemNotFoundException("Status not found"));
+                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
 
         if (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty()) {
             toUpdateStatus.setStatusColor("#CCCCCC");
@@ -67,10 +101,21 @@ public class StatusService {
     }
 
     @Transactional
-    public NewStatusDTO insertNewStatus(String boardId, NewStatusDTO newStatusDTO) {
-        boolean existStatus = getAllStatus(boardId).stream().anyMatch(status -> status.getName().equals(newStatusDTO.getName()));
+    public NewStatusDTO insertNewStatus(String boardId, NewStatusDTO newStatusDTO, String jwtToken) {
+        boolean existStatus = getAllStatus(boardId,jwtToken).stream().anyMatch(status -> status.getName().equals(newStatusDTO.getName()));
         if (existStatus) {
             throw new BadRequestException("Status name must be unique");
+        }
+
+        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+        }
+
+        //Can't access board
+        if (!authorizationResult.isOwner()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
         Status status = modelMapper.map(newStatusDTO, Status.class);
@@ -83,12 +128,23 @@ public class StatusService {
     }
 
     @Transactional
-    public Status deleteStatus(String boardId,Integer statusId) {
+    public Status deleteStatus(String boardId,Integer statusId, String jwtToken) {
         Status toDeleteStatus = statusRepository.findById(statusId).orElseThrow(() -> new BadRequestException("The specified status for delete doesn't exist"));
         if (statusId.equals(1)||statusId.equals(4)) {
             throw new BadRequestException(toDeleteStatus.getName() + " cannot be delete.");
-
         }
+
+        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+        }
+
+        //Can't access board
+        if (!authorizationResult.isOwner()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
         //validate status Id
         List<Task> taskList = taskRepository.findByStatusIdAndBoardId(statusId, boardId);
 
@@ -96,14 +152,14 @@ public class StatusService {
             statusRepository.delete(toDeleteStatus);
             return toDeleteStatus;
         } else {
-            transferStatus(boardId, statusId, null);
+            transferStatus(boardId, statusId, null,jwtToken);
         }
 
         return toDeleteStatus;
     }
 
     @Transactional
-    public Status transferStatus(String boardId, Integer oldStatusId, Integer newStatusId) {
+    public Status transferStatus(String boardId, Integer oldStatusId, Integer newStatusId, String jwtToken) {
         Status transferStatus = statusRepository.findById(newStatusId).orElseThrow(
                 () -> new ItemNotFoundException("The specified status for task transfer does not exist"));
         if (oldStatusId.equals(newStatusId)) {
@@ -111,12 +167,54 @@ public class StatusService {
         }
         List<Task> taskList = taskRepository.findByStatusIdAndBoardId(oldStatusId, boardId);
 
+        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+        }
+
+        //Can't access board
+        if (!authorizationResult.isOwner()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
         for (Task task : taskList) {
             task.setStatus(transferStatus);
             taskRepository.save(task);
         }
-        deleteStatus(boardId,oldStatusId);
+        deleteStatus(boardId,oldStatusId,jwtToken);
         return transferStatus;
     }
 
+    public BoardAuthorizationResult authorizeBoardReadAccess(String boardId, String jwtToken) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
+        // If the board is public, return immediately allowing access
+        if (board.getVisibility() == Visibility.PUBLIC) {
+            return new BoardAuthorizationResult(false, true);  // Public board, ownership doesn't matter
+        }
+
+        User user = userService.getUserByOid(board.getUserOid());
+
+        String tokenUsername = jwtService.extractUsername(jwtToken);
+
+        boolean isOwner = user.getUsername().equals(tokenUsername);
+
+        // Private board means isPublic should be false
+        return new BoardAuthorizationResult(isOwner, false);
+    }
+
+    public BoardAuthorizationResult authorizeBoardModifyAccess(String boardId, String jwtToken) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
+        User user = userService.getUserByOid(board.getUserOid());
+        Visibility visibilityByBoardId = boardRepository.findVisibilityByBoardId(boardId);
+        String tokenUsername = jwtService.extractUsername(jwtToken);
+
+        boolean isOwner = user.getUsername().equals(tokenUsername);
+        boolean isPublic = (visibilityByBoardId == Visibility.PUBLIC);
+
+        return new BoardAuthorizationResult(isOwner, isPublic);
+    }
 }

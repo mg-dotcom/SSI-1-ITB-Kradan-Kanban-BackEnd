@@ -45,9 +45,7 @@ public class GlobalExceptionHandling {
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation error. Check 'errors' field for details.",
                 request.getDescription(false));
-
         errorResponse.addValidationError("status", exception.getReason());
-
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -106,4 +104,23 @@ public class GlobalExceptionHandling {
                 "Body is missing", request.getDescription(false));
         return new ResponseEntity<Object>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(StatusNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleStatusNotFound(StatusNotFoundException exception, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                exception.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException exception, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                exception.getMessage(),
+                request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
 }

@@ -23,6 +23,8 @@ public interface TaskRepository extends JpaRepository<Task,Integer> {
 
     Task findByIdAndBoardId(Integer taskId,String boardId);
 
+    void deleteByStatusId(Integer statusId);
+
 
 
 

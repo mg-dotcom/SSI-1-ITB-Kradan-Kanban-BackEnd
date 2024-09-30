@@ -1,25 +1,29 @@
 package ssi1.integrated.services;
 
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.BoardDTO;
+import ssi1.integrated.dtos.BoardVisibilityDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
+import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
-import ssi1.integrated.security.JwtAuthenticationFilter;
+import ssi1.integrated.project_board.board.Visibility;
+import ssi1.integrated.project_board.status.Status;
+import ssi1.integrated.project_board.status.StatusRepository;
+import ssi1.integrated.project_board.task.TaskRepository;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserDTO;
-import ssi1.integrated.user_account.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -29,6 +33,9 @@ public class BoardService {
     private ModelMapper modelMapper;
     private JwtService jwtService;
     private StatusService statusService;
+   private TaskRepository taskRepository;
+    private StatusRepository statusRepository;
+
 
 
     public List<Board> getAllBoards() {
@@ -43,12 +50,13 @@ public class BoardService {
         }
 
         User user = userService.getUserByOid(jwtPayload.getOid());
-        return boardRepository.findByUserOid(user.getOid());
+        return boardRepository.findAllByUserOid(user.getOid());
     }
 
-    public BoardDTO createBoard(String token,CreateBoardDTO createBoardDTO) {
+    @Transactional
+    public BoardDTO createBoard(String jwtToken,CreateBoardDTO createBoardDTO) {
         // Extract the JWT payload from the request
-        JwtPayload jwtPayload = jwtService.extractPayload(token);
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
 
         // Find the user associated with the OID from the JWT payload
         User user = userService.getUserByOid(jwtPayload.getOid());
@@ -62,6 +70,7 @@ public class BoardService {
         newBoard.setLimitMaximumTask(true);
         newBoard.setEmoji(createBoardDTO.getEmoji());
         newBoard.setColor(createBoardDTO.getColor());
+        newBoard.setVisibility(createBoardDTO.getVisibility());
 
         // Save the new board to the repository
         boardRepository.save(newBoard);
@@ -91,24 +100,60 @@ public class BoardService {
         done.setDescription("The task has been completed");
         done.setStatusColor("#008000");
 
-        statusService.insertNewStatus(newBoard.getId(), noStatus);
-        statusService.insertNewStatus(newBoard.getId(), todo);
-        statusService.insertNewStatus(newBoard.getId(), doing);
-        statusService.insertNewStatus(newBoard.getId(), done);
+        statusService.insertNewStatus(newBoard.getId(), noStatus,jwtToken);
+        statusService.insertNewStatus(newBoard.getId(), todo, jwtToken);
+        statusService.insertNewStatus(newBoard.getId(), doing, jwtToken);
+        statusService.insertNewStatus(newBoard.getId(), done, jwtToken);
 
         return boardDTO;
 
     }
 
-    public BoardDTO getBoardDetail(String boardId) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
+
+    public BoardDTO getBoardDetail(String boardId, String jwtToken) {
+        Board board = getBoardById(boardId);
+        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+
+        // Can't access board
+        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
         User user = userService.getUserByOid(board.getUserOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
         boardDTO.setOwner(userDTO);
         return boardDTO;
+    }
+
+    public boolean boardExists(String id) {
+        return boardRepository.existsById(id);
+    }
+
+
+    public BoardVisibilityDTO changeVisibility(String boardId, BoardVisibilityDTO visibility, String jwtToken){
+        Board board = getBoardById(boardId);
+        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+        }
+
+        //Can't access board
+        if (!authorizationResult.isOwner()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+        //Not in enum
+        Visibility visibilityStatus = visibility.getVisibility();
+
+        if (visibilityStatus != Visibility.PUBLIC && visibilityStatus != Visibility.PRIVATE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid visibility value");
+        }
+
+        board.setVisibility(visibilityStatus);
+        Board updatedBoard = boardRepository.save(board);
+        return modelMapper.map(updatedBoard, BoardVisibilityDTO.class);
     }
 
     public Board getBoardById(String boardId){
@@ -117,13 +162,65 @@ public class BoardService {
         );
     }
 
-    public String deleteBoard(String boardId){
-        boardRepository.findById(boardId).orElseThrow(
-                ()-> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
+    @Transactional
+    public String deleteBoard(String boardId, String jwtToken){
+        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
 
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+        }
+
+        //Can't access board
+        if (!authorizationResult.isOwner()) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+        deleteBoard(boardId);
         boardRepository.deleteById(boardId);
-        return "BOARD ID "+boardId+" DELETED";
+
+        return "BOARD ID " + boardId + " DELETED";
     }
+
+    @Transactional
+    public void deleteBoard(String boardId) {
+        List<Status> statuses = statusRepository.findByBoardId(boardId);
+        for (Status status : statuses) {
+            taskRepository.deleteByStatusId(status.getId());
+        }
+        statusRepository.deleteByBoardId(boardId);
+        boardRepository.deleteById(boardId);
+    }
+
+    public BoardAuthorizationResult authorizeBoardModifyAccess(String boardId, String jwtToken) {
+        Board board = getBoardById(boardId);
+
+        User user = userService.getUserByOid(board.getUserOid());
+        Visibility visibilityByBoardId = boardRepository.findVisibilityByBoardId(boardId);
+        String tokenUsername = jwtService.extractUsername(jwtToken);
+
+        boolean isOwner = user.getUsername().equals(tokenUsername);
+        boolean isPublic = (visibilityByBoardId == Visibility.PUBLIC);
+
+        return new BoardAuthorizationResult(isOwner, isPublic);
+    }
+
+    public BoardAuthorizationResult authorizeBoardReadAccess(String boardId, String jwtToken) {
+        Board board = getBoardById(boardId);
+
+        // If the board is public, return immediately allowing access
+        if (board.getVisibility() == Visibility.PUBLIC) {
+            return new BoardAuthorizationResult(false, true);  // Public board, ownership doesn't matter
+        }
+
+        User user = userService.getUserByOid(board.getUserOid());
+
+        String tokenUsername = jwtService.extractUsername(jwtToken);
+
+        boolean isOwner = user.getUsername().equals(tokenUsername);
+
+        // Private board means isPublic should be false
+        return new BoardAuthorizationResult(isOwner, false);
+    }
+
 
 }

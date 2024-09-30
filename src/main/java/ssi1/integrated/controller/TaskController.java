@@ -71,7 +71,7 @@ public class TaskController {
     }
 
     @PostMapping("/{boardId}/tasks")
-    public ResponseEntity<GeneralTaskDTO> addTask(@Valid@RequestBody NewTaskDTO newTaskDTO, @PathVariable String boardId,  @RequestHeader(name = "Authorization")String accessToken){
+    public ResponseEntity<GeneralTaskDTO> addTask(@RequestBody(required = false) @Valid NewTaskDTO newTaskDTO, @PathVariable String boardId,  @RequestHeader(name = "Authorization")String accessToken){
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO,boardId,jwtToken));
@@ -85,7 +85,7 @@ public class TaskController {
     }
 
     @PutMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@Valid @RequestBody NewTaskDTO newTaskDTO,@PathVariable String boardId, @RequestHeader(name = "Authorization")String accessToken){
+    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@RequestBody(required = false) NewTaskDTO newTaskDTO,@PathVariable String boardId, @RequestHeader(name = "Authorization")String accessToken){
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
         return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO,boardId,jwtToken));

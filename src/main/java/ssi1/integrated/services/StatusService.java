@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -111,6 +112,7 @@ public class StatusService {
             throw new BadRequestException("Invalid NewStatusDTO value");
         }
         
+
         boolean existStatus = getAllStatus(boardId,jwtToken).stream().anyMatch(status -> status.getName().equals(newStatusDTO.getName()));
         if (existStatus) {
             throw new BadRequestException("Status name must be unique");

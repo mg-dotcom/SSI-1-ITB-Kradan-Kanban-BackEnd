@@ -59,14 +59,14 @@ public class StatusController {
     }
 
     @PutMapping("/{boardId}/statuses/{statusId}")
-    public ResponseEntity<NewStatusDTO> updateStatus(@PathVariable String boardId,@PathVariable Integer statusId,@Valid @RequestBody NewStatusDTO updateStatus,  @RequestHeader(name = "Authorization")String accessToken) {
+    public ResponseEntity<NewStatusDTO> updateStatus(@PathVariable String boardId,@PathVariable Integer statusId,@RequestBody(required = false) NewStatusDTO updateStatus,  @RequestHeader(name = "Authorization")String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
         return ResponseEntity.ok(statusService.updateStatus(boardId,statusId, updateStatus, jwtToken));
     }
 
     @PostMapping("/{boardId}/statuses")
-    public ResponseEntity<NewStatusDTO> addStatus(@PathVariable String boardId,@Valid @RequestBody NewStatusDTO newStatusDTO,  @RequestHeader(name = "Authorization")String accessToken) {
+    public ResponseEntity<NewStatusDTO> addStatus(@PathVariable String boardId, @RequestBody(required = false) NewStatusDTO newStatusDTO,  @RequestHeader(name = "Authorization")String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
         NewStatusDTO createdStatus = statusService.insertNewStatus(boardId,newStatusDTO, jwtToken);
@@ -79,6 +79,7 @@ public class StatusController {
         boardService.getBoardById(boardId);
         return statusService.deleteStatus(boardId,statusId,jwtToken);
     }
+
     @DeleteMapping("/{boardId}/statuses/{statusId}/{newStatusId}")
     public ResponseEntity<Status> transfer(@PathVariable String boardId,@PathVariable Integer statusId,  @PathVariable Integer newStatusId, @RequestHeader(name = "Authorization")String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;

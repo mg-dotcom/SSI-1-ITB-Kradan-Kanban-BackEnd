@@ -4,12 +4,14 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.dtos.BoardVisibilityDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
+import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
@@ -55,8 +57,14 @@ public class BoardService {
 
     @Transactional
     public BoardDTO createBoard(String jwtToken,CreateBoardDTO createBoardDTO) {
+        if(createBoardDTO==null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid board create body");
+        }
+
         // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+
+
 
         // Find the user associated with the OID from the JWT payload
         User user = userService.getUserByOid(jwtPayload.getOid());
@@ -136,7 +144,8 @@ public class BoardService {
         BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+            throw new AuthenticationException("JWT token is required") {
+            };
         }
 
         //Can't access board
@@ -144,11 +153,15 @@ public class BoardService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
+        if(visibility==null){
+            throw new BadRequestException("Invalid visibility");
+        }
+
         //Not in enum
         Visibility visibilityStatus = visibility.getVisibility();
 
         if (visibilityStatus != Visibility.PUBLIC && visibilityStatus != Visibility.PRIVATE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid visibility value");
+            throw new BadRequestException("Invalid visibility value");
         }
 
         board.setVisibility(visibilityStatus);

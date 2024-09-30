@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.configs.ListMapper;
@@ -91,8 +92,13 @@ public class TaskService {
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId,String jwtToken) {
         BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
 
+        if(newTask==null){
+            throw new BadRequestException("Invalid insert new task");
+        }
+
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+            throw new AuthenticationException("JWT token is required") {
+            };
         }
 
         //Can't access board

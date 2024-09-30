@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.NewStatusDTO;
@@ -74,8 +75,12 @@ public class StatusService {
     public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO, String jwtToken) {
         BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
 
+        if(updateStatusDTO==null){
+            throw new BadRequestException("Invalid NewStatusDTO value");
+        }
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+            throw new AuthenticationException("JWT token is required") {
+            };
         }
 
         //Can't access board
@@ -107,10 +112,15 @@ public class StatusService {
             throw new BadRequestException("Status name must be unique");
         }
 
+        if(newStatusDTO==null){
+            throw new BadRequestException("Invalid NewStatusDTO value");
+        }
+
         BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+            throw new AuthenticationException("JWT token is required") {
+            };
         }
 
         //Can't access board
@@ -137,7 +147,8 @@ public class StatusService {
         BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+            throw new AuthenticationException("JWT token is required") {
+            };
         }
 
         //Can't access board
@@ -170,7 +181,8 @@ public class StatusService {
         BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+            throw new AuthenticationException("JWT token is required") {
+            };
         }
 
         //Can't access board

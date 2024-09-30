@@ -107,16 +107,25 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO insertNewStatus(String boardId, NewStatusDTO newStatusDTO, String jwtToken) {
+        Board board=boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+        Visibility visibility=board.getVisibility();
+        //TC4
+        System.out.println("Owner "+authorizationResult.isOwner());
+        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
         if(newStatusDTO==null){
             throw new BadRequestException("Invalid NewStatusDTO value");
         }
-        
+
         boolean existStatus = getAllStatus(boardId,jwtToken).stream().anyMatch(status -> status.getName().equals(newStatusDTO.getName()));
         if (existStatus) {
             throw new BadRequestException("Status name must be unique");
         }
 
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {

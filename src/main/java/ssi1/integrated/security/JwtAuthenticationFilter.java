@@ -110,6 +110,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                return;
             }
         }
 

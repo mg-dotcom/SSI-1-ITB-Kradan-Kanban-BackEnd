@@ -73,7 +73,16 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO, String jwtToken) {
+        Board board=boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
         BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+        Visibility visibility=board.getVisibility();
+        //TC4
+        System.out.println("Owner "+authorizationResult.isOwner());
+        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
 
         if(updateStatusDTO==null){
             throw new BadRequestException("Invalid NewStatusDTO value");
@@ -148,12 +157,23 @@ public class StatusService {
 
     @Transactional
     public Status deleteStatus(String boardId,Integer statusId, String jwtToken) {
+        Board board=boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+        Visibility visibility=board.getVisibility();
+        //TC4
+        System.out.println("Owner "+authorizationResult.isOwner());
+        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
+
         Status toDeleteStatus = statusRepository.findById(statusId).orElseThrow(() -> new  ItemNotFoundException("Status not found with STATUS ID: " + statusId));
         if (statusId.equals(1)||statusId.equals(4)) {
             throw new BadRequestException(toDeleteStatus.getName() + " cannot be delete.");
         }
 
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {

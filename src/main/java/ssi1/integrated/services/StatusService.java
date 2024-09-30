@@ -68,7 +68,7 @@ public class StatusService {
         return getAllStatus(boardId, jwtToken).stream()
                 .filter(status -> status.getId().equals(statusId))
                 .findFirst()
-                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
+                .orElseThrow(() -> new StatusNotFoundException("Status not found with STATUS ID: " + statusId));
     }
 
     @Transactional
@@ -139,7 +139,7 @@ public class StatusService {
 
     @Transactional
     public Status deleteStatus(String boardId,Integer statusId, String jwtToken) {
-        Status toDeleteStatus = statusRepository.findById(statusId).orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + statusId));
+        Status toDeleteStatus = statusRepository.findById(statusId).orElseThrow(() -> new BadRequestException("The specified status for delete doesn't exist"));
         if (statusId.equals(1)||statusId.equals(4)) {
             throw new BadRequestException(toDeleteStatus.getName() + " cannot be delete.");
         }

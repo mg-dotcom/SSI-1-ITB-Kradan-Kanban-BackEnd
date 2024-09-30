@@ -75,8 +75,8 @@ public class TaskService {
 
     public Task getTaskById(Integer taskId,String boardId, String jwtToken) {
         Task task=taskRepository.findById(taskId).orElseThrow(
-                ()->new ItemNotFoundException("Task not found with TASK ID: " + taskId));
-
+                ()->new ItemNotFoundException("NOT FOUND")
+        );
         BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
 
         // Can't access board

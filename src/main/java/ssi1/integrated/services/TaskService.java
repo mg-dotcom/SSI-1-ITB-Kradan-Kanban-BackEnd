@@ -81,12 +81,7 @@ public class TaskService {
         );
 
         Visibility visibility=board.getVisibility();
-        //TC4
-        System.out.println("Owner "+authorizationResult.isOwner());
-        // Can't access board
-//        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
-//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-//        }
+
         if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
             throw new ForbiddenException(boardId+" this board id is private");
         }
@@ -100,33 +95,42 @@ public class TaskService {
 
     @Transactional
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId,String jwtToken) {
-        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+
         Board board=boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
         Visibility visibility=board.getVisibility();
-        //TC4
-        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
+        User user = userService.getUserByOid(board.getUserOid());
+
+        String tokenUsername = jwtService.extractUsername(jwtToken);
+
+        boolean isOwner = user.getUsername().equals(tokenUsername);
+
+        if (visibility==Visibility.PRIVATE &&!isOwner) {
+            System.out.println("Case1");
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
+        if(visibility.equals(Visibility.PUBLIC) && !isOwner){
+            System.out.println("Case2");
             throw new ForbiddenException(boardId+" this board id is private");
         }
 
-        if(visibility==Visibility.PUBLIC && !authorizationResult.isOwner()){
+        if(!isOwner){
+            System.out.println("Case3");
             throw new ForbiddenException(boardId+" this board id is private");
         }
 
         if(newTask==null){
+            System.out.println("Case4");
             throw new BadRequestException("Invalid insert new task");
         }
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {
             };
-        }
-
-        //Can't access board
-        if (!authorizationResult.isOwner()) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
         Status status = statusRepository.findById(newTask.getStatus())

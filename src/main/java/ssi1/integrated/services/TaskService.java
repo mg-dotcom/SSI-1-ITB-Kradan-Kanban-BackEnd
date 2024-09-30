@@ -73,7 +73,9 @@ public class TaskService {
 
 
     public Task getTaskById(Integer taskId,String boardId, String jwtToken) {
-
+        Task task=taskRepository.findById(taskId).orElseThrow(
+                ()->new ItemNotFoundException("NOT FOUND")
+        );
         BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
 
         // Can't access board
@@ -81,7 +83,7 @@ public class TaskService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-        return taskRepository.findByIdAndBoardId(taskId,boardId);
+        return taskRepository.findByIdAndBoardId(task.getId(),boardId);
     }
 
 

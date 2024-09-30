@@ -48,7 +48,7 @@ public class BoardController {
     }
 
     @PostMapping("")
-    public ResponseEntity<BoardDTO> createBoard(@RequestHeader (name="Authorization")String accessToken,@Valid @RequestBody CreateBoardDTO boardDTO){
+    public ResponseEntity<BoardDTO> createBoard(@RequestHeader (name="Authorization")String accessToken,@RequestBody(required = false) CreateBoardDTO boardDTO){
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return ResponseEntity.status(HttpStatus.CREATED).body(boardService.createBoard(jwtToken,boardDTO));
     }
@@ -88,7 +88,7 @@ public class BoardController {
     @PatchMapping("/{boardId}")
     public ResponseEntity<BoardVisibilityDTO> setBoardVisibility(
             @PathVariable String boardId,
-            @RequestBody @Valid BoardVisibilityDTO boardVisibilityDTO, @RequestHeader(name = "Authorization")String accessToken) {
+            @RequestBody(required = false) BoardVisibilityDTO boardVisibilityDTO, @RequestHeader(name = "Authorization")String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return ResponseEntity.ok(boardService.changeVisibility(boardId,boardVisibilityDTO,jwtToken));
     }

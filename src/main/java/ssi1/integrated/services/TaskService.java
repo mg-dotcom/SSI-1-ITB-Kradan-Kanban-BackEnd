@@ -104,6 +104,7 @@ public class TaskService {
         Board board=boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
+
         Visibility visibility=board.getVisibility();
         //TC4
         if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){

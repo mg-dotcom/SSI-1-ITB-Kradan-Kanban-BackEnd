@@ -74,15 +74,25 @@ public class TaskService {
 
 
     public Task getTaskById(Integer taskId,String boardId, String jwtToken) {
+
+        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+        Board board=boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        Visibility visibility=board.getVisibility();
+        //TC4
+        System.out.println("Owner "+authorizationResult.isOwner());
+        // Can't access board
+//        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
+//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+//        }
+        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
         Task task=taskRepository.findById(taskId).orElseThrow(
                 ()->new ItemNotFoundException("NOT FOUND")
         );
-        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-
-        // Can't access board
-        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
 
         return taskRepository.findByIdAndBoardId(task.getId(),boardId);
     }
@@ -90,7 +100,14 @@ public class TaskService {
 
     @Transactional
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId,String jwtToken) {
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+        Board board = boardService.getBoardById(boardId);
+        Visibility visibility=board.getVisibility();
+        //TC4
+
+        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
+            throw new ForbiddenException(boardId+" this board id is private");
+        }
 
         if(newTask==null){
             throw new BadRequestException("Invalid insert new task");
@@ -109,7 +126,6 @@ public class TaskService {
         Status status = statusRepository.findById(newTask.getStatus())
                 .orElseThrow(() -> new BadRequestException("status does not exist"));
 
-        Board board = boardService.getBoardById(boardId);
         if (board.getLimitMaximumTask() && !"No Status".equals(status.getName())
                 && !"Done".equals(status.getName())) {
             int noOfTasks = taskRepository.findByStatusId(status.getId()).size();

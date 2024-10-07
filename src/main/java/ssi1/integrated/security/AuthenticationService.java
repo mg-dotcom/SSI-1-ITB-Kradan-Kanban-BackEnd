@@ -3,9 +3,6 @@ package ssi1.integrated.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.security.dtos.AccessToken;
 import ssi1.integrated.security.dtos.AuthenticationRequest;
@@ -21,8 +18,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
 
-
-    public AuthenticationResponse authenticate(AuthenticationRequest request){
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
 
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 request.getUserName(),
@@ -38,8 +34,8 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AccessToken instantAccess(JwtPayload jwtPayload){
-        User user=userRepository.findByOid(jwtPayload.getOid());
+    public AccessToken instantAccess(JwtPayload jwtPayload) {
+        User user = userRepository.findByOid(jwtPayload.getOid());
         return AccessToken.builder().accessToken(jwtService.generateToken(user)).build();
     }
 }

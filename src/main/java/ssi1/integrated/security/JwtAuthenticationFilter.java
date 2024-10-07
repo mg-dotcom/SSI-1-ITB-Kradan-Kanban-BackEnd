@@ -1,13 +1,7 @@
 package ssi1.integrated.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.security.SignatureException;
-
-import io.jsonwebtoken.Claims;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,25 +17,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ssi1.integrated.dtos.BoardDTO;
-import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.exception.respond.ErrorResponse;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.services.BoardService;
-import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
 import ssi1.integrated.utils.UriExtractor;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 @Component
@@ -58,9 +43,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private UserRepository userRepository;
 
     @Override
-        protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                        @NonNull HttpServletResponse response,
-                                        @NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         if (request.getRequestURI().equals("/login")) {
             filterChain.doFilter(request, response);
             return;
@@ -119,11 +104,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-        private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request, HttpStatus status) throws IOException {
-            ErrorResponse errorResponse = new ErrorResponse(status.value(), message, request.getRequestURI());
-            response.setStatus(status.value());
-            response.setContentType("application/json");
-            response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
-        }
+    private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request, HttpStatus status) throws IOException {
+        ErrorResponse errorResponse = new ErrorResponse(status.value(), message, request.getRequestURI());
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+        response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponse));
     }
+}
 

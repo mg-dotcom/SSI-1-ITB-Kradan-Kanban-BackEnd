@@ -12,16 +12,16 @@ import ssi1.integrated.configs.ListMapper;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
+import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ForbiddenException;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
+import ssi1.integrated.exception.handler.LimitationException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.status.Status;
-import ssi1.integrated.project_board.task.Task;
-import ssi1.integrated.exception.handler.BadRequestException;
-import ssi1.integrated.exception.handler.ItemNotFoundException;
-import ssi1.integrated.exception.handler.LimitationException;
 import ssi1.integrated.project_board.status.StatusRepository;
+import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task.TaskRepository;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
@@ -73,57 +73,57 @@ public class TaskService {
     }
 
 
-    public Task getTaskById(Integer taskId,String boardId, String jwtToken) {
+    public Task getTaskById(Integer taskId, String boardId, String jwtToken) {
 
         BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-        Board board=boardRepository.findById(boardId).orElseThrow(
+        Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
-        Visibility visibility=board.getVisibility();
+        Visibility visibility = board.getVisibility();
 
-        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
-            throw new ForbiddenException(boardId+" this board id is private");
+        if (visibility == Visibility.PRIVATE && !authorizationResult.isOwner()) {
+            throw new ForbiddenException(boardId + " this board id is private");
         }
-        Task task=taskRepository.findById(taskId).orElseThrow(
-                ()->new ItemNotFoundException("NOT FOUND")
+        Task task = taskRepository.findById(taskId).orElseThrow(
+                () -> new ItemNotFoundException("NOT FOUND")
         );
 
-        return taskRepository.findByIdAndBoardId(task.getId(),boardId);
+        return taskRepository.findByIdAndBoardId(task.getId(), boardId);
     }
 
 
     @Transactional
-    public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId,String jwtToken) {
+    public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId, String jwtToken) {
 
-        Board board=boardRepository.findById(boardId).orElseThrow(
+        Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
-        Visibility visibility=board.getVisibility();
+        Visibility visibility = board.getVisibility();
         User user = userService.getUserByOid(board.getUserOid());
 
         String tokenUsername = jwtService.extractUsername(jwtToken);
 
         boolean isOwner = user.getUsername().equals(tokenUsername);
 
-        if (visibility==Visibility.PRIVATE &&!isOwner) {
+        if (visibility == Visibility.PRIVATE && !isOwner) {
             System.out.println("Case1");
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
 
-        if(visibility.equals(Visibility.PUBLIC) && !isOwner){
+        if (visibility.equals(Visibility.PUBLIC) && !isOwner) {
             System.out.println("Case2");
-            throw new ForbiddenException(boardId+" this board id is private");
+            throw new ForbiddenException(boardId + " this board id is private");
         }
 
-        if(!isOwner){
+        if (!isOwner) {
             System.out.println("Case3");
-            throw new ForbiddenException(boardId+" this board id is private");
+            throw new ForbiddenException(boardId + " this board id is private");
         }
 
-        if(newTask==null){
+        if (newTask == null) {
             System.out.println("Case4");
             throw new BadRequestException("Invalid insert new task");
         }
@@ -153,9 +153,9 @@ public class TaskService {
     }
 
     @Transactional
-    public NewTaskDTO updateTask(Integer taskId, NewTaskDTO inputTask, String boardId,String jwtToken) {
+    public NewTaskDTO updateTask(Integer taskId, NewTaskDTO inputTask, String boardId, String jwtToken) {
         Board board = boardService.getBoardById(boardId);
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+        BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
@@ -190,7 +190,7 @@ public class TaskService {
         existingTask.setStatus(status);
         existingTask.setBoard(board);
 
-        NewTaskDTO newTaskDTO=new NewTaskDTO();
+        NewTaskDTO newTaskDTO = new NewTaskDTO();
         newTaskDTO.setId(existingTask.getId());
         newTaskDTO.setTitle(existingTask.getTitle());
         newTaskDTO.setDescription(existingTask.getDescription());
@@ -201,8 +201,8 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDTO removeTask(Integer taskId,String boardId, String jwtToken) {
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+    public TaskDTO removeTask(Integer taskId, String boardId, String jwtToken) {
+        BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
@@ -217,7 +217,7 @@ public class TaskService {
         if (!isExistingTask) {
             throw new ItemNotFoundException("Task not found with TASK ID: " + taskId);
         }
-        Task task = taskRepository.findByIdAndBoardId(taskId,boardId);
+        Task task = taskRepository.findByIdAndBoardId(taskId, boardId);
         TaskDTO deletedTask = modelMapper.map(task, TaskDTO.class);
         taskRepository.delete(task);
         return deletedTask;

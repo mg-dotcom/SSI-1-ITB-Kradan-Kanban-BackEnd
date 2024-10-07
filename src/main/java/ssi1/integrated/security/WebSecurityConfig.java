@@ -19,7 +19,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class WebSecurityConfig{
+public class WebSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -42,7 +42,7 @@ public class WebSecurityConfig{
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173","http://intproj23.sit.kmutt.ac.th"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://intproj23.sit.kmutt.ac.th"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowCredentials(true);
         configuration.addAllowedHeader("*");

@@ -13,13 +13,11 @@ import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.TaskService;
-import org.springframework.web.bind.annotation.CrossOrigin;
-
 
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173","http://ip23ssi1.sit.kmutt.ac.th","http://intproj23.sit.kmutt.ac.th"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://ip23ssi1.sit.kmutt.ac.th", "http://intproj23.sit.kmutt.ac.th"})
 @RequestMapping("/v3/boards")
 
 public class TaskController {
@@ -71,24 +69,24 @@ public class TaskController {
     }
 
     @PostMapping("/{boardId}/tasks")
-    public ResponseEntity<GeneralTaskDTO> addTask(@RequestBody(required = false) NewTaskDTO newTaskDTO, @PathVariable String boardId,  @RequestHeader(name = "Authorization")String accessToken){
+    public ResponseEntity<GeneralTaskDTO> addTask(@RequestBody(required = false) NewTaskDTO newTaskDTO, @PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO,boardId,jwtToken));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.insertNewTask(newTaskDTO, boardId, jwtToken));
     }
 
     @DeleteMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<TaskDTO> deleteTask(@PathVariable Integer taskId,@PathVariable String boardId,@RequestHeader(name = "Authorization")String accessToken) {
+    public ResponseEntity<TaskDTO> deleteTask(@PathVariable Integer taskId, @PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
-       return ResponseEntity.ok(service.removeTask(taskId,boardId,jwtToken));
+        return ResponseEntity.ok(service.removeTask(taskId, boardId, jwtToken));
     }
 
     @PutMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId,@RequestBody(required = false) NewTaskDTO newTaskDTO,@PathVariable String boardId, @RequestHeader(name = "Authorization")String accessToken){
+    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId, @RequestBody(required = false) NewTaskDTO newTaskDTO, @PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
-        return ResponseEntity.ok(service.updateTask(taskId,newTaskDTO,boardId,jwtToken));
+        return ResponseEntity.ok(service.updateTask(taskId, newTaskDTO, boardId, jwtToken));
     }
 
 }

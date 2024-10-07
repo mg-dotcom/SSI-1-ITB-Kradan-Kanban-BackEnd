@@ -1,7 +1,7 @@
 package ssi1.integrated.user_account;
 
 public enum Role {
-  LECTURER,
+    LECTURER,
     STAFF,
     STUDENT
 }

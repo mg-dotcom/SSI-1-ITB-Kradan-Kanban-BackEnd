@@ -9,7 +9,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ssi1.integrated.user_account.UserRepository;
@@ -18,13 +17,15 @@ import ssi1.integrated.user_account.UserRepository;
 @RequiredArgsConstructor
 public class ApplicationConfig {
     @Bean
-    public ModelMapper modelMapper(){
+    public ModelMapper modelMapper() {
         return new ModelMapper();
     }
+
     @Bean
-    public ListMapper listMapper(){
+    public ListMapper listMapper() {
         return ListMapper.getInstance();
     }
+
     private final UserRepository userRepository;
 
     @Bean

@@ -11,9 +11,9 @@ import lombok.Setter;
 @Setter
 public class AuthenticationRequest {
     @NotEmpty(message = "Username cannot be empty")
-    @Size(max = 50,message = "Username cannot be longer than 50 characters")
+    @Size(max = 50, message = "Username cannot be longer than 50 characters")
     private String userName;
     @NotEmpty(message = "Password cannot be empty")
-    @Size(max = 14,message = "Password cannot be longer than 14 characters")
+    @Size(max = 14, message = "Password cannot be longer than 14 characters")
     private String password;
 }

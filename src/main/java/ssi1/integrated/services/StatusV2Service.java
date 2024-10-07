@@ -13,7 +13,7 @@ public class StatusV2Service {
     private StatusRepository statusRepository;
 
 
-    public List<Status> getAllStatus(){
+    public List<Status> getAllStatus() {
         return statusRepository.findAll();
     }
 }

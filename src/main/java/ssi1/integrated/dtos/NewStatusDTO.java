@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ssi1.integrated.exception.handler.BadRequestException;
-import ssi1.integrated.exception.handler.LimitationException;
 
 @Getter
 @Setter
@@ -22,9 +20,9 @@ public class NewStatusDTO {
     private String statusColor;
 
     public void setName(String name) {
-        if (name == null ) {
+        if (name == null) {
             throw new BadRequestException("Name must not be null");
-        } else if(name.isEmpty()){
+        } else if (name.isEmpty()) {
             throw new BadRequestException("Name must not be empty");
         }
         this.name = name.trim();
@@ -34,7 +32,7 @@ public class NewStatusDTO {
         this.description = (description != null) ? description.trim() : null;
     }
 
-    public void setStatusColor(String statusColor){
+    public void setStatusColor(String statusColor) {
         this.statusColor = (statusColor != null) ? statusColor.trim() : "#CCCCCC";
     }
 }

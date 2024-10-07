@@ -15,7 +15,7 @@ import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_ALPHABET;
 @Setter
 @ToString
 @Entity
-@Table(name = "board",schema = "integrated2")
+@Table(name = "board", schema = "integrated2")
 public class Board {
     @Id
     private String id;

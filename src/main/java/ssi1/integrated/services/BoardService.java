@@ -35,16 +35,15 @@ public class BoardService {
     private ModelMapper modelMapper;
     private JwtService jwtService;
     private StatusService statusService;
-   private TaskRepository taskRepository;
+    private TaskRepository taskRepository;
     private StatusRepository statusRepository;
-
 
 
     public List<Board> getAllBoards() {
         return boardRepository.findAll();
     }
 
-    public List<Board> getAllBoards(String token){
+    public List<Board> getAllBoards(String token) {
         JwtPayload jwtPayload = jwtService.extractPayload(token);
 
         if (jwtPayload == null) {
@@ -56,14 +55,13 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardDTO createBoard(String jwtToken,CreateBoardDTO createBoardDTO) {
-        if(createBoardDTO==null){
+    public BoardDTO createBoard(String jwtToken, CreateBoardDTO createBoardDTO) {
+        if (createBoardDTO == null) {
             throw new BadRequestException("Invalid board create body");
         }
 
         // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-
 
 
         // Find the user associated with the OID from the JWT payload
@@ -88,27 +86,27 @@ public class BoardService {
         boardDTO.setOwner(userDTO);
 
         //create default statuses
-        NewStatusDTO noStatus=new NewStatusDTO();
+        NewStatusDTO noStatus = new NewStatusDTO();
         noStatus.setName("No Status");
         noStatus.setDescription("A status has not been assigned");
         noStatus.setStatusColor("#CCCCCC");
 
-        NewStatusDTO todo=new NewStatusDTO();
+        NewStatusDTO todo = new NewStatusDTO();
         todo.setName("To Do");
         todo.setDescription("The task is included in the project");
         todo.setStatusColor("#FFA500");
 
-        NewStatusDTO doing=new NewStatusDTO();
+        NewStatusDTO doing = new NewStatusDTO();
         doing.setName("Doing");
         doing.setDescription("The task is being worked on");
         doing.setStatusColor("#FF9A00");
 
-        NewStatusDTO done=new NewStatusDTO();
+        NewStatusDTO done = new NewStatusDTO();
         done.setName("Done");
         done.setDescription("The task has been completed");
         done.setStatusColor("#008000");
 
-        statusService.insertNewStatus(newBoard.getId(), noStatus,jwtToken);
+        statusService.insertNewStatus(newBoard.getId(), noStatus, jwtToken);
         statusService.insertNewStatus(newBoard.getId(), todo, jwtToken);
         statusService.insertNewStatus(newBoard.getId(), doing, jwtToken);
         statusService.insertNewStatus(newBoard.getId(), done, jwtToken);
@@ -139,9 +137,9 @@ public class BoardService {
     }
 
 
-    public BoardVisibilityDTO changeVisibility(String boardId, BoardVisibilityDTO visibility, String jwtToken){
+    public BoardVisibilityDTO changeVisibility(String boardId, BoardVisibilityDTO visibility, String jwtToken) {
         Board board = getBoardById(boardId);
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+        BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {
@@ -153,7 +151,7 @@ public class BoardService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-        if(visibility==null){
+        if (visibility == null) {
             throw new BadRequestException("Invalid visibility");
         }
 
@@ -169,15 +167,15 @@ public class BoardService {
         return modelMapper.map(updatedBoard, BoardVisibilityDTO.class);
     }
 
-    public Board getBoardById(String boardId){
+    public Board getBoardById(String boardId) {
         return boardRepository.findById(boardId).orElseThrow(
-                ()-> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
     }
 
     @Transactional
-    public String deleteBoard(String boardId, String jwtToken){
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+    public String deleteBoard(String boardId, String jwtToken) {
+        BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");

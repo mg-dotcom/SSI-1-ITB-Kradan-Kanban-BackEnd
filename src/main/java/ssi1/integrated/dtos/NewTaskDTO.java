@@ -1,6 +1,5 @@
 package ssi1.integrated.dtos;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -24,7 +23,7 @@ public class NewTaskDTO {
     private Integer status;
     private String statusName;
 
-    public void setTitle(String title){
+    public void setTitle(String title) {
         if (title != null) {
             this.title = title.trim();
         } else {
@@ -32,17 +31,17 @@ public class NewTaskDTO {
         }
     }
 
-    public void setDescription(String description){
+    public void setDescription(String description) {
         String trimmedDescription = (description != null) ? description.trim() : null;
         this.description = (trimmedDescription != null && !trimmedDescription.isEmpty()) ? trimmedDescription : null;
     }
 
-    public void setAssignees(String assignees){
+    public void setAssignees(String assignees) {
         String trimmedAssignees = (assignees != null) ? assignees.trim() : null;
         this.assignees = (trimmedAssignees != null && !trimmedAssignees.isEmpty()) ? trimmedAssignees : null;
     }
 
-    public void setStatus(Integer statusId){
+    public void setStatus(Integer statusId) {
         this.status = (statusId != null) ? statusId : 1;
     }
 

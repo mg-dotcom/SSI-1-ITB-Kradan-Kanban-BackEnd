@@ -4,15 +4,12 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
-import ssi1.integrated.exception.handler.StatusNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
@@ -73,22 +70,22 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO, String jwtToken) {
-        Board board=boardRepository.findById(boardId).orElseThrow(
+        Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
-        Visibility visibility=board.getVisibility();
+        BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
+        Visibility visibility = board.getVisibility();
         //TC4
-        System.out.println("Owner "+authorizationResult.isOwner());
-        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
-            throw new ForbiddenException(boardId+" this board id is private");
+        System.out.println("Owner " + authorizationResult.isOwner());
+        if (visibility == Visibility.PRIVATE && !authorizationResult.isOwner()) {
+            throw new ForbiddenException(boardId + " this board id is private");
         }
 
-        if(visibility==Visibility.PUBLIC && !authorizationResult.isOwner()){
-            throw new ForbiddenException(boardId+" this board id is private");
+        if (visibility == Visibility.PUBLIC && !authorizationResult.isOwner()) {
+            throw new ForbiddenException(boardId + " this board id is private");
         }
 
-        if(updateStatusDTO==null){
+        if (updateStatusDTO == null) {
             throw new BadRequestException("Invalid NewStatusDTO value");
         }
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
@@ -101,7 +98,7 @@ public class StatusService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-        if (statusId.equals(1)||statusId.equals(4)) {
+        if (statusId.equals(1) || statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");
         }
         Status toUpdateStatus = statusRepository.findById(statusId)
@@ -120,24 +117,24 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO insertNewStatus(String boardId, NewStatusDTO newStatusDTO, String jwtToken) {
-        Board board=boardRepository.findById(boardId).orElseThrow(
+        Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
-        Visibility visibility=board.getVisibility();
+        BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
+        Visibility visibility = board.getVisibility();
         //TC4
-        System.out.println("Owner "+authorizationResult.isOwner());
-        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
-            throw new ForbiddenException(boardId+" this board id is private");
+        System.out.println("Owner " + authorizationResult.isOwner());
+        if (visibility == Visibility.PRIVATE && !authorizationResult.isOwner()) {
+            throw new ForbiddenException(boardId + " this board id is private");
         }
-        if(visibility==Visibility.PUBLIC && !authorizationResult.isOwner()){
-            throw new ForbiddenException(boardId+" this board id is private");
+        if (visibility == Visibility.PUBLIC && !authorizationResult.isOwner()) {
+            throw new ForbiddenException(boardId + " this board id is private");
         }
-        if(newStatusDTO==null){
+        if (newStatusDTO == null) {
             throw new BadRequestException("Invalid NewStatusDTO value");
         }
 
-        boolean existStatus = getAllStatus(boardId,jwtToken).stream().anyMatch(status -> status.getName().equals(newStatusDTO.getName()));
+        boolean existStatus = getAllStatus(boardId, jwtToken).stream().anyMatch(status -> status.getName().equals(newStatusDTO.getName()));
         if (existStatus) {
             throw new BadRequestException("Status name must be unique");
         }
@@ -163,26 +160,25 @@ public class StatusService {
     }
 
     @Transactional
-    public Status deleteStatus(String boardId,Integer statusId, String jwtToken) {
-        Board board=boardRepository.findById(boardId).orElseThrow(
+    public Status deleteStatus(String boardId, Integer statusId, String jwtToken) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
-        Visibility visibility=board.getVisibility();
+        BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
+        Visibility visibility = board.getVisibility();
         //TC4
-        System.out.println("Owner "+authorizationResult.isOwner());
-        if(visibility==Visibility.PRIVATE && !authorizationResult.isOwner()){
-            throw new ForbiddenException(boardId+" this board id is private");
+        System.out.println("Owner " + authorizationResult.isOwner());
+        if (visibility == Visibility.PRIVATE && !authorizationResult.isOwner()) {
+            throw new ForbiddenException(boardId + " this board id is private");
         }
-        if(visibility==Visibility.PUBLIC && !authorizationResult.isOwner()){
-            throw new ForbiddenException(boardId+" this board id is private");
+        if (visibility == Visibility.PUBLIC && !authorizationResult.isOwner()) {
+            throw new ForbiddenException(boardId + " this board id is private");
         }
 
-        Status toDeleteStatus = statusRepository.findById(statusId).orElseThrow(() -> new  ItemNotFoundException("Status not found with STATUS ID: " + statusId));
-        if (statusId.equals(1)||statusId.equals(4)) {
+        Status toDeleteStatus = statusRepository.findById(statusId).orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
+        if (statusId.equals(1) || statusId.equals(4)) {
             throw new BadRequestException(toDeleteStatus.getName() + " cannot be delete.");
         }
-
 
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
@@ -202,7 +198,7 @@ public class StatusService {
             statusRepository.delete(toDeleteStatus);
             return toDeleteStatus;
         } else {
-            transferStatus(boardId, statusId, null,jwtToken);
+            transferStatus(boardId, statusId, null, jwtToken);
         }
 
         return toDeleteStatus;
@@ -217,7 +213,7 @@ public class StatusService {
         }
         List<Task> taskList = taskRepository.findByStatusIdAndBoardId(oldStatusId, boardId);
 
-        BoardAuthorizationResult authorizationResult  = authorizeBoardModifyAccess(boardId, jwtToken);
+        BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {
@@ -234,7 +230,7 @@ public class StatusService {
             task.setStatus(transferStatus);
             taskRepository.save(task);
         }
-        deleteStatus(boardId,oldStatusId,jwtToken);
+        deleteStatus(boardId, oldStatusId, jwtToken);
         return transferStatus;
     }
 

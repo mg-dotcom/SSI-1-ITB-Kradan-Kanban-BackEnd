@@ -1,4 +1,3 @@
-
 package ssi1.integrated.project_board.task;
 
 
@@ -19,28 +18,28 @@ import java.time.ZonedDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "task",schema = "integrated2")
+@Table(name = "task", schema = "integrated2")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="taskId", nullable = false ,unique = true)
+    @Column(name = "taskId", nullable = false, unique = true)
     private Integer id;
-    @Column(name="taskTitle")
+    @Column(name = "taskTitle")
     private String title;
-    @Column(name="taskDescription")
+    @Column(name = "taskDescription")
     private String description;
-    @Column(name="taskAssignees")
+    @Column(name = "taskAssignees")
     private String assignees;
 
     @ManyToOne
-    @JoinColumn(name="statusId", nullable = false)
+    @JoinColumn(name = "statusId", nullable = false)
     private Status status;
 
     @CreationTimestamp
-    @Column(name="createdOn",  nullable = false, updatable = false ,insertable = false )
+    @Column(name = "createdOn", nullable = false, updatable = false, insertable = false)
     private ZonedDateTime createdOn;
     @UpdateTimestamp
-    @Column(name="updatedOn" ,nullable = false,insertable = false)
+    @Column(name = "updatedOn", nullable = false, insertable = false)
     private ZonedDateTime updatedOn;
 
     @NotNull

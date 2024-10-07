@@ -20,9 +20,9 @@ public class CollabManagement {
     @Column(name = "collabNo")
     private Integer collabNo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "user_oid", nullable = false)
-    private UserBoard user;
+    private String user_oid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)

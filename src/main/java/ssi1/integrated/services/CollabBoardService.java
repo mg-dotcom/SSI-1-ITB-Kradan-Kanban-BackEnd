@@ -1,6 +1,7 @@
 package ssi1.integrated.services;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
@@ -22,12 +23,19 @@ import static ssi1.integrated.project_board.board.Visibility.PUBLIC;
 
 @Service
 public class CollabBoardService {
+    @Autowired
     private CollabBoardRepository collabBoardRepository;
+    @Autowired
     private BoardService boardService;
+    @Autowired
     private BoardRepository boardRepository;
+    @Autowired
     private UserService userService;
+    @Autowired
     private UserLocalService userLocalService;
+    @Autowired
     private ModelMapper modelMapper;
+    @Autowired
     private JwtService jwtService;
 
 

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
+import ssi1.integrated.dtos.CollaboratorDTO;
 import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.services.CollabBoardService;
@@ -17,9 +18,14 @@ public class CollabBoardController {
     @Autowired
     private CollabBoardService collabBoardService;
     @GetMapping("/{boardId}/collabs")
-    public List<CollabBoard> getAllCollabBoards(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
+    public List<CollaboratorDTO> getAllCollaborators(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return collabBoardService.getAllCollabBoard(jwtToken,boardId);
+        return collabBoardService.getAllCollabsBoard(jwtToken,boardId);
+    }
+    @GetMapping("/{boardId}/collabs/{collabsOid}")
+    public CollaboratorDTO getCollaborators(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken,String collabsOid) {
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        return collabBoardService.getCollaborators(jwtToken,boardId,collabsOid);
     }
 
     @PostMapping("/{boardId}/collabs")

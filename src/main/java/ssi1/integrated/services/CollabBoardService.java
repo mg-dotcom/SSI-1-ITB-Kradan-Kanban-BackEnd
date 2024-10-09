@@ -2,6 +2,7 @@ package ssi1.integrated.services;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
 import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
@@ -60,15 +61,15 @@ public class CollabBoardService {
 //    }
 
 
-    public CollabBoardDTO addCollabBoard(String jwtToken, String boardId, String email, AccessRight access_right){
+    public CollabBoardDTO addCollabBoard(String jwtToken, String boardId, AddCollabBoardDTO addCollabBoardDTO){
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
         // find user in email and store in local user
-        User foundedUserByEmail = userService.getUserByEmail(email);
+        User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail());
         if (foundedUserByEmail == null){
-            throw new ItemNotFoundException("User Email Not Found with email" + email);
+            throw new ItemNotFoundException("User Email Not Found with email" + addCollabBoardDTO.getEmail());
         }
         UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
 
@@ -76,23 +77,23 @@ public class CollabBoardService {
         List<CollabBoard> existingCollabBoard = collabBoardRepository.findAllByBoardId(boardId);
         boolean collaboratorEmailExisting = false;
         for (CollabBoard collabBoard : existingCollabBoard) {
-            if (collabBoard.getUser_oid().getEmail().equals(email)) {
+            if (collabBoard.getUser_oid().getEmail().equals(addCollabBoardDTO.getEmail())) {
                 collaboratorEmailExisting = true;
                 break;
             }
         }
 //        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();
-        if (savedUserToLocal.getEmail() != null && !collaboratorEmailExisting && (access_right == AccessRight.WRITE || access_right == AccessRight.READ)) {
+        if (savedUserToLocal.getEmail() != null && !collaboratorEmailExisting && (addCollabBoardDTO.getAccessRight() == AccessRight.WRITE || addCollabBoardDTO.getAccessRight() == AccessRight.READ)) {
             CollabBoard newCollabBoard = new CollabBoard();
             newCollabBoard.setUser_oid(savedUserToLocal);
-            newCollabBoard.setAccessRight(access_right);
+            newCollabBoard.setAccessRight(addCollabBoardDTO.getAccessRight());
             newCollabBoard.setBoard(board);
 
             collabBoardDTO.setBoardID(boardId);
             collabBoardDTO.setCollaboratorName(savedUserToLocal.getUsername());
-            collabBoardDTO.setCollaboratorEmail(email);
-            collabBoardDTO.setAccessRight(access_right);
+            collabBoardDTO.setCollaboratorEmail(addCollabBoardDTO.getEmail());
+            collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
         }
         return collabBoardDTO;
     }

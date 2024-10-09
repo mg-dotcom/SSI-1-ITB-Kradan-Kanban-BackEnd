@@ -1,6 +1,7 @@
 package ssi1.integrated.controller;
 
 import org.springframework.web.bind.annotation.*;
+import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
 import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
@@ -20,9 +21,9 @@ public class CollabBoardController {
     }
 
     @PostMapping("/{boardId}/collabs")
-    public CollabBoardDTO addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody String email, @RequestBody AccessRight accessRight) {
+    public CollabBoardDTO addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody AddCollabBoardDTO addCollabBoardDTO) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return collabBoardService.addCollabBoard(jwtToken,boardId,email,accessRight);
+        return collabBoardService.addCollabBoard(jwtToken,boardId,addCollabBoardDTO);
     }
 
 }

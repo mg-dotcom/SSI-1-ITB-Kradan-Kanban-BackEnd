@@ -6,9 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import ssi1.integrated.project_board.board.Board;
-import ssi1.integrated.user_account.User;
-
-import java.time.LocalDateTime;
+import ssi1.integrated.project_board.user_local.UserLocal;
 import java.time.ZonedDateTime;
 
 @Getter
@@ -25,7 +23,7 @@ public class CollabBoard {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_oid", nullable = false)
-    private User user_oid;
+    private UserLocal user_oid;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "board_id", nullable = false)

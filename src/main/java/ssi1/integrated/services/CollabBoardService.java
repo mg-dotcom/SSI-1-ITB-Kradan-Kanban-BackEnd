@@ -11,6 +11,7 @@ import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
+import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
 
@@ -24,6 +25,7 @@ public class CollabBoardService {
     private BoardService boardService;
     private BoardRepository boardRepository;
     private UserService userService;
+    private UserLocalService userLocalService;
     private ModelMapper modelMapper;
     private JwtService jwtService;
 
@@ -62,11 +64,15 @@ public class CollabBoardService {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
-        User user = userService.getUserByEmail(email);
-        if (user == null){
+
+        // find user in email and store in local user
+        User foundedUserByEmail = userService.getUserByEmail(email);
+        if (foundedUserByEmail == null){
             throw new ItemNotFoundException("User Email Not Found with email" + email);
         }
-//        boolean isCollab = collabBoardRepository.existsByUser_oidAndBoard_Id(user.getOid(), boardId);
+        UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
+
+//      boolean isCollab = collabBoardRepository.existsByUser_oidAndBoard_Id(user.getOid(), boardId);
         List<CollabBoard> existingCollabBoard = collabBoardRepository.findAllByBoardId(boardId);
         boolean collaboratorEmailExisting = false;
         for (CollabBoard collabBoard : existingCollabBoard) {
@@ -77,14 +83,14 @@ public class CollabBoardService {
         }
 //        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();
-        if (user.getEmail() != null && collaboratorEmailExisting == false && (access_right == AccessRight.WRITE || access_right == AccessRight.READ)) {
+        if (savedUserToLocal.getEmail() != null && !collaboratorEmailExisting && (access_right == AccessRight.WRITE || access_right == AccessRight.READ)) {
             CollabBoard newCollabBoard = new CollabBoard();
-            newCollabBoard.setUser_oid(user);
+            newCollabBoard.setUser_oid(savedUserToLocal);
             newCollabBoard.setAccessRight(access_right);
             newCollabBoard.setBoard(board);
 
             collabBoardDTO.setBoardID(boardId);
-            collabBoardDTO.setCollaboratorName(user.getUsername());
+            collabBoardDTO.setCollaboratorName(savedUserToLocal.getUsername());
             collabBoardDTO.setCollaboratorEmail(email);
             collabBoardDTO.setAccessRight(access_right);
         }

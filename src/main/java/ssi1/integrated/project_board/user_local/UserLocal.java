@@ -1,4 +1,4 @@
-package ssi1.integrated.project_board.user_board;
+package ssi1.integrated.project_board.user_local;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "user", schema = "integrated2")
-public class UserBoard {
+public class UserLocal {
 
     @Id
     @Column(name = "oid", nullable = false, unique = true, length = 36)

@@ -21,7 +21,7 @@ import ssi1.integrated.user_account.User;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ssi1.integrated.project_board.board.Visibility.PUBLIC;
+import static ssi1.integrated.project_board.board.Visibility.*;
 
 @Service
 public class CollabBoardService {
@@ -62,16 +62,28 @@ public class CollabBoardService {
     }
 
     public CollaboratorDTO getCollaborators(String jwtToken, String boardId,String collabsOid){
-        CollabBoard foundedCollabsBoard = collabBoardRepository.findByUser_oidAndBoard_Id(collabsOid,boardId);
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-//        CollabBoard foundedCollabsBoard = collabBoardRepository.findByUser_oidAndBoard_Id(boardId,collabsOid);
-        UserLocal userLocal = userLocalService.getUserByOid(collabsOid);
+        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) ) {
+            throw new ForbiddenException("You do not have permission to access this board.");
+        }
+
+        // Fetch the collaborator details based on the provided collabOid
+        CollabBoard collabBoard = collabBoardRepository.findByUser_oidAndBoard_Id(collabsOid, boardId);
+        if (collabBoard == null) {
+            throw new ItemNotFoundException("Collaborator not found for given board.");
+        }
+
+        UserLocal foundedUserLocal = userLocalService.getUserByOid(collabBoard.getUser_oid().getOid());
         CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
-        collaboratorDTO.setUser_oid(userLocal.getOid());
-        collaboratorDTO.setCollaboratorName(userLocal.getName());
-        collaboratorDTO.setCollaboratorEmail(userLocal.getEmail());
-        collaboratorDTO.setAccessRight(foundedCollabsBoard.getAccessRight());
-        collaboratorDTO.setAddedOn(foundedCollabsBoard.getAddedOn());
+        collaboratorDTO.setUser_oid(foundedUserLocal.getOid());
+        collaboratorDTO.setCollaboratorName(foundedUserLocal.getName());
+        collaboratorDTO.setCollaboratorEmail(foundedUserLocal.getEmail());
+        collaboratorDTO.setAccessRight(collabBoard.getAccessRight());
+        collaboratorDTO.setAddedOn(collabBoard.getAddedOn());
+
         return collaboratorDTO;
     }
 
@@ -110,8 +122,6 @@ public class CollabBoardService {
             collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
             collabBoardRepository.save(newCollabBoard);
         }
-
-
         return collabBoardDTO;
     }
 

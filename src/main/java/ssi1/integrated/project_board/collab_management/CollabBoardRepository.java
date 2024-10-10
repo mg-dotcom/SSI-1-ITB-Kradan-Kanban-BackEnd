@@ -9,9 +9,8 @@ import java.util.List;
 @Repository
 public interface CollabBoardRepository extends JpaRepository<CollabBoard, Integer> {
     List<CollabBoard> findAllByBoardId(String boardId);
-    @Query("SELECT cb FROM CollabBoard cb WHERE cb.board.id = :boardId AND cb.user_oid = :user_oid")
+    @Query("SELECT CollabBoard FROM CollabBoard cb WHERE cb.board.id = :boardId AND cb.user_oid = :user_oid")
     CollabBoard findByUser_oidAndBoard_Id(String user_oid,String boardId);
-//
-//    Boolean existsByUser_oidAndBoard_Id(String user_oid,String boardId);
 
+//  Boolean existsByUser_oidAndBoard_Id(String user_oid,String boardId);
 }

@@ -1,6 +1,9 @@
 package ssi1.integrated.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
@@ -29,9 +32,9 @@ public class CollabBoardController {
     }
 
     @PostMapping("/{boardId}/collabs")
-    public CollabBoardDTO addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody AddCollabBoardDTO addCollabBoardDTO) {
+    public ResponseEntity<CollabBoardDTO> addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody @Valid AddCollabBoardDTO addCollabBoardDTO) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return collabBoardService.addCollabBoard(jwtToken,boardId,addCollabBoardDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(jwtToken,boardId,addCollabBoardDTO));
     }
 
 }

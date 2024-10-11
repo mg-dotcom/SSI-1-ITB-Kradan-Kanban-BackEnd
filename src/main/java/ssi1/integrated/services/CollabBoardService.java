@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
 import ssi1.integrated.dtos.CollaboratorDTO;
+import ssi1.integrated.exception.handler.BadRequestException;
+import ssi1.integrated.exception.handler.ConflictException;
 import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
@@ -99,35 +101,31 @@ public class CollabBoardService {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
-//        // Extract the JWT payload from the request
-//        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-//        // Find the user associated with the OID from the JWT payload
-//        User user = userService.getUserByOid(jwtPayload.getOid());
-        // find user in email and store in local user
-        User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail());
-        System.out.println("Founded USER Id is : " + foundedUserByEmail.getOid());
-
-        if (foundedUserByEmail == null){
-            throw new ItemNotFoundException("User Email Not Found with email" + addCollabBoardDTO.getEmail());
-        }
-        if ( !(addCollabBoardDTO.getAccessRight().equals(AccessRight.WRITE) || addCollabBoardDTO.getAccessRight().equals(AccessRight.READ))){
-            throw new ItemNotFoundException("The AccessRight wasn't WRITE or READ");
+        // Extract the JWT payload from the request
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        // Find the user associated with the OID from the JWT payload
+        User userOwner = userService.getUserByOid(jwtPayload.getOid());
+        if (!userOwner.getOid().equals(board.getUserOid())){
+            throw new ForbiddenException("You do not have permission to modify this board.");
         }
 
-        UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
+        if (addCollabBoardDTO.getEmail().equals(userOwner.getEmail())){
+            throw new ConflictException("The email belongs to the board owner.");
+        }
 
-        System.out.println("Saved User Email : "+savedUserToLocal.getEmail());
         List<CollabBoard> existingCollabBoard = collabBoardRepository.findAllByBoardId(boardId);
-        boolean collaboratorEmailExisting = false;
         for (CollabBoard collabBoard : existingCollabBoard) {
             if (collabBoard.getUser().getEmail().equals(addCollabBoardDTO.getEmail())) {
-                collaboratorEmailExisting = true;
-                break;
+                throw new ConflictException("The email belongs to an existing collaborator.");
             }
         }
-//        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+        User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail());
+        if (foundedUserByEmail == null) {
+            throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
+        }
+        UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
+
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();
-        if (savedUserToLocal.getEmail() != null && !collaboratorEmailExisting) {
             CollabBoard newCollabBoard = new CollabBoard();
             newCollabBoard.setUser(savedUserToLocal);
             newCollabBoard.setAccessRight(addCollabBoardDTO.getAccessRight());
@@ -140,7 +138,7 @@ public class CollabBoardService {
             System.out.println("Unsave.");
             collabBoardRepository.save(newCollabBoard);
             System.out.println("Saved." + newCollabBoard.getUser().getEmail());
-        }
+
         return collabBoardDTO;
     }
 

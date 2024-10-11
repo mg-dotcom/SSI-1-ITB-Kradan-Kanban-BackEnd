@@ -1,6 +1,7 @@
 package ssi1.integrated.project_board.collab_management;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -21,9 +22,7 @@ public class CollabBoard {
     @Column(name = "collabNo")
     private Integer collabNo;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_oid", nullable = false)
-    private UserLocal user_oid;
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "board_id", nullable = false)
@@ -36,4 +35,10 @@ public class CollabBoard {
     @CreationTimestamp
     @Column(name = "addedOn",nullable = false)
     private ZonedDateTime addedOn;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_oid", nullable = false)
+    private UserLocal user;
+
 }

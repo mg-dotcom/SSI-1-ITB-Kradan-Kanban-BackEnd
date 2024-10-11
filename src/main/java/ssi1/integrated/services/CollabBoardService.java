@@ -44,12 +44,17 @@ public class CollabBoardService {
                 Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
+        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) ) {
+            throw new ForbiddenException("You do not have permission to access this board.");
+        }
+
                List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardId(boardId);
         List<CollaboratorDTO> collaboratorDTOList = new ArrayList<>();
 
                 for (CollabBoard collabBoard: foundedCollabBoardLists){
                     CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
-                    UserLocal foundedUserLocal = userLocalService.getUserByOid(collabBoard.getUser_oid().getOid());
+                    UserLocal foundedUserLocal = userLocalService.getUserByOid(collabBoard.getUser().getOid());
                     collaboratorDTO.setUser_oid(foundedUserLocal.getOid());
                     collaboratorDTO.setCollaboratorName(foundedUserLocal.getName());
                     collaboratorDTO.setCollaboratorEmail(foundedUserLocal.getEmail());
@@ -65,18 +70,20 @@ public class CollabBoardService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) ) {
-            throw new ForbiddenException("You do not have permission to access this board.");
-        }
+
 
         // Fetch the collaborator details based on the provided collabOid
-        CollabBoard collabBoard = collabBoardRepository.findByUser_oidAndBoard_Id(collabsOid, boardId);
+        CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
+
+        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) && !collabBoard.getUser().getOid().equals(collabsOid)) {
+            throw new ForbiddenException("You do not have permission to access this board.");
+        }
         if (collabBoard == null) {
             throw new ItemNotFoundException("Collaborator not found for given board.");
         }
+        UserLocal foundedUserLocal = userLocalService.getUserByOid(collabsOid);
 
-        UserLocal foundedUserLocal = userLocalService.getUserByOid(collabBoard.getUser_oid().getOid());
         CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
         collaboratorDTO.setUser_oid(foundedUserLocal.getOid());
         collaboratorDTO.setCollaboratorName(foundedUserLocal.getName());
@@ -103,7 +110,7 @@ public class CollabBoardService {
         List<CollabBoard> existingCollabBoard = collabBoardRepository.findAllByBoardId(boardId);
         boolean collaboratorEmailExisting = false;
         for (CollabBoard collabBoard : existingCollabBoard) {
-            if (collabBoard.getUser_oid().getEmail().equals(addCollabBoardDTO.getEmail())) {
+            if (collabBoard.getUser().getEmail().equals(addCollabBoardDTO.getEmail())) {
                 collaboratorEmailExisting = true;
                 break;
             }
@@ -112,7 +119,7 @@ public class CollabBoardService {
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();
         if (savedUserToLocal.getEmail() != null && !collaboratorEmailExisting && (addCollabBoardDTO.getAccessRight() == AccessRight.WRITE || addCollabBoardDTO.getAccessRight() == AccessRight.READ)) {
             CollabBoard newCollabBoard = new CollabBoard();
-            newCollabBoard.setUser_oid(savedUserToLocal);
+            newCollabBoard.setUser(savedUserToLocal);
             newCollabBoard.setAccessRight(addCollabBoardDTO.getAccessRight());
             newCollabBoard.setBoard(board);
 

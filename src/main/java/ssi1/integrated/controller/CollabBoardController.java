@@ -23,7 +23,7 @@ public class CollabBoardController {
         return collabBoardService.getAllCollabsBoard(jwtToken,boardId);
     }
     @GetMapping("/{boardId}/collabs/{collabsOid}")
-    public CollaboratorDTO getCollaborators(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken,String collabsOid) {
+    public CollaboratorDTO getCollaborators( @RequestHeader(name = "Authorization") String accessToken,@PathVariable String boardId,@PathVariable String collabsOid) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return collabBoardService.getCollaborators(jwtToken,boardId,collabsOid);
     }

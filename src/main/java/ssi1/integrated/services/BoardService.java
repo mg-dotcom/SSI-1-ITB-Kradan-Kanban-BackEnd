@@ -150,11 +150,12 @@ public class BoardService {
     public BoardDTO getBoardDetail(String boardId, String jwtToken) {
         Board board = getBoardById(boardId);
         BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-
+        ContributorAuthorizationResult contributorAuthorizationResult =ContributorAccess(boardId,jwtToken);
         // Can't access board
         if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
+
 
         User user = userService.getUserByOid(board.getUserOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);

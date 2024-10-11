@@ -7,16 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ssi1.integrated.dtos.BoardDTO;
-import ssi1.integrated.dtos.BoardVisibilityDTO;
-import ssi1.integrated.dtos.CreateBoardDTO;
-import ssi1.integrated.dtos.NewStatusDTO;
+import ssi1.integrated.dtos.*;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
+import ssi1.integrated.project_board.collab_management.CollabBoard;
+import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.TaskRepository;
@@ -25,7 +24,10 @@ import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserDTO;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -37,13 +39,15 @@ public class BoardService {
     private StatusService statusService;
     private TaskRepository taskRepository;
     private StatusRepository statusRepository;
+    private CollabBoardRepository collabBoardRepository;
 
 
     public List<Board> getAllBoards() {
+
         return boardRepository.findAll();
     }
 
-    public List<Board> getAllBoards(String token) {
+    public ArrayList<Object> getAllBoards(String token) {
         JwtPayload jwtPayload = jwtService.extractPayload(token);
 
         if (jwtPayload == null) {
@@ -51,7 +55,24 @@ public class BoardService {
         }
 
         User user = userService.getUserByOid(jwtPayload.getOid());
-        return boardRepository.findAllByUserOid(user.getOid());
+        List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOid(user.getOid());
+        List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_Oid(user.getOid());
+        for (CollabBoard eachCollabsBoard: listCollabsBoard){
+            CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
+            collaboratorDTO.setOid(user.getOid());
+            collaboratorDTO.setName(user.getName());
+            collaboratorDTO.setEmail(user.getEmail());
+            collaboratorDTO.setAccessRight(eachCollabsBoard.getAccessRight());
+            collaboratorDTO.setAddedOn(eachCollabsBoard.getAddedOn());
+        }
+        ArrayList<Object> toReturnAllRelatedBoards = new ArrayList<>();
+
+        // Add personal boards and collaboration boards to the combined list
+        toReturnAllRelatedBoards.addAll(toReturnPersonalBoard);   // Add all personal boards
+        toReturnAllRelatedBoards.addAll(listCollabsBoard);        // Add all collaboration boards
+
+        // Return the combined list
+        return toReturnAllRelatedBoards;
     }
 
     @Transactional

@@ -13,6 +13,7 @@ import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.services.BoardService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -41,7 +42,7 @@ public class BoardController {
     }
 
     @GetMapping("")
-    public List<Board> getBoardByUser(@RequestHeader(name = "Authorization") String accessToken) {
+    public ArrayList<Object> getBoardByUser(@RequestHeader(name = "Authorization") String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return boardService.getAllBoards(jwtToken);
     }

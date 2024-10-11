@@ -56,9 +56,9 @@ public class CollabBoardService {
                 for (CollabBoard collabBoard: foundedCollabBoardLists){
                     CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
                     UserLocal foundedUserLocal = userLocalService.getUserByOid(collabBoard.getUser().getOid());
-                    collaboratorDTO.setUser_oid(foundedUserLocal.getOid());
-                    collaboratorDTO.setCollaboratorName(foundedUserLocal.getName());
-                    collaboratorDTO.setCollaboratorEmail(foundedUserLocal.getEmail());
+                    collaboratorDTO.setOid(foundedUserLocal.getOid());
+                    collaboratorDTO.setName(foundedUserLocal.getName());
+                    collaboratorDTO.setEmail(foundedUserLocal.getEmail());
                     collaboratorDTO.setAccessRight(collabBoard.getAccessRight());
                     collaboratorDTO.setAddedOn(collabBoard.getAddedOn());
 
@@ -86,9 +86,9 @@ public class CollabBoardService {
         UserLocal foundedUserLocal = userLocalService.getUserByOid(collabsOid);
 
         CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
-        collaboratorDTO.setUser_oid(foundedUserLocal.getOid());
-        collaboratorDTO.setCollaboratorName(foundedUserLocal.getName());
-        collaboratorDTO.setCollaboratorEmail(foundedUserLocal.getEmail());
+        collaboratorDTO.setOid(foundedUserLocal.getOid());
+        collaboratorDTO.setName(foundedUserLocal.getName());
+        collaboratorDTO.setEmail(foundedUserLocal.getEmail());
         collaboratorDTO.setAccessRight(collabBoard.getAccessRight());
         collaboratorDTO.setAddedOn(collabBoard.getAddedOn());
 

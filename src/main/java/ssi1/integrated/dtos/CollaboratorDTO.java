@@ -10,9 +10,9 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 public class CollaboratorDTO {
-    private String user_oid;
-    private String collaboratorName;
-    private String collaboratorEmail;
+    private String oid;
+    private String name;
+    private String email;
     private AccessRight accessRight;
     private ZonedDateTime addedOn;
 }

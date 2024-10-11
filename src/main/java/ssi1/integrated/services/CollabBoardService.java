@@ -104,6 +104,10 @@ public class CollabBoardService {
         if (foundedUserByEmail == null){
             throw new ItemNotFoundException("User Email Not Found with email" + addCollabBoardDTO.getEmail());
         }
+        if ( !(addCollabBoardDTO.getAccessRight().equals(AccessRight.WRITE) || addCollabBoardDTO.getAccessRight().equals(AccessRight.READ))){
+            throw new ItemNotFoundException("The AccessRight wasn't WRITE or READ");
+        }
+
         UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
 
 //      boolean isCollab = collabBoardRepository.existsByUser_oidAndBoard_Id(user.getOid(), boardId);

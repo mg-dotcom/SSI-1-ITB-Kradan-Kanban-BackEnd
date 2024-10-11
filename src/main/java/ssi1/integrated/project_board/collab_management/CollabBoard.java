@@ -22,8 +22,6 @@ public class CollabBoard {
     @Column(name = "collabNo")
     private Integer collabNo;
 
-
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "board_id", nullable = false)
     private Board board;
@@ -37,7 +35,7 @@ public class CollabBoard {
     private ZonedDateTime addedOn;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_oid", nullable = false)
     private UserLocal user;
 

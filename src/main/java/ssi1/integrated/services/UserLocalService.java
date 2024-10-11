@@ -26,6 +26,7 @@ public class UserLocalService {
         if (user == null) {
             throw new BadRequestException("User doesn't exist" + user);
         }
+
         UserLocal userLocal = modelMapper.map(user, UserLocal.class);
         return userLocalRepository.save(userLocal);
     }

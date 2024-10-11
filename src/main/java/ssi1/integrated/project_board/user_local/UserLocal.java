@@ -4,12 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ssi1.integrated.project_board.collab_management.CollabBoard;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -31,7 +25,5 @@ public class UserLocal {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @OneToMany(mappedBy = "user")
-    private List<CollabBoard> collabManagements = new ArrayList<>();
 
 }

@@ -155,6 +155,9 @@ public class BoardService {
         if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
+        if (!contributorAuthorizationResult.isCanRead()){
+            throw new ForbiddenException("Access denied to this board Because you are not Collaborator");
+        }
 
 
         User user = userService.getUserByOid(board.getUserOid());

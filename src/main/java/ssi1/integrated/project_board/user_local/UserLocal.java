@@ -9,7 +9,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Entity
-@Table(name = "user", schema = "integrated2")
+@Table(name = "userLocal", schema = "integrated2")
 public class UserLocal {
 
     @Id

@@ -14,7 +14,7 @@ import java.time.ZonedDateTime;
 @Setter
 @ToString
 @Entity
-@Table(name = "collab_management", schema = "integrated2")
+@Table(name = "collaborator", schema = "integrated2")
 public class CollabBoard {
 
     @Id

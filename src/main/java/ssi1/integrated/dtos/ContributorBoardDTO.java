@@ -14,14 +14,16 @@ import java.time.ZonedDateTime;
 @Setter
 public class ContributorBoardDTO {
     @NotNull
-    @NotEmpty
-    @Size(max = 120, message = "size must be between 0 and 120")
+    private String boardId;
     private String boardName;
     @NotNull(message = "Visibility cannot be null")
     private Visibility visibility;
     private String ownerName;
+    private String color;
+    private String emoji;
     private AccessRight accessRight;
     private ZonedDateTime addedOn;
+
 
     public void setVisibility(Visibility visibility) {
         this.visibility = (visibility == null) ? Visibility.PRIVATE : visibility;

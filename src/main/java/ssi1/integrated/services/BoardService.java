@@ -27,6 +27,7 @@ import ssi1.integrated.user_account.UserDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,7 +48,7 @@ public class BoardService {
         return boardRepository.findAll();
     }
 
-    public ArrayList<Object> getAllBoards(String token) {
+    public AllBoardDTO getAllBoards(String token) {
         JwtPayload jwtPayload = jwtService.extractPayload(token);
 
         if (jwtPayload == null) {
@@ -57,22 +58,27 @@ public class BoardService {
         User user = userService.getUserByOid(jwtPayload.getOid());
         List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOid(user.getOid());
         List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_Oid(user.getOid());
-        for (CollabBoard eachCollabsBoard: listCollabsBoard){
-            CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
-            collaboratorDTO.setOid(user.getOid());
-            collaboratorDTO.setName(user.getName());
-            collaboratorDTO.setEmail(user.getEmail());
-            collaboratorDTO.setAccessRight(eachCollabsBoard.getAccessRight());
-            collaboratorDTO.setAddedOn(eachCollabsBoard.getAddedOn());
-        }
-        ArrayList<Object> toReturnAllRelatedBoards = new ArrayList<>();
 
-        // Add personal boards and collaboration boards to the combined list
-        toReturnAllRelatedBoards.addAll(toReturnPersonalBoard);   // Add all personal boards
-        toReturnAllRelatedBoards.addAll(listCollabsBoard);        // Add all collaboration boards
+        ArrayList<ContributorBoardDTO> collabsBoardDTOs = new ArrayList<>();
+        for (CollabBoard eachCollabsBoard: listCollabsBoard){
+            ContributorBoardDTO contributorBoardDTO = new ContributorBoardDTO();
+            Optional<Board> board = boardRepository.findById(eachCollabsBoard.getBoard().getId());
+            User ownerOfBoard = userService.getUserByOid(board.get().getUserOid());
+
+            contributorBoardDTO.setBoardName(board.get().getName());
+            contributorBoardDTO.setVisibility(board.get().getVisibility());
+            contributorBoardDTO.setOwnerName(ownerOfBoard.getName());
+            contributorBoardDTO.setAccessRight(eachCollabsBoard.getAccessRight());
+            contributorBoardDTO.setAddedOn(eachCollabsBoard.getAddedOn());
+
+            collabsBoardDTOs.add(contributorBoardDTO);
+        }
+        AllBoardDTO allBoardDTO = new AllBoardDTO();
+        allBoardDTO.setPersonalBoard(new ArrayList<>(toReturnPersonalBoard));  // Set personal boards
+        allBoardDTO.setCollabsBoard(collabsBoardDTOs);          // Add all collaboration boards
 
         // Return the combined list
-        return toReturnAllRelatedBoards;
+        return allBoardDTO;
     }
 
     @Transactional

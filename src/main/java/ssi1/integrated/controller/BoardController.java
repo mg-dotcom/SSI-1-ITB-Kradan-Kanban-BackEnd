@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ssi1.integrated.dtos.AllBoardDTO;
 import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.dtos.BoardVisibilityDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
@@ -42,7 +43,7 @@ public class BoardController {
     }
 
     @GetMapping("")
-    public ArrayList<Object> getBoardByUser(@RequestHeader(name = "Authorization") String accessToken) {
+    public AllBoardDTO getBoardByUser(@RequestHeader(name = "Authorization") String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return boardService.getAllBoards(jwtToken);
     }

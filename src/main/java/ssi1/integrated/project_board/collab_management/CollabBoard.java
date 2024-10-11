@@ -23,11 +23,11 @@ public class CollabBoard {
     private Integer collabNo;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "board_id", nullable = false)
+    @JoinColumn(name = "boardId", nullable = false)
     private Board board;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "access_right", nullable = false)
+    @Column(name = "accessRight", nullable = false)
     private AccessRight accessRight = AccessRight.READ;
 
     @CreationTimestamp
@@ -36,7 +36,7 @@ public class CollabBoard {
 
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "user_oid", nullable = false)
+    @JoinColumn(name = "userOid", nullable = false)
     private UserLocal user;
 
 }

@@ -49,12 +49,12 @@ public class TaskService {
 
     public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId, String jwtToken) {
 
-        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-
-        // Can't access board
-        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
+//        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+//
+//        // Can't access board
+//        if (!authorizationResult.isPublic()) {
+//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+//        }
 
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
@@ -75,16 +75,16 @@ public class TaskService {
 
     public Task getTaskById(Integer taskId, String boardId, String jwtToken) {
 
-        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+//        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
         Visibility visibility = board.getVisibility();
 
-        if (visibility == Visibility.PRIVATE && !authorizationResult.isOwner()) {
-            throw new ForbiddenException(boardId + " this board id is private");
-        }
+//        if (visibility == Visibility.PRIVATE && !authorizationResult.isOwner()) {
+//            throw new ForbiddenException(boardId + " this board id is private");
+//        }
         Task task = taskRepository.findById(taskId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")
         );

@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
+import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.services.BoardService;
@@ -25,6 +27,8 @@ public class TaskController {
     private TaskService service;
     @Autowired
     private BoardService boardService;
+    @Autowired
+    private BoardRepository boardRepository;
 
     @GetMapping("/{boardId}/tasks")
     public ResponseEntity<List<GeneralTaskDTO>> getAllTasks(
@@ -34,7 +38,9 @@ public class TaskController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken
     ) {
-        Board board = boardService.getBoardById(boardId);
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
 
         if (board.getVisibility() == Visibility.PUBLIC) {
             return ResponseEntity.ok(service.getAllTasks(sortBy, filterStatuses, direction, boardId, null));
@@ -54,7 +60,10 @@ public class TaskController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken
     ) {
-        Board board = boardService.getBoardById(boardId);
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
 
         if (board.getVisibility() == Visibility.PUBLIC) {
             return ResponseEntity.ok(service.getTaskById(taskId, boardId, null));

@@ -149,22 +149,23 @@ public class BoardService {
 
     public BoardDTO getBoardDetail(String boardId, String jwtToken) {
         Board board = getBoardById(boardId);
-        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-        ContributorAuthorizationResult contributorAuthorizationResult =ContributorAccess(boardId,jwtToken);
+//        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+//        ContributorAuthorizationResult contributorAuthorizationResult = ContributorAccess(boardId,jwtToken);
         // Can't access board
-        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
-        if (!contributorAuthorizationResult.isCanRead()){
-            throw new ForbiddenException("Access denied to this board Because you are not Collaborator");
-        }
+//        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
+//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+//        }
 
+//        if (!contributorAuthorizationResult.isCanRead()){
+//            throw new ForbiddenException("Access denied to this board Because you are not Collaborator");
+//        }
 
         User user = userService.getUserByOid(board.getUserOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
         boardDTO.setOwner(userDTO);
         return boardDTO;
+
     }
 
     public boolean boardExists(String id) {
@@ -268,23 +269,24 @@ public class BoardService {
         return new BoardAuthorizationResult(isOwner, false);
     }
 
-    public  ContributorAuthorizationResult ContributorAccess(String boardId, String jwtToken) {
-
-        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        ContributorAuthorizationResult contributorAuthorizationResult= new ContributorAuthorizationResult();
-        CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-        if (collabBoard.getAccessRight().equals(AccessRight.READ)){
-            contributorAuthorizationResult.setCanRead(true);
-            contributorAuthorizationResult.setCanWrite(false);
-        }
-        if (collabBoard.getAccessRight().equals(AccessRight.WRITE)){
-            contributorAuthorizationResult.setCanRead(true);
-            contributorAuthorizationResult.setCanWrite(true);
-        }
-
-        // Private board means isPublic should be false
-        return contributorAuthorizationResult;
-    }
+//    public  ContributorAuthorizationResult ContributorAccess(String boardId, String jwtToken) {
+//
+//        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+//        ContributorAuthorizationResult contributorAuthorizationResult= new ContributorAuthorizationResult();
+//        CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+//        if (jwtToken == null){
+//            contributorAuthorizationResult.setCanRead(true);
+//            contributorAuthorizationResult.setCanWrite(false);
+//            return contributorAuthorizationResult;
+//        }
+////        if (collabBoard.getAccessRight().equals(AccessRight.WRITE)){
+////            contributorAuthorizationResult.setCanRead(true);
+////            contributorAuthorizationResult.setCanWrite(true);
+////        }
+//            // Private board means isPublic should be false
+//        return contributorAuthorizationResult;
+//
+//    }
 
 
 }

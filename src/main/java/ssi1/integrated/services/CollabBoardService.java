@@ -47,12 +47,12 @@ public class CollabBoardService {
                 Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) ) {
-            throw new ForbiddenException("You do not have permission to access this board.");
-        }
+//        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
+//        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) ) {
+//            throw new ForbiddenException("You do not have permission to access this board.");
+//        }
 
-               List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardId(boardId);
+               List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardId(board.getId());
         List<CollaboratorDTO> collaboratorDTOList = new ArrayList<>();
 
                 for (CollabBoard collabBoard: foundedCollabBoardLists){

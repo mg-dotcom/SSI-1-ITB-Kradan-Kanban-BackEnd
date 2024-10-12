@@ -1,7 +1,9 @@
 package ssi1.integrated.services;
 
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
@@ -141,6 +143,62 @@ public class CollabBoardService {
 
         return collabBoardDTO;
     }
+
+    @Transactional
+    public CollabBoard updateCollaboratorAccessRight(String jwtToken,String boardId,String collabsOid,AccessRight accessRight){
+        JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
+
+        //404
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
+        //404
+        if(collaborator==null){
+            throw new ItemNotFoundException("The "+collabsOid+" is not a collaborator on the board.");
+        }
+
+        //403
+        if(!board.getUserOid().equals(jwtPayload.getOid())){
+            throw new ForbiddenException("Only board owner can edit access right.");
+        }
+
+        //400 - NOT SURE BRO
+        if(!(accessRight.equals(AccessRight.READ)||accessRight.equals(AccessRight.WRITE))){
+            throw new BadRequestException("Access right must be READ or WRITE only!");
+        }
+
+        collaborator.setAccessRight(accessRight);
+
+        return collaborator;
+    }
+
+    @Transactional
+    public void deleteCollaborator(String jwtToken, String boardId,String collabsOid){
+        JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
+
+        //404
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
+        //404
+        if(collaborator==null){
+            throw new ItemNotFoundException("The "+collabsOid+" is not a collaborator on the board.");
+        }
+
+        //403
+        if(!(jwtPayload.getOid().equals(board.getUserOid())||jwtPayload.getOid().equals(collaborator.getUser().getOid()))){
+            throw new ForbiddenException("Only board owner can delete collaborators and only collaborator can delete themself");
+        }
+
+        collabBoardRepository.delete(collaborator);
+
+
+    }
+
 
     public BoardAuthorizationResult authorizeBoardReadAccess(String boardId, String jwtToken) {
         Board board = boardService.getBoardById(boardId);

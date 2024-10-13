@@ -20,6 +20,7 @@ import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.TaskRepository;
+import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
@@ -42,7 +43,7 @@ public class BoardService {
     private TaskRepository taskRepository;
     private StatusRepository statusRepository;
     private CollabBoardRepository collabBoardRepository;
-
+    private UserLocalService userLocalService;
 
     public List<Board> getAllBoards() {
 
@@ -62,10 +63,12 @@ public class BoardService {
 
         ArrayList<ContributorBoardDTO> collabsBoardDTOs = new ArrayList<>();
         for (CollabBoard eachCollabsBoard: listCollabsBoard){
+            UserLocal foundedUserLocal=userLocalService.getUserByOid(eachCollabsBoard.getUser().getOid());
             ContributorBoardDTO contributorBoardDTO = new ContributorBoardDTO();
             Optional<Board> board = boardRepository.findById(eachCollabsBoard.getBoard().getId());
             User ownerOfBoard = userService.getUserByOid(board.get().getUserOid());
 
+            contributorBoardDTO.setOid(foundedUserLocal.getOid());
             contributorBoardDTO.setBoardId(board.get().getId());
             contributorBoardDTO.setColor(board.get().getColor());
             contributorBoardDTO.setEmoji(board.get().getEmoji());
@@ -149,16 +152,6 @@ public class BoardService {
 
     public BoardDTO getBoardDetail(String boardId, String jwtToken) {
         Board board = getBoardById(boardId);
-//        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-//        ContributorAuthorizationResult contributorAuthorizationResult = ContributorAccess(boardId,jwtToken);
-        // Can't access board
-//        if (!authorizationResult.isOwner() && !authorizationResult.isPublic()) {
-//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-//        }
-
-//        if (!contributorAuthorizationResult.isCanRead()){
-//            throw new ForbiddenException("Access denied to this board Because you are not Collaborator");
-//        }
 
         User user = userService.getUserByOid(board.getUserOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
@@ -250,43 +243,6 @@ public class BoardService {
 
         return new BoardAuthorizationResult(isOwner, isPublic);
     }
-
-    public BoardAuthorizationResult authorizeBoardReadAccess(String boardId, String jwtToken) {
-        Board board = getBoardById(boardId);
-
-        // If the board is public, return immediately allowing access
-        if (board.getVisibility() == Visibility.PUBLIC) {
-            return new BoardAuthorizationResult(false, true);  // Public board, ownership doesn't matter
-        }
-
-        User user = userService.getUserByOid(board.getUserOid());
-
-        String tokenUsername = jwtService.extractUsername(jwtToken);
-
-        boolean isOwner = user.getUsername().equals(tokenUsername);
-
-        // Private board means isPublic should be false
-        return new BoardAuthorizationResult(isOwner, false);
-    }
-
-//    public  ContributorAuthorizationResult ContributorAccess(String boardId, String jwtToken) {
-//
-//        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-//        ContributorAuthorizationResult contributorAuthorizationResult= new ContributorAuthorizationResult();
-//        CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-//        if (jwtToken == null){
-//            contributorAuthorizationResult.setCanRead(true);
-//            contributorAuthorizationResult.setCanWrite(false);
-//            return contributorAuthorizationResult;
-//        }
-////        if (collabBoard.getAccessRight().equals(AccessRight.WRITE)){
-////            contributorAuthorizationResult.setCanRead(true);
-////            contributorAuthorizationResult.setCanWrite(true);
-////        }
-//            // Private board means isPublic should be false
-//        return contributorAuthorizationResult;
-//
-//    }
 
 
 }

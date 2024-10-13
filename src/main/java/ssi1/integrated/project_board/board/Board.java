@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.ZonedDateTime;
 import java.util.Random;
 
 import static com.aventrix.jnanoid.jnanoid.NanoIdUtils.DEFAULT_ALPHABET;
@@ -28,6 +30,10 @@ public class Board {
     @Enumerated(EnumType.STRING)
     @ColumnDefault("PRIVATE")
     private Visibility visibility;
+
+    @CreationTimestamp
+    @Column(name = "createdOn", nullable = false, updatable = false, insertable = false)
+    private ZonedDateTime createdOn;
 
     @PrePersist
     public void generateId() {

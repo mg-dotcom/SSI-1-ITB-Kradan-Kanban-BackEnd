@@ -13,6 +13,7 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 public class ContributorBoardDTO {
+    private String oid;
     @NotNull
     private String boardId;
     private String boardName;

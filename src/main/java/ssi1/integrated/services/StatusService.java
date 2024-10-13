@@ -277,4 +277,23 @@ public class StatusService {
         return collaborator!=null;
     }
 
+    // Helper method to check board access rights
+    private void authorizeBoardAccess(String boardId, String jwtToken, boolean requireWriteAccess) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
+
+        Visibility visibility = board.getVisibility();
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken, boardId);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken, boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner && (!isCollaborator || (requireWriteAccess && !isCollaboratorWrite))) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+        if (visibility == Visibility.PUBLIC && requireWriteAccess && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can modify this board.");
+        }
+    }
+
 }

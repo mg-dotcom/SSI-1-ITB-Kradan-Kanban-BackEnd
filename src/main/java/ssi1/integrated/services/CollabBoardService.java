@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+import ssi1.integrated.dtos.AccessRightDTO;
 import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
 import ssi1.integrated.dtos.CollaboratorDTO;
@@ -145,7 +146,7 @@ public class CollabBoardService {
     }
 
     @Transactional
-    public CollabBoard updateCollaboratorAccessRight(String jwtToken,String boardId,String collabsOid,AccessRight accessRight){
+    public CollabBoard updateCollaboratorAccessRight(String jwtToken, String boardId, String collabsOid, AccessRightDTO accessRight){
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
 
         //404
@@ -164,12 +165,12 @@ public class CollabBoardService {
             throw new ForbiddenException("Only board owner can edit access right.");
         }
 
-        //400 - NOT SURE BRO
-        if(!(accessRight.equals(AccessRight.READ)||accessRight.equals(AccessRight.WRITE))){
-            throw new BadRequestException("Access right must be READ or WRITE only!");
+        //400 
+        try {
+            collaborator.setAccessRight(AccessRight.valueOf(accessRight.getAccessRight().toUpperCase()));
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid access right provided.");
         }
-
-        collaborator.setAccessRight(accessRight);
 
         return collaborator;
     }

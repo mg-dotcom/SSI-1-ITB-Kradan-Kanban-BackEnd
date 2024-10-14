@@ -102,14 +102,19 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO, String jwtToken) {
+
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        Status toUpdateStatus = statusRepository.findById(statusId)
+                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
+
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {
             };
         }
 
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
 
         Visibility visibility = board.getVisibility();
 
@@ -135,8 +140,7 @@ public class StatusService {
         if (statusId.equals(1) || statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");
         }
-        Status toUpdateStatus = statusRepository.findById(statusId)
-                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
+
 
         if (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty()) {
             toUpdateStatus.setStatusColor("#CCCCCC");

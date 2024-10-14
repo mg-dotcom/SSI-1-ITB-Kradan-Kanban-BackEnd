@@ -45,10 +45,6 @@ public class StatusService {
     private CollabBoardRepository collabBoardRepository;
 
     public List<Status> getAllStatus(String boardId, String jwtToken) {
-        if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new AuthenticationException("JWT is required") {
-            };
-        }
 
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
@@ -63,6 +59,15 @@ public class StatusService {
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
+
+//        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
+//            throw new ForbiddenException("Only board owner and collaborators with write access can add status.");
+//        }
+//
+//        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+//            throw new AuthenticationException("JWT is required") {
+//            };
+//        }
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         return statusRepository.findByBoardId(boardId, sort);
@@ -83,6 +88,15 @@ public class StatusService {
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
+
+//        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
+//            throw new ForbiddenException("Only board owner and collaborators with write access can add status.");
+//        }
+//
+//        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+//            throw new AuthenticationException("JWT is required") {
+//            };
+//        }
 
         return getAllStatus(boardId, jwtToken).stream()
                 .filter(status -> status.getId().equals(statusId))

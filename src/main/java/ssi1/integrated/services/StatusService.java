@@ -44,7 +44,7 @@ public class StatusService {
     @Autowired
     private CollabBoardRepository collabBoardRepository;
 
-    public List<Status> getAllStatus(String boardId, String jwtToken) {
+    public List<Status> getAllStatus(String boardId, String accessToken) {
 
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
@@ -52,51 +52,47 @@ public class StatusService {
 
         Visibility visibility = board.getVisibility();
 
+        if (visibility == Visibility.PUBLIC) {
+            Sort sort = Sort.by(Sort.Direction.ASC, "id");
+            return statusRepository.findByBoardId(boardId, sort);
+        }
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
-        // board private and not owner cannot access
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
-
-//        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
-//            throw new ForbiddenException("Only board owner and collaborators with write access can add status.");
-//        }
-//
-//        if (jwtToken == null || jwtToken.trim().isEmpty()) {
-//            throw new AuthenticationException("JWT is required") {
-//            };
-//        }
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         return statusRepository.findByBoardId(boardId, sort);
     }
 
 
-    public Status getStatusById(String boardId, Integer statusId, String jwtToken) {
+    public Status getStatusById(String boardId, Integer statusId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
         Visibility visibility = board.getVisibility();
+        
+        if(visibility == Visibility.PUBLIC){
+            Sort sort = Sort.by(Sort.Direction.ASC, "id");
+            return statusRepository.findByBoardId(boardId, sort)
+                    .stream()
+                    .filter(status -> status.getId().equals(statusId))
+                    .findFirst()
+                    .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
+        }
 
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
-        // board private and not owner cannot access
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
-
-//        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
-//            throw new ForbiddenException("Only board owner and collaborators with write access can add status.");
-//        }
-//
-//        if (jwtToken == null || jwtToken.trim().isEmpty()) {
-//            throw new AuthenticationException("JWT is required") {
-//            };
-//        }
 
         return getAllStatus(boardId, jwtToken).stream()
                 .filter(status -> status.getId().equals(statusId))

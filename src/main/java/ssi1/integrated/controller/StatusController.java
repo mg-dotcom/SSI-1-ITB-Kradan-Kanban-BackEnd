@@ -31,14 +31,12 @@ public class StatusController {
 
     @GetMapping("/{boardId}/statuses")
     public ResponseEntity<List<Status>> getAllStatus(@PathVariable String boardId, @RequestHeader(name = "Authorization", required = false) String accessToken) {
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return ResponseEntity.ok(statusService.getAllStatus(boardId, jwtToken));
+        return ResponseEntity.ok(statusService.getAllStatus(boardId, accessToken));
     }
 
     @GetMapping("/{boardId}/statuses/{statusId}")
     public ResponseEntity<Status> getStatusById(@PathVariable String boardId, @PathVariable Integer statusId, @RequestHeader(name = "Authorization", required = false) String accessToken) {
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return ResponseEntity.ok((statusService.getStatusById(boardId, statusId, jwtToken)));
+        return ResponseEntity.ok((statusService.getStatusById(boardId, statusId, accessToken)));
     }
 
     @PutMapping("/{boardId}/statuses/{statusId}")

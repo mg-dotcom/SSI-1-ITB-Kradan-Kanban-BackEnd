@@ -15,5 +15,6 @@ public interface BoardRepository extends JpaRepository<Board, String> {
     @Query("SELECT b.visibility FROM Board b WHERE b.id = :boardId")
     Visibility findVisibilityByBoardId(String boardId);
 
+    List<Board> findAllByUserOidOrderByCreatedOnAsc(String userOid);
 
 }

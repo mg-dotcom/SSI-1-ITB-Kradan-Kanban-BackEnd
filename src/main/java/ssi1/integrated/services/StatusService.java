@@ -76,7 +76,7 @@ public class StatusService {
         );
 
         Visibility visibility = board.getVisibility();
-        
+
         if(visibility == Visibility.PUBLIC){
             Sort sort = Sort.by(Sort.Direction.ASC, "id");
             return statusRepository.findByBoardId(boardId, sort)

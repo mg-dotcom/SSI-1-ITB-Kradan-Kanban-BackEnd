@@ -58,8 +58,8 @@ public class BoardService {
         }
 
         User user = userService.getUserByOid(jwtPayload.getOid());
-        List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOid(user.getOid());
-        List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_Oid(user.getOid());
+        List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOidOrderByCreatedOnAsc(user.getOid());
+        List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_OidOrderByAddedOnAsc(user.getOid());
 
         ArrayList<ContributorBoardDTO> collabsBoardDTOs = new ArrayList<>();
         for (CollabBoard eachCollabsBoard: listCollabsBoard){

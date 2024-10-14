@@ -45,13 +45,25 @@ public class CollabBoardController {
             @RequestHeader(name = "Authorization", required = false) String accessToken,
             @PathVariable String boardId,
             @PathVariable String collabsOid) {
-        return ResponseEntity.ok(collabBoardService.getCollaborators(accessToken, boardId, collabsOid));
+
+//        return ResponseEntity.ok(collabBoardService.getCollaborators(accessToken, boardId, collabsOid));
+
+
+            Board board = boardService.getBoardById(boardId);
+            String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+            return ResponseEntity.ok(collabBoardService.getCollaborators(jwtToken, boardId, collabsOid));
+
     }
 
 
     @PostMapping("/{boardId}/collabs")
+
     public ResponseEntity<CollabBoardDTO> addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody @Valid AddCollabBoardDTO addCollabBoardDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(accessToken,boardId,addCollabBoardDTO));
+//        return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(accessToken,boardId,addCollabBoardDTO));
+        
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(jwtToken,boardId,addCollabBoardDTO));
+
     }
 
     @PatchMapping("/{boardId}/collabs/{collab_oid}")

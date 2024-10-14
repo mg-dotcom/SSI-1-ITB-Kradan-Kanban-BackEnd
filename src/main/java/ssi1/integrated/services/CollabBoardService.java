@@ -87,16 +87,20 @@ public class CollabBoardService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
+
         Visibility visibility = board.getVisibility();
+
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
-
-        if (visibility == PRIVATE&&!isOwner&&isCollaborator) {
+        if (visibility == PRIVATE && !isOwner && !isCollaborator) {
             throw new ForbiddenException("You do not have permission to access this board.");
         }
         // Fetch the collaborator details based on the provided collabOid
         CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
+        if(collabBoard==null){
+            throw new ItemNotFoundException("Not found collaborator");
+        }
         UserLocal foundedUserLocal = userLocalService.getUserByOid(collabsOid);
 
         CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
@@ -108,10 +112,6 @@ public class CollabBoardService {
 
         if (visibility == Visibility.PUBLIC) {
             return collaboratorDTO;
-        }
-
-        if (collabBoard == null) {
-            throw new ItemNotFoundException("Collaborator not found for given board.");
         }
 
         return collaboratorDTO;

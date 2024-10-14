@@ -3,6 +3,7 @@ package ssi1.integrated.services;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.AccessRightDTO;
@@ -46,55 +47,59 @@ public class CollabBoardService {
     @Autowired
     private JwtService jwtService;
 
-    public List<CollaboratorDTO> getAllCollabsBoard(String jwtToken, String boardId){
-                Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
+    public List<CollaboratorDTO> getAllCollabsBoard(String accessToken, String boardId){
+        Board board = boardRepository.findById(boardId).orElseThrow(
+        () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        System.out.println("founded JWTPLAYLOAD : "+ jwtPayload.getOid().toUpperCase());
-
-        UserLocal userLocal = userLocalService.getUserByOid(jwtPayload.getOid());
-        List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardIdOrderByAddedOnAsc(board.getId());
-        boolean isCollaborator = false;
-        for (CollabBoard collabBoard: foundedCollabBoardLists){
-            if (collabBoard.getUser().getOid().equals(userLocal.getOid())){
-                isCollaborator = true;
-                
-                break;
-            }
-
-        }
-        if (board.getVisibility() == PRIVATE && !isCollaborator) {
-                throw new ForbiddenException("You do not have permission to access this board.");
-        }
+        List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardId(board.getId());
         List<CollaboratorDTO> collaboratorDTOList = new ArrayList<>();
-                for (CollabBoard collabBoard: foundedCollabBoardLists){
-                    CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
-                    UserLocal foundedUserLocal = userLocalService.getUserByOid(collabBoard.getUser().getOid());
-                    collaboratorDTO.setOid(foundedUserLocal.getOid());
-                    collaboratorDTO.setName(foundedUserLocal.getName());
-                    collaboratorDTO.setEmail(foundedUserLocal.getEmail());
-                    collaboratorDTO.setAccessRight(collabBoard.getAccessRight());
-                    collaboratorDTO.setAddedOn(collabBoard.getAddedOn());
 
-                    collaboratorDTOList.add(collaboratorDTO);
-                }
+        for (CollabBoard collabBoard: foundedCollabBoardLists){
+            CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
+            UserLocal foundedUserLocal = userLocalService.getUserByOid(collabBoard.getUser().getOid());
+            collaboratorDTO.setOid(foundedUserLocal.getOid());
+            collaboratorDTO.setName(foundedUserLocal.getName());
+            collaboratorDTO.setEmail(foundedUserLocal.getEmail());
+            collaboratorDTO.setAccessRight(collabBoard.getAccessRight());
+            collaboratorDTO.setAddedOn(collabBoard.getAddedOn());
+
+            collaboratorDTOList.add(collaboratorDTO);
+        }
+
+        Visibility visibility = board.getVisibility();
+        if (visibility == Visibility.PUBLIC) {
+            return collaboratorDTOList;
+        }
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
         return collaboratorDTOList;
     }
 
-    public CollaboratorDTO getCollaborators(String jwtToken, String boardId,String collabsOid){
+    public CollaboratorDTO getCollaborators(String accessToken, String boardId,String collabsOid){
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-        // Fetch the collaborator details based on the provided collabOid
-        CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
 
-        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) && !collabBoard.getUser().getOid().equals(collabsOid)) {
+        Visibility visibility = board.getVisibility();
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken,boardId);
+        if (visibility == PRIVATE && !isOwner && !isCollaborator) {
             throw new ForbiddenException("You do not have permission to access this board.");
         }
-        if (collabBoard == null) {
-            throw new ItemNotFoundException("Collaborator not found for given board.");
+        // Fetch the collaborator details based on the provided collabOid
+        CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
+        if(collabBoard==null){
+            throw new ItemNotFoundException("Not found collaborator");
         }
         UserLocal foundedUserLocal = userLocalService.getUserByOid(collabsOid);
 
@@ -104,6 +109,10 @@ public class CollabBoardService {
         collaboratorDTO.setEmail(foundedUserLocal.getEmail());
         collaboratorDTO.setAccessRight(collabBoard.getAccessRight());
         collaboratorDTO.setAddedOn(collabBoard.getAddedOn());
+
+        if (visibility == Visibility.PUBLIC) {
+            return collaboratorDTO;
+        }
 
         return collaboratorDTO;
     }
@@ -227,16 +236,23 @@ public class CollabBoardService {
         return new BoardAuthorizationResult(isOwner, false);
     }
 
-    public BoardAuthorizationResult authorizeBoardModifyAccess(String boardId, String jwtToken) {
-        Board board = boardService.getBoardById(boardId);
+    private boolean isBoardOwner(String userOid, String jwtToken) {
+        JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
+        User user = userService.getUserByOid(userOid);
+        return user.getOid().equals(jwtPayload.getOid());
+    }
 
-        User user = userService.getUserByOid(board.getUserOid());
-        Visibility visibilityByBoardId = boardRepository.findVisibilityByBoardId(boardId);
-        String tokenUsername = jwtService.extractUsername(jwtToken);
+    // Check if collaborator has write access
+    public boolean isCollaboratorWriteAccess(String jwtToken, String boardId) {
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
-        boolean isOwner = user.getUsername().equals(tokenUsername);
-        boolean isPublic = (visibilityByBoardId == PUBLIC);
+        return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
+    }
 
-        return new BoardAuthorizationResult(isOwner, isPublic);
+    public boolean isCollaborator(String jwtToken, String boardId){
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+        return collaborator!=null;
     }
 }

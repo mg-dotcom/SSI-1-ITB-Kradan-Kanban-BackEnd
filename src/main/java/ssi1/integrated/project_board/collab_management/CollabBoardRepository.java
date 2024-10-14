@@ -12,7 +12,7 @@ public interface CollabBoardRepository extends JpaRepository<CollabBoard, Intege
     List<CollabBoard> findAllByBoardId(String boardId);
     List<CollabBoard> findAllByBoardIdOrderByAddedOnAsc(String boardId);
     List<CollabBoard> findByUser_Oid(String userOid);
-//    @Query("SELECT CollabBoard FROM CollabBoard cb WHERE cb.board.id = :boardId AND cb.user_oid.oid = :user_oid")
+    //    @Query("SELECT CollabBoard FROM CollabBoard cb WHERE cb.board.id = :boardId AND cb.user_oid.oid = :user_oid")
     CollabBoard findByBoard_IdAndUser_Oid(String boardId, String oid);
 
 //  Boolean existsByUser_oidAndBoard_Id(String user_oid,String boardId);

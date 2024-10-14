@@ -17,5 +17,4 @@ public interface BoardRepository extends JpaRepository<Board, String> {
 
     List<Board> findAllByUserOidOrderByCreatedOnAsc(String userOid);
 
-
 }

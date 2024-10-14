@@ -44,17 +44,23 @@ public class StatusService {
     @Autowired
     private CollabBoardRepository collabBoardRepository;
 
-    public List<Status> getAllStatus(String boardId, String jwtToken) {
+    public List<Status> getAllStatus(String boardId, String accessToken) {
+
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
         Visibility visibility = board.getVisibility();
 
+        if (visibility == Visibility.PUBLIC) {
+            Sort sort = Sort.by(Sort.Direction.ASC, "id");
+            return statusRepository.findByBoardId(boardId, sort);
+        }
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
-        // board private and not owner cannot access
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
@@ -64,17 +70,26 @@ public class StatusService {
     }
 
 
-    public Status getStatusById(String boardId, Integer statusId, String jwtToken) {
+    public Status getStatusById(String boardId, Integer statusId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
         Visibility visibility = board.getVisibility();
 
+        if(visibility == Visibility.PUBLIC){
+            Sort sort = Sort.by(Sort.Direction.ASC, "id");
+            return statusRepository.findByBoardId(boardId, sort)
+                    .stream()
+                    .filter(status -> status.getId().equals(statusId))
+                    .findFirst()
+                    .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
+        }
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
-        // board private and not owner cannot access
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
@@ -230,7 +245,27 @@ public class StatusService {
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
+        Visibility visibility = board.getVisibility();
+
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private.");
+        }
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can delete status.");
+        }
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new AuthenticationException("JWT token is required") {
+            };
+        }
+
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
 
         Status transferStatus = statusRepository.findById(newStatusId).orElseThrow(
                 () -> new ItemNotFoundException("The specified status for task transfer does not exist"));
@@ -238,15 +273,6 @@ public class StatusService {
             throw new BadRequestException("Destination status for task transfer must be different from current status.");
         }
         List<Task> taskList = taskRepository.findByStatusIdAndBoardId(oldStatusId, boardId);
-
-        if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new AuthenticationException("JWT token is required") {
-            };
-        }
-
-        if (!isOwner) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
 
         for (Task task : taskList) {
             task.setStatus(transferStatus);

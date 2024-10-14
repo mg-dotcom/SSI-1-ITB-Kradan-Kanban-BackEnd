@@ -33,24 +33,30 @@ public class CollabBoardController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
 
-
-        List<CollaboratorDTO> collaborators;
-
-         if (accessToken != null && accessToken.startsWith("Bearer ")) {
-            String jwtToken = accessToken.substring(7);
-            collaborators = collabBoardService.getAllCollabsBoard(jwtToken, boardId);
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Access denied to private board with BOARD ID: " + boardId);
-        }
-
-        // Wrapping the list of collaborators in an object
+//        Board board = boardService.getBoardById(boardId);
+//        List<CollaboratorDTO> collaborators;
+//
+//        if (board.getVisibility() == Visibility.PUBLIC) {
+//            collaborators = collabBoardService.getAllCollabsBoard(null, boardId);
+//        } else if (accessToken != null && accessToken.startsWith("Bearer ")) {
+//            String jwtToken = accessToken.substring(7);
+//            collaborators = collabBoardService.getAllCollabsBoard(jwtToken, boardId);
+//        } else {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body("Access denied to private board with BOARD ID: " + boardId);
+//        }
+//
+//        // Wrapping the list of collaborators in an object
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("collaborators", collaborators);
+//
+//        return ResponseEntity.ok(response);
+        List<CollaboratorDTO> collaborators=collabBoardService.getAllCollabsBoard(accessToken, boardId);
         Map<String, Object> response = new HashMap<>();
         response.put("collaborators", collaborators);
 
         return ResponseEntity.ok(response);
     }
-
 
     @GetMapping("/{boardId}/collabs/{collabsOid}")
     public ResponseEntity<?> getCollaborators(

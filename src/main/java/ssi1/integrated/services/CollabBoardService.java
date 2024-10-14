@@ -50,16 +50,24 @@ public class CollabBoardService {
                 Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-//        BoardAuthorizationResult authorizationResult = authorizeBoardReadAccess(boardId, jwtToken);
-//        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) ) {
-//            throw new ForbiddenException("You do not have permission to access this board.");
-//        }
-//        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-//        // Find the user associated with the OID from the JWT payload
-//        User userOwner = userService.getUserByOid(jwtPayload.getOid());
-        List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardIdOrderByAddedOnAsc(board.getId());
-        List<CollaboratorDTO> collaboratorDTOList = new ArrayList<>();
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        System.out.println("founded JWTPLAYLOAD : "+ jwtPayload.getOid().toUpperCase());
 
+        UserLocal userLocal = userLocalService.getUserByOid(jwtPayload.getOid());
+        List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardIdOrderByAddedOnAsc(board.getId());
+        boolean isCollaborator = false;
+        for (CollabBoard collabBoard: foundedCollabBoardLists){
+            if (collabBoard.getUser().getOid().equals(userLocal.getOid())){
+                isCollaborator = true;
+                
+                break;
+            }
+
+        }
+        if (board.getVisibility() == PRIVATE && !isCollaborator) {
+                throw new ForbiddenException("You do not have permission to access this board.");
+        }
+        List<CollaboratorDTO> collaboratorDTOList = new ArrayList<>();
                 for (CollabBoard collabBoard: foundedCollabBoardLists){
                     CollaboratorDTO collaboratorDTO = new CollaboratorDTO();
                     UserLocal foundedUserLocal = userLocalService.getUserByOid(collabBoard.getUser().getOid());

@@ -33,14 +33,10 @@ public class CollabBoardController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
 
-        Board board = boardService.getBoardById(boardId);
+
         List<CollaboratorDTO> collaborators;
 
-        if (board.getVisibility() == Visibility.PUBLIC) {
-
-            collaborators = collabBoardService.getAllCollabsBoard(null, boardId);
-            System.out.println("Get into the public board!");
-        } else if (accessToken != null && accessToken.startsWith("Bearer ")) {
+         if (accessToken != null && accessToken.startsWith("Bearer ")) {
             String jwtToken = accessToken.substring(7);
             collaborators = collabBoardService.getAllCollabsBoard(jwtToken, boardId);
         } else {

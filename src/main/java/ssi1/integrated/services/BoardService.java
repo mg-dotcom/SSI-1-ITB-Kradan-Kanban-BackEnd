@@ -89,7 +89,7 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardDTO createBoard(String jwtToken, CreateBoardDTO createBoardDTO) {
+    public Board createBoard(String jwtToken, CreateBoardDTO createBoardDTO) {
         if (createBoardDTO == null) {
             throw new BadRequestException("Invalid board create body");
         }
@@ -114,10 +114,6 @@ public class BoardService {
 
         // Save the new board to the repository
         boardRepository.save(newBoard);
-
-        // Convert the Board entity to a BoardDTO
-        BoardDTO boardDTO = modelMapper.map(newBoard, BoardDTO.class);
-        boardDTO.setOwner(userDTO);
 
         //create default statuses
         NewStatusDTO noStatus = new NewStatusDTO();
@@ -145,7 +141,7 @@ public class BoardService {
         statusService.insertNewStatus(newBoard.getId(), doing, jwtToken);
         statusService.insertNewStatus(newBoard.getId(), done, jwtToken);
 
-        return boardDTO;
+        return newBoard;
 
     }
 

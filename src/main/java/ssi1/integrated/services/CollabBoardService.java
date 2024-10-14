@@ -201,9 +201,7 @@ public class CollabBoardService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-        if(accessRight.getAccessRight() == null){
-            throw new BadRequestException("Access right must not be null");
-        }
+
 
         Visibility visibility = board.getVisibility();
 
@@ -222,6 +220,10 @@ public class CollabBoardService {
 
         if (!isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
+        }
+
+        if(accessRight.getAccessRight() == null){
+            throw new BadRequestException("Access right must not be null");
         }
 
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);

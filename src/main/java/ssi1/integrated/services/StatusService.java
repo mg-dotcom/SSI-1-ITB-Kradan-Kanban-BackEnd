@@ -115,7 +115,6 @@ public class StatusService {
             };
         }
 
-
         Visibility visibility = board.getVisibility();
 
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);

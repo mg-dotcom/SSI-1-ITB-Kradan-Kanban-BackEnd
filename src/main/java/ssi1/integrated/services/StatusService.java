@@ -45,6 +45,11 @@ public class StatusService {
     private CollabBoardRepository collabBoardRepository;
 
     public List<Status> getAllStatus(String boardId, String jwtToken) {
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new AuthenticationException("JWT is required") {
+            };
+        }
+
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );

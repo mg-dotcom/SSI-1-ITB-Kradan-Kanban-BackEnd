@@ -207,8 +207,10 @@ public class BoardService {
         BoardAuthorizationResult authorizationResult = authorizeBoardModifyAccess(boardId, jwtToken);
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "JWT token is required");
+            throw new AuthenticationException("JWT token is required") {
+            };
         }
+
 
         //Can't access board
         if (!authorizationResult.isOwner()) {

@@ -107,14 +107,10 @@ public class StatusService {
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
-        Status toUpdateStatus = statusRepository.findById(statusId)
-                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
-
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {
             };
         }
-
         Visibility visibility = board.getVisibility();
 
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
@@ -139,6 +135,9 @@ public class StatusService {
         if (statusId.equals(1) || statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");
         }
+        
+        Status toUpdateStatus = statusRepository.findById(statusId)
+                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
 
 
         if (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty()) {

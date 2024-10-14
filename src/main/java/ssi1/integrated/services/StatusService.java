@@ -107,6 +107,11 @@ public class StatusService {
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
+        Status toUpdateStatus = statusRepository.findById(statusId)
+                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
+
+        boolean isCollaborator = isCollaborator(jwtToken,boardId);
+
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {
             };
@@ -116,11 +121,11 @@ public class StatusService {
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
 
-        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
             throw new ForbiddenException(boardId + " this board id is private.");
         }
 
-        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
             throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
         }
 
@@ -136,8 +141,7 @@ public class StatusService {
             throw new BadRequestException("This status cannot be modified.");
         }
         
-        Status toUpdateStatus = statusRepository.findById(statusId)
-                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
+
 
 
         if (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty()) {

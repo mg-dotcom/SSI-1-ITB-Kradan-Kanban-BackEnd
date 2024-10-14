@@ -63,5 +63,4 @@ public class CollabBoardController {
     public void deleteCollaborator(@RequestHeader(name = "Authorization") String accessToken,@PathVariable String boardId,@PathVariable String collab_oid){
         collabBoardService.deleteCollaborator(accessToken,boardId,collab_oid);
     }
-
 }

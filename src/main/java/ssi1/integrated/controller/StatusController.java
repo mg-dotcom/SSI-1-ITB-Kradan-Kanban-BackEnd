@@ -42,7 +42,6 @@ public class StatusController {
     @PutMapping("/{boardId}/statuses/{statusId}")
     public ResponseEntity<NewStatusDTO> updateStatus(@PathVariable String boardId, @PathVariable Integer statusId, @RequestBody(required = false) NewStatusDTO updateStatus, @RequestHeader(name = "Authorization") String accessToken) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        boardService.getBoardById(boardId);
         return ResponseEntity.ok(statusService.updateStatus(boardId, statusId, updateStatus, jwtToken));
     }
 
@@ -67,6 +66,4 @@ public class StatusController {
         boardService.getBoardById(boardId);
         return ResponseEntity.ok(statusService.transferStatus(boardId, statusId, newStatusId, jwtToken));
     }
-
-
 }

@@ -49,13 +49,13 @@ public class TaskService {
     @Autowired
     private CollabBoardRepository collabBoardRepository;
 
-    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId, String jwtToken) {
+    public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
         Visibility visibility = board.getVisibility();
-
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
@@ -80,14 +80,14 @@ public class TaskService {
     }
 
 
-    public Task getTaskById(Integer taskId, String boardId, String jwtToken) {
+    public Task getTaskById(Integer taskId, String boardId, String accessToken) {
 
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
         Visibility visibility = board.getVisibility();
-
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 

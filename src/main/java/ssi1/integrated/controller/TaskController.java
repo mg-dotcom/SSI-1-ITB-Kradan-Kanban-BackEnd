@@ -38,20 +38,6 @@ public class TaskController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken
     ) {
-//        Board board = boardRepository.findById(boardId).orElseThrow(
-//                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-//        );
-//
-//        if (board.getVisibility() == Visibility.PUBLIC) {
-//            return ResponseEntity.ok(service.getAllTasks(sortBy, filterStatuses, direction, boardId, null));
-//        }
-//
-//        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-//            String jwtToken = accessToken.substring(7);
-//            return ResponseEntity.ok(service.getAllTasks(sortBy, filterStatuses, direction, boardId, jwtToken));
-//        }
-//
-//        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         return ResponseEntity.ok(service.getAllTasks(sortBy, filterStatuses, direction, boardId, accessToken));
     }
@@ -62,21 +48,22 @@ public class TaskController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken
     ) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
-
-
-        if (board.getVisibility() == Visibility.PUBLIC) {
-            return ResponseEntity.ok(service.getTaskById(taskId, boardId, null));
-        }
-
-        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-            String jwtToken = accessToken.substring(7);
-            return ResponseEntity.ok(service.getTaskById(taskId, boardId, jwtToken));
-        }
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        Board board = boardRepository.findById(boardId).orElseThrow(
+//                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+//        );
+//
+//
+//        if (board.getVisibility() == Visibility.PUBLIC) {
+//            return ResponseEntity.ok(service.getTaskById(taskId, boardId, null));
+//        }
+//
+//        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+//            String jwtToken = accessToken.substring(7);
+//            return ResponseEntity.ok(service.getTaskById(taskId, boardId, jwtToken));
+//        }
+//
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        return ResponseEntity.ok(service.getTaskById(taskId, boardId, accessToken));
     }
 
     @PostMapping("/{boardId}/tasks")

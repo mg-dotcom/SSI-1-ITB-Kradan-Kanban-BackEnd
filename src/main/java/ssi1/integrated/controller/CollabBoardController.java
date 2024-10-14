@@ -84,7 +84,7 @@ public class CollabBoardController {
 
 
     @PostMapping("/{boardId}/collabs")
-    public ResponseEntity<CollabBoardDTO> addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody @Valid AddCollabBoardDTO addCollabBoardDTO) {
+    public ResponseEntity<CollabBoardDTO> addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody AddCollabBoardDTO addCollabBoardDTO) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(jwtToken,boardId,addCollabBoardDTO));
     }

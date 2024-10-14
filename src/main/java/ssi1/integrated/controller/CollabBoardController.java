@@ -33,24 +33,6 @@ public class CollabBoardController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
 
-//        Board board = boardService.getBoardById(boardId);
-//        List<CollaboratorDTO> collaborators;
-//
-//        if (board.getVisibility() == Visibility.PUBLIC) {
-//            collaborators = collabBoardService.getAllCollabsBoard(null, boardId);
-//        } else if (accessToken != null && accessToken.startsWith("Bearer ")) {
-//            String jwtToken = accessToken.substring(7);
-//            collaborators = collabBoardService.getAllCollabsBoard(jwtToken, boardId);
-//        } else {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-//                    .body("Access denied to private board with BOARD ID: " + boardId);
-//        }
-//
-//        // Wrapping the list of collaborators in an object
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("collaborators", collaborators);
-//
-//        return ResponseEntity.ok(response);
         List<CollaboratorDTO> collaborators=collabBoardService.getAllCollabsBoard(accessToken, boardId);
         Map<String, Object> response = new HashMap<>();
         response.put("collaborators", collaborators);
@@ -63,36 +45,18 @@ public class CollabBoardController {
             @RequestHeader(name = "Authorization", required = false) String accessToken,
             @PathVariable String boardId,
             @PathVariable String collabsOid) {
-
-        Board board = boardService.getBoardById(boardId);
-
-        // If the board is public, allow access without token
-        if (board.getVisibility() == Visibility.PUBLIC) {
-            return ResponseEntity.ok(collabBoardService.getCollaborators(null, boardId, collabsOid));
-        }
-
-        // If the board is private, check if the token is present and valid
-        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-            String jwtToken = accessToken.substring(7);
-            return ResponseEntity.ok(collabBoardService.getCollaborators(jwtToken, boardId, collabsOid));
-        }
-
-        // If no token is provided and the board is private, return access denied
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body("Access denied to private board with BOARD ID: " + boardId);
+        return ResponseEntity.ok(collabBoardService.getCollaborators(accessToken, boardId, collabsOid));
     }
 
 
     @PostMapping("/{boardId}/collabs")
     public ResponseEntity<CollabBoardDTO> addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody @Valid AddCollabBoardDTO addCollabBoardDTO) {
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(jwtToken,boardId,addCollabBoardDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(accessToken,boardId,addCollabBoardDTO));
     }
 
     @PatchMapping("/{boardId}/collabs/{collab_oid}")
     public CollabBoard updateCollaboratorAccessRight(@RequestHeader(name = "Authorization") String accessToken,@PathVariable String boardId,@PathVariable String collab_oid,@RequestBody AccessRightDTO accessRight){
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return collabBoardService.updateCollaboratorAccessRight(jwtToken,boardId,collab_oid,accessRight);
+        return collabBoardService.updateCollaboratorAccessRight(accessToken,boardId,collab_oid,accessRight);
     }
 
     @DeleteMapping("/{boardId}/collabs/{collab_oid}")

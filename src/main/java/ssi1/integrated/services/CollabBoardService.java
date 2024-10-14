@@ -68,9 +68,15 @@ public class CollabBoardService {
 
         Visibility visibility = board.getVisibility();
         if (visibility == Visibility.PUBLIC) {
+            System.out.println("ok");
             return collaboratorDTOList;
         }
 
+        if (accessToken == null || accessToken.trim().isEmpty()) {
+            System.out.println("okok");
+            throw new AuthenticationException("JWT token is required.") {
+            };
+        }
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
@@ -96,7 +102,7 @@ public class CollabBoardService {
         if (visibility == PRIVATE && !isOwner && !isCollaborator) {
             throw new ForbiddenException("You do not have permission to access this board.");
         }
-        // Fetch the collaborator details based on the provided collabOid
+
         CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
         if(collabBoard==null){
             throw new ItemNotFoundException("Not found collaborator");
@@ -117,10 +123,34 @@ public class CollabBoardService {
         return collaboratorDTO;
     }
 
-    public CollabBoardDTO addCollabBoard(String jwtToken, String boardId, AddCollabBoardDTO addCollabBoardDTO){
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
+    public CollabBoardDTO addCollabBoard(String accessToken, String boardId, AddCollabBoardDTO addCollabBoardDTO){
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
+
+        Visibility visibility = board.getVisibility();
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can add tasks.");
+        }
+
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
+        }
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new AuthenticationException("JWT token is required.") {
+            };
+        }
+
         // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         // Find the user associated with the OID from the JWT payload
@@ -163,13 +193,30 @@ public class CollabBoardService {
     }
 
     @Transactional
-    public CollabBoard updateCollaboratorAccessRight(String jwtToken, String boardId, String collabsOid, AccessRightDTO accessRight){
-        JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
+    public CollabBoard updateCollaboratorAccessRight(String accessToken, String boardId, String collabsOid, AccessRightDTO accessRight){
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-        //404
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
+        Visibility visibility = board.getVisibility();
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can add tasks.");
+        }
+
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
+        }
+
+        JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
 
         CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
         //404
@@ -193,13 +240,30 @@ public class CollabBoardService {
     }
 
     @Transactional
-    public void deleteCollaborator(String jwtToken, String boardId,String collabsOid){
-        JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
+    public void deleteCollaborator(String accessToken, String boardId,String collabsOid){
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-        //404
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
+        Visibility visibility = board.getVisibility();
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can add tasks.");
+        }
+
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
+        }
+
+        JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
 
         CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
         //404
@@ -215,25 +279,6 @@ public class CollabBoardService {
         collabBoardRepository.delete(collaborator);
 
 
-    }
-
-
-    public BoardAuthorizationResult authorizeBoardReadAccess(String boardId, String jwtToken) {
-        Board board = boardService.getBoardById(boardId);
-
-        // If the board is public, return immediately allowing access
-        if (board.getVisibility() == PUBLIC) {
-            return new BoardAuthorizationResult(false, true);  // Public board, ownership doesn't matter
-        }
-
-        User user = userService.getUserByOid(board.getUserOid());
-
-        String tokenUsername = jwtService.extractUsername(jwtToken);
-
-        boolean isOwner = user.getUsername().equals(tokenUsername);
-
-        // Private board means isPublic should be false
-        return new BoardAuthorizationResult(isOwner, false);
     }
 
     private boolean isBoardOwner(String userOid, String jwtToken) {

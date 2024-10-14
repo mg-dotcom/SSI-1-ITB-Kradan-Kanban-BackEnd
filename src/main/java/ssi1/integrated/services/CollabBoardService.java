@@ -54,7 +54,9 @@ public class CollabBoardService {
 //        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) ) {
 //            throw new ForbiddenException("You do not have permission to access this board.");
 //        }
-
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        // Find the user associated with the OID from the JWT payload
+        User userOwner = userService.getUserByOid(jwtPayload.getOid());
         List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardIdOrderByAddedOnAsc(board.getId());
         List<CollaboratorDTO> collaboratorDTOList = new ArrayList<>();
 
@@ -75,8 +77,6 @@ public class CollabBoardService {
     public CollaboratorDTO getCollaborators(String jwtToken, String boardId,String collabsOid){
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
-
-
 
         // Fetch the collaborator details based on the provided collabOid
         CollabBoard collabBoard = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
@@ -135,8 +135,8 @@ public class CollabBoardService {
             newCollabBoard.setBoard(board);
 
             collabBoardDTO.setBoardId(boardId);
-            collabBoardDTO.setCollaboratorName(savedUserToLocal.getUsername());
-            collabBoardDTO.setCollaboratorEmail(addCollabBoardDTO.getEmail());
+            collabBoardDTO.setName(savedUserToLocal.getName());
+            collabBoardDTO.setEmail(addCollabBoardDTO.getEmail());
             collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
             System.out.println("Unsave.");
             collabBoardRepository.save(newCollabBoard);

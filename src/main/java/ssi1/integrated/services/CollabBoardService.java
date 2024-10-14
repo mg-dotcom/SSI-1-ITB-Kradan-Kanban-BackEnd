@@ -55,7 +55,7 @@ public class CollabBoardService {
 //            throw new ForbiddenException("You do not have permission to access this board.");
 //        }
 
-               List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardId(board.getId());
+        List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardIdOrderByAddedOnAsc(board.getId());
         List<CollaboratorDTO> collaboratorDTOList = new ArrayList<>();
 
                 for (CollabBoard collabBoard: foundedCollabBoardLists){

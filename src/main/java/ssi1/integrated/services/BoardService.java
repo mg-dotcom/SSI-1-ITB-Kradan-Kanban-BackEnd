@@ -3,6 +3,7 @@ package ssi1.integrated.services;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
@@ -58,8 +59,8 @@ public class BoardService {
         }
 
         User user = userService.getUserByOid(jwtPayload.getOid());
-        List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOid(user.getOid());
-        List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_Oid(user.getOid());
+        List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOidOrderByCreatedOnAsc(user.getOid());
+        List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_OidOrderByAddedOnAsc(user.getOid());
 
         ArrayList<ContributorBoardDTO> collabsBoardDTOs = new ArrayList<>();
         for (CollabBoard eachCollabsBoard: listCollabsBoard){

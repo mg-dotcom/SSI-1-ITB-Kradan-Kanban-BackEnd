@@ -135,8 +135,8 @@ public class CollabBoardService {
             newCollabBoard.setBoard(board);
 
             collabBoardDTO.setBoardId(boardId);
-            collabBoardDTO.setCollaboratorName(savedUserToLocal.getUsername());
-            collabBoardDTO.setCollaboratorEmail(addCollabBoardDTO.getEmail());
+            collabBoardDTO.setName(savedUserToLocal.getName());
+            collabBoardDTO.setEmail(addCollabBoardDTO.getEmail());
             collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
             System.out.println("Unsave.");
             collabBoardRepository.save(newCollabBoard);

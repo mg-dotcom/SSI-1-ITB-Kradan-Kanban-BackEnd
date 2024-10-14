@@ -8,7 +8,7 @@ import ssi1.integrated.project_board.collab_management.AccessRight;
 @Setter
 public class CollabBoardDTO {
     private String boardId;
-    private String collaboratorName;
-    private String collaboratorEmail;
+    private String name;
+    private String email;
     private AccessRight accessRight;
 }

@@ -93,6 +93,7 @@ public class CollabBoardService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
+
         Visibility visibility = board.getVisibility();
 
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
@@ -160,10 +161,6 @@ public class CollabBoardService {
 
         if (addCollabBoardDTO.getEmail().equals(userOwner.getEmail())){
             throw new ConflictException("The email belongs to the board owner.");
-        }
-
-        if (addCollabBoardDTO.getAccessRight() == null){
-            throw new BadRequestException("Access Right can no be null");
         }
 
         List<CollabBoard> existingCollabBoard = collabBoardRepository.findAllByBoardId(boardId);

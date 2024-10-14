@@ -54,9 +54,9 @@ public class CollabBoardService {
 //        if ( !(board.getVisibility().equals(PUBLIC) || authorizationResult.isOwner()) ) {
 //            throw new ForbiddenException("You do not have permission to access this board.");
 //        }
-        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        // Find the user associated with the OID from the JWT payload
-        User userOwner = userService.getUserByOid(jwtPayload.getOid());
+//        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+//        // Find the user associated with the OID from the JWT payload
+//        User userOwner = userService.getUserByOid(jwtPayload.getOid());
         List<CollabBoard> foundedCollabBoardLists = collabBoardRepository.findAllByBoardIdOrderByAddedOnAsc(board.getId());
         List<CollaboratorDTO> collaboratorDTOList = new ArrayList<>();
 

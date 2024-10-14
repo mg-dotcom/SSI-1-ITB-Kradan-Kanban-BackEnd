@@ -235,7 +235,27 @@ public class StatusService {
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
+        Visibility visibility = board.getVisibility();
+
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private.");
+        }
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can delete status.");
+        }
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new AuthenticationException("JWT token is required") {
+            };
+        }
+
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
 
         Status transferStatus = statusRepository.findById(newStatusId).orElseThrow(
                 () -> new ItemNotFoundException("The specified status for task transfer does not exist"));
@@ -243,15 +263,6 @@ public class StatusService {
             throw new BadRequestException("Destination status for task transfer must be different from current status.");
         }
         List<Task> taskList = taskRepository.findByStatusIdAndBoardId(oldStatusId, boardId);
-
-        if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new AuthenticationException("JWT token is required") {
-            };
-        }
-
-        if (!isOwner) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
 
         for (Task task : taskList) {
             task.setStatus(transferStatus);

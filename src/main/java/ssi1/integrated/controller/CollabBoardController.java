@@ -67,19 +67,19 @@ public class CollabBoardController {
         Board board = boardService.getBoardById(boardId);
 
         // If the board is public, allow access without token
-        if (board.getVisibility() == Visibility.PUBLIC) {
-            return ResponseEntity.ok(collabBoardService.getCollaborators(null, boardId, collabsOid));
-        }
+//        if (board.getVisibility() == Visibility.PUBLIC) {
+//            return ResponseEntity.ok(collabBoardService.getCollaborators(null, boardId, collabsOid));
+//        }
 
         // If the board is private, check if the token is present and valid
-        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-            String jwtToken = accessToken.substring(7);
-            return ResponseEntity.ok(collabBoardService.getCollaborators(jwtToken, boardId, collabsOid));
-        }
 
-        // If no token is provided and the board is private, return access denied
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body("Access denied to private board with BOARD ID: " + boardId);
+            String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+            return ResponseEntity.ok(collabBoardService.getCollaborators(jwtToken, boardId, collabsOid));
+
+
+//        // If no token is provided and the board is private, return access denied
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                .body("Access denied to private board with BOARD ID: " + boardId);
     }
 
 

@@ -16,7 +16,9 @@ import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.CollabBoardService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:5173", "http://ip23ssi1.sit.kmutt.ac.th", "http://intproj23.sit.kmutt.ac.th"})
@@ -31,22 +33,29 @@ public class CollabBoardController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
 
-        Board board = boardService.getBoardById(boardId);
+//        Board board = boardService.getBoardById(boardId);
+//        List<CollaboratorDTO> collaborators;
+//
+//        if (board.getVisibility() == Visibility.PUBLIC) {
+//            collaborators = collabBoardService.getAllCollabsBoard(null, boardId);
+//        } else if (accessToken != null && accessToken.startsWith("Bearer ")) {
+//            String jwtToken = accessToken.substring(7);
+//            collaborators = collabBoardService.getAllCollabsBoard(jwtToken, boardId);
+//        } else {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body("Access denied to private board with BOARD ID: " + boardId);
+//        }
+//
+//        // Wrapping the list of collaborators in an object
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("collaborators", collaborators);
+//
+//        return ResponseEntity.ok(response);
+        List<CollaboratorDTO> collaborators=collabBoardService.getAllCollabsBoard(accessToken, boardId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("collaborators", collaborators);
 
-        // If the board is public, allow access without token
-        if (board.getVisibility() == Visibility.PUBLIC) {
-            return ResponseEntity.ok(collabBoardService.getAllCollabsBoard(null, boardId));
-        }
-
-        // If the board is private, check if the token is present and valid
-        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-            String jwtToken = accessToken.substring(7);
-            return ResponseEntity.ok(collabBoardService.getAllCollabsBoard(jwtToken, boardId));
-        }
-
-        // If no token is provided and the board is private, return access denied
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body("Access denied to private board with BOARD ID: " + boardId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{boardId}/collabs/{collabsOid}")

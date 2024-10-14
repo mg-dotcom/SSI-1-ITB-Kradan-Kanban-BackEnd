@@ -258,18 +258,18 @@ public class CollabBoardService {
 
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
-        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+        boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
-        if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaboratorWrite) {
+        if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
 
-        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
             throw new ForbiddenException("Only board owner and collaborators with write access can add tasks.");
         }
 
-        if (!isOwner && !isCollaboratorWrite) {
+        if (!isOwner && !isCollaborator) {
             throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
         }
 

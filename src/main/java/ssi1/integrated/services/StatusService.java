@@ -102,10 +102,16 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO, String jwtToken) {
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
+
+        if(collaborator.getAccessRight() == AccessRight.READ){
+            throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
+        }
 
         Status toUpdateStatus = statusRepository.findById(statusId)
                 .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
@@ -116,16 +122,17 @@ public class StatusService {
             throw new AuthenticationException("JWT token is required") {
             };
         }
+
         Visibility visibility = board.getVisibility();
 
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
 
-        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException(boardId + " this board id is private.");
         }
 
-        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
         }
 

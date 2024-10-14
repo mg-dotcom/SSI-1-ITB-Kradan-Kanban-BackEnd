@@ -276,14 +276,16 @@ public class CollabBoardService {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
 
         CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
-        //404
-        if(collaborator==null){
-            throw new ItemNotFoundException("The "+collabsOid+" is not a collaborator on the board.");
-        }
+
 
         //403
         if(!(jwtPayload.getOid().equals(board.getUserOid())||jwtPayload.getOid().equals(collaborator.getUser().getOid()))){
             throw new ForbiddenException("Only board owner can delete collaborators and only collaborator can delete themself");
+        }
+
+        //404
+        if(collaborator==null){
+            throw new ItemNotFoundException("The "+collabsOid+" is not a collaborator on the board.");
         }
 
         collabBoardRepository.delete(collaborator);

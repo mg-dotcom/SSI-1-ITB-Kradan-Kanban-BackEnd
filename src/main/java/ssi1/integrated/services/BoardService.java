@@ -46,7 +46,6 @@ public class BoardService {
     private UserLocalService userLocalService;
 
     public List<Board> getAllBoards() {
-
         return boardRepository.findAll();
     }
 
@@ -149,10 +148,24 @@ public class BoardService {
     public BoardDTO getBoardDetail(String boardId, String jwtToken) {
         Board board = getBoardById(boardId);
 
+        Visibility visibility = board.getVisibility();
+
         User user = userService.getUserByOid(board.getUserOid());
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
         boardDTO.setOwner(userDTO);
+
+        if(visibility == Visibility.PUBLIC){
+            return boardDTO;
+        }
+
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
         return boardDTO;
 
     }
@@ -240,6 +253,27 @@ public class BoardService {
         boolean isPublic = (visibilityByBoardId == Visibility.PUBLIC);
 
         return new BoardAuthorizationResult(isOwner, isPublic);
+    }
+
+    // Check if user is the board owner
+    private boolean isBoardOwner(String userOid, String jwtToken) {
+        JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
+        User user = userService.getUserByOid(userOid);
+        return user.getOid().equals(jwtPayload.getOid());
+    }
+
+    // Check if collaborator has write access
+    public boolean isCollaboratorWriteAccess(String jwtToken, String boardId) {
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+
+        return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
+    }
+
+    public boolean isCollaborator(String jwtToken, String boardId){
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+        return collaborator!=null;
     }
 
 

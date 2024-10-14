@@ -50,6 +50,18 @@ public class TaskService {
     private CollabBoardRepository collabBoardRepository;
 
     public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId, String jwtToken) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        Visibility visibility = board.getVisibility();
+
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
 
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
@@ -73,6 +85,15 @@ public class TaskService {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
+
+        Visibility visibility = board.getVisibility();
+
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
 
         Task task = taskRepository.findById(taskId).orElseThrow(
                 () -> new ItemNotFoundException("NOT FOUND")
@@ -238,5 +259,11 @@ public class TaskService {
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
         return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
+    }
+
+    public boolean isCollaborator(String jwtToken, String boardId){
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+        return collaborator!=null;
     }
 }

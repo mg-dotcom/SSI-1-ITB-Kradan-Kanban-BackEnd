@@ -163,6 +163,10 @@ public class CollabBoardService {
             throw new ConflictException("The email belongs to the board owner.");
         }
 
+        if (addCollabBoardDTO.getEmail() != null && addCollabBoardDTO.getAccessRight() == null) {
+            throw new BadRequestException("Access right must not be null");
+        }
+
         List<CollabBoard> existingCollabBoard = collabBoardRepository.findAllByBoardId(boardId);
         for (CollabBoard collabBoard : existingCollabBoard) {
             if (collabBoard.getUser().getEmail().equals(addCollabBoardDTO.getEmail())) {

@@ -1,6 +1,7 @@
 package ssi1.integrated.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -75,7 +76,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } else {
             jwt = authHeader.substring(7);
             try {
-                userName = jwtService.extractUsername(jwt);
+                userName = jwtService.extractUsername(jwt); // Extract the username from the token
+            } catch (ExpiredJwtException e) {
+                // Handle expired JWT token case and return 401 Unauthorized
+                sendErrorResponse(response, "Token has expired. Please use refresh token.", request, HttpStatus.UNAUTHORIZED);
+                return;
             } catch (JwtException e) {
                 if (request.getMethod().matches("POST|PUT|DELETE|PATCH")) {
                     sendErrorResponse(response, e.getMessage(), request, HttpStatus.UNAUTHORIZED);

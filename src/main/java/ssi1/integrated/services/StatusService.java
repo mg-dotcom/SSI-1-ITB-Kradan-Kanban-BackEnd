@@ -133,11 +133,6 @@ public class StatusService {
             throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
         }
 
-        // Validate the updateStatusDTO
-        if (updateStatusDTO == null) {
-            throw new BadRequestException("Invalid NewStatusDTO value");
-        }
-
         // Ensure the status being modified is not restricted
         if (statusId.equals(1) || statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");

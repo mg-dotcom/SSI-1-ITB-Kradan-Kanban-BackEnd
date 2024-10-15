@@ -185,6 +185,7 @@ public class CollabBoardService {
             newCollabBoard.setAccessRight(addCollabBoardDTO.getAccessRight());
             newCollabBoard.setBoard(board);
 
+            collabBoardDTO.setOid(savedUserToLocal.getOid());
             collabBoardDTO.setBoardId(boardId);
             collabBoardDTO.setName(savedUserToLocal.getName());
             collabBoardDTO.setEmail(addCollabBoardDTO.getEmail());

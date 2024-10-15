@@ -29,15 +29,15 @@ public class CollabBoardController {
     @Autowired
     private CollabBoardService collabBoardService;
     @GetMapping("/{boardId}/collabs")
-    public ResponseEntity<?> getAllCollaborators(
+    public ResponseEntity<List<CollaboratorDTO>> getAllCollaborators(
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
 
-        List<CollaboratorDTO> collaborators=collabBoardService.getAllCollabsBoard(accessToken, boardId);
-        Map<String, Object> response = new HashMap<>();
-        response.put("collaborators", collaborators);
+        // Fetch the list of collaborators
+        List<CollaboratorDTO> collaborators = collabBoardService.getAllCollabsBoard(accessToken, boardId);
 
-        return ResponseEntity.ok(response);
+        // Directly return the list of collaborators
+        return ResponseEntity.ok(collaborators);
     }
 
     @GetMapping("/{boardId}/collabs/{collabsOid}")

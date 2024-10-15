@@ -102,65 +102,65 @@ public class StatusService {
 
     @Transactional
     public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO, String jwtToken) {
-        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
-
-        if(collaborator.getAccessRight() == AccessRight.READ){
-            throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
-        }
-
-        Status toUpdateStatus = statusRepository.findById(statusId)
-                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
-
-        boolean isCollaborator = isCollaborator(jwtToken,boardId);
-
+        // Early JWT Token check
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {
             };
         }
 
-        Visibility visibility = board.getVisibility();
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+
+        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+
+
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
 
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
-        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken, boardId);
 
-        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
-            throw new ForbiddenException(boardId + " this board id is private.");
-        }
-
-        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+        // Check if collaborator exists and if they have read-only access
+        if (collaborator != null && collaborator.getAccessRight() == AccessRight.READ && !isOwner) {
             throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
         }
 
+        // Handle board visibility and access
+        if (board.getVisibility() == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board is private.");
+        } else if (board.getVisibility() == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
+        }
+
+        // Validate the updateStatusDTO
         if (updateStatusDTO == null) {
             throw new BadRequestException("Invalid NewStatusDTO value");
         }
 
-        if (!isOwner && !isCollaboratorWrite) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
-
+        // Ensure the status being modified is not restricted
         if (statusId.equals(1) || statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");
         }
-        
 
+        // Fetch status to update (throws exception if not found)
+        Status toUpdateStatus = statusRepository.findById(statusId)
+                .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
 
-
-        if (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty()) {
-            toUpdateStatus.setStatusColor("#CCCCCC");
-        } else {
-            toUpdateStatus.setStatusColor(updateStatusDTO.getStatusColor());
-        }
+        // Update the status fields
+        toUpdateStatus.setStatusColor(
+                (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty())
+                        ? "#CCCCCC"
+                        : updateStatusDTO.getStatusColor()
+        );
         toUpdateStatus.setName(updateStatusDTO.getName());
         toUpdateStatus.setDescription(updateStatusDTO.getDescription());
+
+        // Save updated status and map to DTO
         Status updatedStatus = statusRepository.save(toUpdateStatus);
         return modelMapper.map(updatedStatus, NewStatusDTO.class);
     }
+
 
     @Transactional
     public NewStatusDTO insertNewStatus(String boardId, NewStatusDTO newStatusDTO, String jwtToken) {

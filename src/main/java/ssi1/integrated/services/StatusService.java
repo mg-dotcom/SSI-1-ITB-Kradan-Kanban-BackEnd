@@ -45,7 +45,6 @@ public class StatusService {
     private CollabBoardRepository collabBoardRepository;
 
     public List<Status> getAllStatus(String boardId, String accessToken) {
-
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
@@ -53,6 +52,7 @@ public class StatusService {
         Visibility visibility = board.getVisibility();
 
         if (visibility == Visibility.PUBLIC) {
+            System.out.println("test");
             Sort sort = Sort.by(Sort.Direction.ASC, "id");
             return statusRepository.findByBoardId(boardId, sort);
         }

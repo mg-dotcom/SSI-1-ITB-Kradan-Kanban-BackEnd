@@ -54,21 +54,29 @@ public class TaskService {
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
-        Visibility visibility = board.getVisibility();
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
-        boolean isCollaborator = isCollaborator(jwtToken,boardId);
-
-        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
-
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
                 sortBy
         );
 
         Sort sort = Sort.by(sortOrder);
+        Visibility visibility = board.getVisibility();
+
+        if (visibility == Visibility.PUBLIC) {
+            return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
+        }
+
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken,boardId);
+
+
+
+        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
 
         if (filterStatuses == null) {
             List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);

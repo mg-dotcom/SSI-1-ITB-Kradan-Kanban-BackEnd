@@ -82,12 +82,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 sendErrorResponse(response, "Token has expired. Please use refresh token.", request, HttpStatus.UNAUTHORIZED);
                 return;
             } catch (JwtException e) {
-//                if (request.getMethod().matches("POST|PUT|DELETE|PATCH")) {
-//                    sendErrorResponse(response, e.getMessage(), request, HttpStatus.UNAUTHORIZED);
-//                    return;
-//                }
-                sendErrorResponse(response, e.getMessage(), request, HttpStatus.UNAUTHORIZED);
-                return;
+                if (request.getMethod().matches("POST|PUT|DELETE|PATCH")) {
+                    sendErrorResponse(response, e.getMessage(), request, HttpStatus.UNAUTHORIZED);
+                    return;
+                }
             }
         }
 

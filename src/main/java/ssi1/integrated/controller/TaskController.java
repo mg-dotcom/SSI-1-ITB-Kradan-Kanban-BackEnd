@@ -37,16 +37,6 @@ public class TaskController {
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken
     ) {
-//        // If the board is public, allow access without token
-//        if (board.getVisibility() == Visibility.PUBLIC) {
-//            return ResponseEntity.ok(boardService.getBoardDetail(boardId, null));
-//        }
-//
-//        // If the board is private, check if the token is present and valid
-//        if (accessToken != null && accessToken.startsWith("Bearer ")) {
-//            String jwtToken = accessToken.substring(7);
-//            return ResponseEntity.ok(boardService.getBoardDetail(boardId, jwtToken));
-//        }
         return ResponseEntity.ok(service.getAllTasks(sortBy, filterStatuses, direction, boardId, accessToken));
     }
 

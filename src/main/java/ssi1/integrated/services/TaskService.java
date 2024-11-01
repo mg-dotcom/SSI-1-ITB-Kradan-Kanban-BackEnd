@@ -62,6 +62,11 @@ public class TaskService {
         Sort sort = Sort.by(sortOrder);
         Visibility visibility = board.getVisibility();
 
+        if (visibility == Visibility.PUBLIC && filterStatuses == null) {
+            List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
+            return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
+        }
+
         if (visibility == Visibility.PUBLIC) {
             return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
         }
@@ -70,13 +75,9 @@ public class TaskService {
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
-
-
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
-
-
 
         if (filterStatuses == null) {
             List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
@@ -84,7 +85,6 @@ public class TaskService {
         }
 
         return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
-
     }
 
 

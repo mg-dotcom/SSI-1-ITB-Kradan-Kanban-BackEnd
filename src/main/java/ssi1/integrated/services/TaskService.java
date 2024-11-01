@@ -89,27 +89,31 @@ public class TaskService {
 
 
     public Task getTaskById(Integer taskId, String boardId, String accessToken) {
-
+        // Fetch the board by ID
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
+        // Check the board's visibility
         Visibility visibility = board.getVisibility();
+        // If the board is public, you can return the task without needing a token
+        if (visibility == Visibility.PUBLIC) {
+            return taskRepository.findByIdAndBoardId(taskId, boardId);
+        }
+
+        // Extract the JWT token if present
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
-        boolean isCollaborator = isCollaborator(jwtToken,boardId);
+        boolean isCollaborator = isCollaborator(jwtToken, boardId);
 
-        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
+        // Check access for private boards
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-        Task task = taskRepository.findById(taskId).orElseThrow(
-                () -> new ItemNotFoundException("NOT FOUND")
-        );
-
-        return taskRepository.findByIdAndBoardId(task.getId(), board.getId());
+        // If the board is private and the user has access, fetch the task
+        return taskRepository.findByIdAndBoardId(taskId, boardId);
     }
-
 
     @Transactional
     public GeneralTaskDTO insertNewTask(NewTaskDTO newTask, String boardId, String jwtToken) {

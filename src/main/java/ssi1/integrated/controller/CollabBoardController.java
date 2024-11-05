@@ -48,7 +48,6 @@ public class CollabBoardController {
         return ResponseEntity.ok(collabBoardService.getCollaborators(accessToken, boardId, collabsOid));
     }
 
-
     @PostMapping("/{boardId}/collabs")
     public ResponseEntity<CollabBoardDTO> addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody AddCollabBoardDTO addCollabBoardDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(accessToken,boardId,addCollabBoardDTO));

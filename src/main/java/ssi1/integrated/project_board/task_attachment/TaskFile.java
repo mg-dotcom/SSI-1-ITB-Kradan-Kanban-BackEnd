@@ -1,31 +1,29 @@
 package ssi1.integrated.project_board.task_attachment;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import ssi1.integrated.project_board.task.Task;
 
 import java.time.ZonedDateTime;
 
+@Getter
+@Setter
+@ToString
 @Entity
-@Table(name = "task_attachment")
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class TaskAttachment {
+@Table(name = "task_attachment", schema = "integrated2")
+public class TaskFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "attachmentId", nullable = false, unique = true)
+    @Column(name = "attachmentId", unique = true)
     private Integer id;
+
 
     @Column(name = "fileName", nullable = false)
     private String fileName;
 
-    // If you want to store the file content, rename to fileData
-    @Lob // Large Object annotation for file content
-    private byte[] fileData;
+    @Column(name = "fileSize", nullable = false)
+    private Long fileSize;
 
     @CreationTimestamp
     @Column(name = "createdOn", nullable = false, updatable = false)

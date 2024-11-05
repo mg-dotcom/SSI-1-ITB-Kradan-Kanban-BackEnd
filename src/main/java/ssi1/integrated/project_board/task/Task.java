@@ -1,6 +1,7 @@
 package ssi1.integrated.project_board.task;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -10,8 +11,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.status.Status;
+import ssi1.integrated.project_board.task_attachment.TaskFile;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 
 @Getter
@@ -47,4 +50,7 @@ public class Task {
     @JoinColumn(name = "boardId", nullable = false)
     private Board board;
 
+    @OneToMany(mappedBy = "task", fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<TaskFile> files;
 }

@@ -5,29 +5,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartFile;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
-import ssi1.integrated.exception.handler.ItemNotFoundException;
-import ssi1.integrated.project_board.board.Board;
-import ssi1.integrated.project_board.board.BoardRepository;
-import ssi1.integrated.project_board.board.Visibility;
+import ssi1.integrated.dtos.TaskFileDTO;
+import ssi1.integrated.exception.handler.FileUploadException;
 import ssi1.integrated.project_board.task.Task;
+import ssi1.integrated.project_board.task_attachment.TaskFile;
 import ssi1.integrated.services.BoardService;
+import ssi1.integrated.services.TaskFileService;
 import ssi1.integrated.services.TaskService;
 
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:5173", "http://ip23ssi1.sit.kmutt.ac.th", "http://intproj23.sit.kmutt.ac.th"})
 @RequestMapping("/v3/boards")
-
 public class TaskController {
     @Autowired
     private TaskService service;
     @Autowired
     private BoardService boardService;
-
+    @Autowired
+    TaskFileService taskFileService;
 
     @GetMapping("/{boardId}/tasks")
     public ResponseEntity<List<GeneralTaskDTO>> getAllTasks(
@@ -48,6 +53,39 @@ public class TaskController {
     ) {
         return ResponseEntity.ok(service.getTaskById(taskId, boardId, accessToken));
     }
+
+    // FILE SERVICE
+    @GetMapping("/{boardId}/tasks/{taskId}/files")
+    public ResponseEntity<List<TaskFileDTO>> getFilesForTask(
+            @PathVariable String boardId,
+            @PathVariable Integer taskId,
+            @RequestHeader(name = "Authorization", required = false) String accessToken) {
+        return ResponseEntity.ok(taskFileService.getFilesByTaskId(taskId,boardId, accessToken));
+    }
+
+    @PostMapping("/{boardId}/tasks/{taskId}/files")
+    public ResponseEntity<String> uploadFiles(
+            @PathVariable String boardId,
+            @PathVariable Integer taskId,
+            @RequestParam("files") MultipartFile[] files,
+            @RequestHeader(name = "Authorization", required = false) String accessToken) throws IOException {
+
+        List<TaskFile> fileList = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("One or more files are empty. Please upload valid files.");
+            }
+            TaskFile taskFile = new TaskFile();
+            taskFile.setFileName(file.getOriginalFilename());
+            taskFile.setFileSize(file.getSize());
+            taskFile.setCreatedOn(ZonedDateTime.now());
+            fileList.add(taskFile);
+        }
+        taskFileService.saveAllFilesList(taskId, fileList);
+        return ResponseEntity.ok("Files uploaded successfully.");
+    }
+
 
     @PostMapping("/{boardId}/tasks")
     public ResponseEntity<GeneralTaskDTO> addTask(@RequestBody(required = false) NewTaskDTO newTaskDTO, @PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {

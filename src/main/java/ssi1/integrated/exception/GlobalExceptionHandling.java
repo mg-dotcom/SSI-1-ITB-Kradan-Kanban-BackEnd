@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ssi1.integrated.dtos.FileInfoDTO;
 import ssi1.integrated.exception.handler.*;
 import ssi1.integrated.exception.respond.ErrorResponse;
+import ssi1.integrated.exception.respond.FileErrorResponse;
 import ssi1.integrated.exception.respond.LimitationRespond;
 
 @RestControllerAdvice
@@ -132,6 +134,19 @@ public class GlobalExceptionHandling {
                 exception.getMessage(),
                 request.getDescription(false));
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    @ExceptionHandler(FileUploadException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // Set the HTTP status code
+    public ResponseEntity<FileErrorResponse> handleFileUploadException(FileUploadException exception,WebRequest request) {
+        FileErrorResponse fileErrorResponse = new FileErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),exception.getMessage() ,request.getDescription(false)
+        );
+
+        for (FileInfoDTO fileError : exception.getFileErrors()) {
+            fileErrorResponse.addValidationFileError(fileError);
+        }
+        return new ResponseEntity<>(fileErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
 }

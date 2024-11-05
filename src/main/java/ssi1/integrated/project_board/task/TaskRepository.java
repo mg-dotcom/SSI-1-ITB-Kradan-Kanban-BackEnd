@@ -23,6 +23,9 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
     Task findByIdAndBoardId(Integer taskId, String boardId);
 
+    @Query("SELECT COUNT(tf) FROM TaskFile tf WHERE tf.task.id = ?1")
+    Integer countFilesByTaskId(Integer taskId);
+
     void deleteByStatusId(Integer statusId);
 
 

@@ -23,6 +23,7 @@ import ssi1.integrated.project_board.task_attachment.TaskFileRepository;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
+import ssi1.integrated.utils.FileSizeFormatter;
 
 import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
@@ -40,8 +41,6 @@ public class TaskFileService {
     @Autowired
     private BoardRepository boardRepository;
     @Autowired
-    private StatusRepository statusRepository;
-    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private ListMapper listMapper;
@@ -54,6 +53,7 @@ public class TaskFileService {
 
     private static final int MAX_FILES = 10;
     private static final long MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB in bytes
+
 
     public List<TaskFileDTO> getFilesByTaskId(Integer taskId, String boardId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
@@ -83,69 +83,73 @@ public class TaskFileService {
     }
 
 
-    public void saveAllFilesList (Integer taskId, List<TaskFile> fileList)  {
+    public void saveAllFilesList(Integer taskId, List<TaskFile> fileList) {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
+        List<FileInfoDTO> duplicateFileInfos = fileList.stream()
+                .filter(file -> taskRepository.existsByTaskIdAndFileName(taskId, file.getFileName()))
+                .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
+                .collect(Collectors.toList());
+
+        if (!duplicateFileInfos.isEmpty()) {
+            String message = "Filenames must be unique within the task. The following files are not added due to duplicate names:";
+            throw new FileUploadException(message, duplicateFileInfos);
+        }
+
+        List<FileInfoDTO> exceedFileInfos = fileList.stream()
+                .filter(file -> file.getFileSize() > MAX_FILE_SIZE)
+                .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
+                .collect(Collectors.toList());
+
         int currentFileCount = taskRepository.countFilesByTaskId(taskId);
+        int allowedFilesCount = MAX_FILES - currentFileCount;
 
-        // Check if adding all the new files would exceed the limit
-        if (currentFileCount + fileList.size() > MAX_FILES) {
-            int allowedFilesCount = MAX_FILES - currentFileCount;
+        List<TaskFile> validFiles = fileList.stream()
+                .filter(file -> file.getFileSize() <= MAX_FILE_SIZE &&
+                        !taskRepository.existsByTaskIdAndFileName(taskId, file.getFileName()))
+                .limit(allowedFilesCount)
+                .map(file -> {
+                    TaskFile taskFile = new TaskFile();
+                    taskFile.setFileName(file.getFileName());
+                    taskFile.setFileSize(file.getFileSize());
+                    taskFile.setCreatedOn(ZonedDateTime.now());
+                    taskFile.setTask(existingTask);
+                    return taskFile;
+                })
+                .collect(Collectors.toList());
 
-            List<TaskFile> filesWithinLimit = fileList.stream()
-                    .limit(allowedFilesCount)
-                    .map(file -> {
-                        TaskFile taskFile = new TaskFile();
-                        taskFile.setFileName(file.getFileName());
-                        taskFile.setFileSize(file.getFileSize());
-                        taskFile.setCreatedOn(ZonedDateTime.now());
-                        taskFile.setTask(existingTask);
-                        return taskFile;
-                    })
-                    .collect(Collectors.toList());
-            List<FileInfoDTO> excessFileInfos = fileList.stream()
+        if (validFiles.size() < fileList.size()) {
+            List<FileInfoDTO> excessCountFiles = fileList.stream()
+                    .filter(file -> file.getFileSize() <= MAX_FILE_SIZE) // Only valid size files
                     .skip(allowedFilesCount)
                     .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
                     .collect(Collectors.toList());
-
-            fileRepository.saveAll(filesWithinLimit);
-            throw new FileUploadException("Each task can have at most "+ MAX_FILES +" files. The following files are not added:",excessFileInfos);
+            exceedFileInfos.addAll(excessCountFiles); // Include files exceeding the MAX_FILES limit
         }
 
-
-        // Check if each file exceed 20MB
-        for (TaskFile file : fileList) {
-            //            if (file.getFileSize() > MAX_FILE_SIZE) {
-//               fileErrors.add("File " + file.getFileName() + " exceeds the maximum file size of 20 MB.");
-//            }
-            TaskFile attachment = new TaskFile();
-            attachment.setFileName(file.getFileName());
-            attachment.setFileSize(file.getFileSize());
-            attachment.setCreatedOn(file.getCreatedOn());
-            attachment.setTask(existingTask);
-            fileRepository.save(attachment);
+        if (!exceedFileInfos.isEmpty()) {
+            String message = "Each task can have at most " + MAX_FILES + " files and each file cannot be larger than " +
+                    (MAX_FILE_SIZE / (1024 * 1024)) + " MB. The following files are not added due to size limit:";
+            throw new FileUploadException(message, exceedFileInfos);
         }
 
-        // If within limit, save all files
-        fileRepository.saveAll(fileList);
+        fileRepository.saveAll(validFiles);
     }
 
-    // Check if user is the board owner
+
+
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
         User user = userService.getUserByOid(userOid);
         return user.getOid().equals(jwtPayload.getOid());
     }
-
-    // Check if collaborator has write access
     public boolean isCollaboratorWriteAccess(String jwtToken, String boardId) {
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
         return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
     }
-
     public boolean isCollaborator(String jwtToken, String boardId){
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());

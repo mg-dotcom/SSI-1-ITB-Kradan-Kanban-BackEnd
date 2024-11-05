@@ -12,11 +12,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ssi1.integrated.dtos.FileInfoDTO;
 import ssi1.integrated.exception.handler.*;
 import ssi1.integrated.exception.respond.ErrorResponse;
 import ssi1.integrated.exception.respond.FileErrorResponse;
 import ssi1.integrated.exception.respond.LimitationRespond;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @RestControllerAdvice
 public class GlobalExceptionHandling {
@@ -138,9 +142,9 @@ public class GlobalExceptionHandling {
 
     @ExceptionHandler(FileUploadException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST) // Set the HTTP status code
-    public ResponseEntity<FileErrorResponse> handleFileUploadException(FileUploadException exception,WebRequest request) {
+    public ResponseEntity<FileErrorResponse> handleFileUploadException(FileUploadException exception, WebRequest request) {
         FileErrorResponse fileErrorResponse = new FileErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),exception.getMessage() ,request.getDescription(false)
+                HttpStatus.BAD_REQUEST.value(), exception.getMessage(), request.getDescription(false)
         );
 
         for (FileInfoDTO fileError : exception.getFileErrors()) {
@@ -149,4 +153,11 @@ public class GlobalExceptionHandling {
         return new ResponseEntity<>(fileErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<FileErrorResponse> handleMaxSizeException(MaxUploadSizeExceededException exception,WebRequest request) {
+        FileErrorResponse fileErrorResponse = new FileErrorResponse(
+                HttpStatus.BAD_REQUEST.value(), exception.getMessage(), request.getDescription(false)
+        );
+        return new ResponseEntity<>(fileErrorResponse, HttpStatus.PAYLOAD_TOO_LARGE);
+    }
 }

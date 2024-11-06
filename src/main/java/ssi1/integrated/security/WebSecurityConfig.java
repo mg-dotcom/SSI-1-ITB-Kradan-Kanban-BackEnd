@@ -31,7 +31,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF protection
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login","/send-email", "/v3/**").permitAll() // Permit access to /login
+                        .requestMatchers("/login","/v3/send-email", "/v3/**").permitAll() // Permit access to /login
                         .anyRequest().authenticated()) // Require authentication for all other requests
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Set session to stateless

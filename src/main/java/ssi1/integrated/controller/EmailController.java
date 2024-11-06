@@ -16,10 +16,9 @@ public class EmailController {
     }
 
     @PostMapping("/send-email")
-    public String sendEmail(@RequestBody SendEmailDTO sendEmailDTO) {
-        emailService.sendEmail(sendEmailDTO);
+    public String sendEmail(@RequestHeader(name = "Authorization") String accessToken,@RequestBody SendEmailDTO sendEmailDTO) {
+        emailService.sendEmail(accessToken,sendEmailDTO);
         return "Email sent successfully!";
     }
-
 }
 

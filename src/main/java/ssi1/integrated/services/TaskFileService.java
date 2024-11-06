@@ -87,28 +87,27 @@ public class TaskFileService {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
-        // Step 1: Check for duplicate filenames within the task
+        // ! Step 1: Check for duplicate filenames within the task
         List<FileInfoDTO> duplicateFileInfos = fileList.stream()
                 .filter(file -> taskRepository.existsByTaskIdAndFileName(taskId, file.getFileName()))
                 .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
                 .collect(Collectors.toList());
 
         if (!duplicateFileInfos.isEmpty()) {
-            String message = "Filenames must be unique within the task. The following files are not added due to duplicate names:";
-            throw new FileUploadException(message, duplicateFileInfos);
+            throw new FileUploadException("Filenames must be unique within the task. The following files are not added due to duplicate names:", duplicateFileInfos);
         }
 
-        // Step 2: Check for files exceeding the maximum file size
+        // ! Step 2: Check for files exceeding the maximum file size
         List<FileInfoDTO> exceedFileInfos = fileList.stream()
                 .filter(file -> file.getFileSize() > MAX_FILE_SIZE)
                 .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
                 .collect(Collectors.toList());
 
-        // Step 3: Determine the allowed file count based on current attachments
+        // ! Step 3: Determine the allowed file count based on current attachments
         int currentFileCount = taskRepository.countFilesByTaskId(taskId);
         int allowedFilesCount = MAX_FILES - currentFileCount;
 
-        // Step 4: Collect valid files that fit within size and count limits
+        // ! Step 4: Collect valid files that fit within size and count limits
         List<TaskFile> validFiles = new ArrayList<>();
         List<FileInfoDTO> excessFiles = new ArrayList<>(exceedFileInfos);
 
@@ -128,23 +127,20 @@ public class TaskFileService {
             }
         }
 
-        // Step 5: Construct an appropriate message for files that couldn't be added
+        // !  Step 5: Construct an appropriate message for files that couldn't be added
         if (!exceedFileInfos.isEmpty() && validFiles.size() < fileList.size()) {
-            // Both conditions are violated
+            // Both conditions are true
             String message = "Each task can have at most " + MAX_FILES + " files and each file cannot be larger than " +
                     (MAX_FILE_SIZE / (1024 * 1024)) + " MB. The following files are not added due to size or count limits:";
             throw new FileUploadException(message, excessFiles);
         } else if (!exceedFileInfos.isEmpty()) {
-            // Only file size is violated
             String message = "Each file cannot be larger than " + (MAX_FILE_SIZE / (1024 * 1024)) + " MB. The following files are not added due to size limit:";
             throw new FileUploadException(message, exceedFileInfos);
         } else if (validFiles.size() < fileList.size()) {
-            // Only file count is violated
             String message = "Each task can have at most " + MAX_FILES + " files. The following files are not added due to exceeding the file count:";
             throw new FileUploadException(message, excessFiles);
         }
 
-        // Step 6: Save all valid files
         fileRepository.saveAll(validFiles);
     }
 

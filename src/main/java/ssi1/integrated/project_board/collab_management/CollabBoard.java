@@ -30,6 +30,10 @@ public class CollabBoard {
     @Column(name = "accessRight", nullable = false)
     private AccessRight accessRight = AccessRight.READ;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private Status status;
+
     @CreationTimestamp
     @Column(name = "addedOn",nullable = false)
     private ZonedDateTime addedOn;

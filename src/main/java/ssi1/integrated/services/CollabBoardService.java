@@ -20,6 +20,7 @@ import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
+import ssi1.integrated.project_board.collab_management.Status;
 import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
@@ -46,6 +47,8 @@ public class CollabBoardService {
     private ModelMapper modelMapper;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private EmailService emailService;
 
     public List<CollaboratorDTO> getAllCollabsBoard(String accessToken, String boardId){
         Board board = boardRepository.findById(boardId).orElseThrow(
@@ -177,6 +180,8 @@ public class CollabBoardService {
         if (foundedUserByEmail == null) {
             throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
         }
+
+        emailService.sendEmail(boardId,addCollabBoardDTO.getEmail());
         UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
 
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();
@@ -184,6 +189,7 @@ public class CollabBoardService {
             newCollabBoard.setUser(savedUserToLocal);
             newCollabBoard.setAccessRight(addCollabBoardDTO.getAccessRight());
             newCollabBoard.setBoard(board);
+            newCollabBoard.setStatus(Status.PENDING);
 
             collabBoardDTO.setOid(savedUserToLocal.getOid());
             collabBoardDTO.setBoardId(boardId);
@@ -248,6 +254,8 @@ public class CollabBoardService {
         return collaborator;
     }
 
+    
+
     @Transactional
     public void deleteCollaborator(String accessToken, String boardId,String collabsOid){
         Board board = boardRepository.findById(boardId)
@@ -288,8 +296,6 @@ public class CollabBoardService {
         }
 
         collabBoardRepository.delete(collaborator);
-
-
     }
 
     private boolean isBoardOwner(String userOid, String jwtToken) {

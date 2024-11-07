@@ -17,16 +17,12 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendEmail(String accessToken,SendEmailDTO sendEmailDTO) {
-        if (accessToken == null || accessToken.trim().isEmpty()) {
-            System.out.println("okok");
-            throw new AuthenticationException("JWT token is required.") {
-            };
-        }
+    public void sendEmail(String boardId,String to) {
+
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(sendEmailDTO.getTo());
-        message.setSubject(sendEmailDTO.getSubject());
-        message.setText(sendEmailDTO.getBody());
+        message.setTo(to);
+        message.setSubject("Board Inviting!!");
+        message.setText(boardId);
 
         mailSender.send(message);
         System.out.println("Sent mail successfully!");

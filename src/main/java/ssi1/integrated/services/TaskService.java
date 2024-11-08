@@ -26,6 +26,7 @@ import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task.TaskRepository;
 import ssi1.integrated.project_board.task_attachment.TaskFile;
+import ssi1.integrated.project_board.task_attachment.TaskFileRepository;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
@@ -51,6 +52,8 @@ public class TaskService {
     private BoardRepository boardRepository;
     @Autowired
     private CollabBoardRepository collabBoardRepository;
+    @Autowired
+    private TaskFileRepository fileRepository;
 
     public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
@@ -96,6 +99,9 @@ public class TaskService {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
+
+        taskRepository.findById(taskId).orElseThrow(
+                () -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
         // Check the board's visibility
         Visibility visibility = board.getVisibility();
@@ -254,7 +260,13 @@ public class TaskService {
         if (!isExistingTask) {
             throw new ItemNotFoundException("Task not found with TASK ID: " + taskId);
         }
+
+
         Task task = taskRepository.findByIdAndBoardId(taskId, boardId);
+
+        for (TaskFile file : task.getFiles()) {
+            fileRepository.delete(file);
+        }
         TaskDTO deletedTask = modelMapper.map(task, TaskDTO.class);
         taskRepository.delete(task);
         return deletedTask;

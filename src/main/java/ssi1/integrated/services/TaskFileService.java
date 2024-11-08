@@ -1,5 +1,6 @@
 package ssi1.integrated.services;
 
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
-import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task.TaskRepository;
 import ssi1.integrated.project_board.task_attachment.TaskFile;
@@ -23,9 +23,6 @@ import ssi1.integrated.project_board.task_attachment.TaskFileRepository;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
-import ssi1.integrated.utils.FileSizeFormatter;
-
-import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,10 +37,6 @@ public class TaskFileService {
     private TaskRepository taskRepository;
     @Autowired
     private BoardRepository boardRepository;
-    @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
-    private ListMapper listMapper;
     @Autowired
     private JwtService jwtService;
     @Autowired
@@ -81,7 +74,7 @@ public class TaskFileService {
         return mappedFiles;
     }
 
-    public TaskFileDTO getFileById(String boardId, Integer taskId, Integer fileId, String accessToken) {
+    public TaskFileDTO getFileById(String boardId, Integer fileId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
@@ -106,6 +99,7 @@ public class TaskFileService {
         return new TaskFileDTO(file);
     }
 
+    @Transactional
     public List<TaskFile> saveAllFilesList(Integer taskId, List<TaskFile> fileList, String boardId, String jwtToken) {
         // ! Checking security
         Task existingTask = taskRepository.findById(taskId)
@@ -123,19 +117,12 @@ public class TaskFileService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-
         if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException("Only board owner and collaborators with write access can edit tasks.");
         }
 
         if (!isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
-        }
-
-        boolean isExistingTask = taskRepository.existsById(taskId);
-
-        if (!isExistingTask) {
-            throw new ItemNotFoundException("Task not found with TASK ID: " + taskId);
         }
 
         StringBuilder errorMessages = new StringBuilder();
@@ -186,7 +173,7 @@ public class TaskFileService {
                 .filter(file -> !duplicateFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName()))
                         && !exceedFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName()))
                         && !excessFiles.stream().anyMatch(f -> f.getFileName().equals(file.getFileName())))
-                .limit(MAX_FILES - currentFileCount) // Limit to the maximum allowed file count
+                .limit(allowedFilesCount)
                 .map(file -> {
                     TaskFile taskFile = new TaskFile();
                     taskFile.setFileName(file.getFileName());
@@ -208,6 +195,39 @@ public class TaskFileService {
         return validFiles;
     }
 
+    @Transactional
+    public TaskFileDTO deleteFileById(String boardId, Integer fileId, Integer taskId,String jwtToken){
+        // ! Checking security
+        Task existingTask = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
+
+        TaskFile file = fileRepository.findById(fileId).orElseThrow(() -> new ItemNotFoundException("File not found with FILE ID: " + fileId));
+
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        Visibility visibility = board.getVisibility();
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken, boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can edit tasks.");
+        }
+
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
+        }
+
+        fileRepository.delete(file);
+
+        return new TaskFileDTO(file);
+    }
+
     private void appendErrorMessage(StringBuilder errorMessages, String message, List<FileInfoDTO> fileInfos, List<FileInfoDTO> errorFiles) {
         if (errorMessages.length() > 0) {
             errorMessages.append(" , ");
@@ -216,8 +236,6 @@ public class TaskFileService {
 
         errorFiles.addAll(fileInfos);
     }
-
-
 
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);

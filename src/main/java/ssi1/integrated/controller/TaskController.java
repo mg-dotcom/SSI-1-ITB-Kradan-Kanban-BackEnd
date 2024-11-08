@@ -69,10 +69,9 @@ public class TaskController {
     @GetMapping("/{boardId}/tasks/{taskId}/files/{fileId}")
     public ResponseEntity<TaskFileDTO> getFileById(
             @PathVariable String boardId,
-            @PathVariable Integer taskId,
             @PathVariable Integer fileId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
-        return ResponseEntity.ok(taskFileService.getFileById(boardId, taskId,fileId, accessToken));
+        return ResponseEntity.ok(taskFileService.getFileById(boardId,fileId, accessToken));
     }
 
     @PutMapping("/{boardId}/tasks/{taskId}")
@@ -104,10 +103,20 @@ public class TaskController {
                 fileList.add(taskFile);
             }
             List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, fileList, boardId, jwtToken);
-            List<TaskFileDTO> fileDTOs = savedFiles.stream().map(TaskFileDTO::new).collect(Collectors.toList());
-            newTaskDTO.setFiles(fileDTOs);
+            newTaskDTO.setFiles(savedFiles);
         }
         return ResponseEntity.ok(newTaskDTO);
+    }
+
+    @DeleteMapping("/{boardId}/tasks/{taskId}/files/{fileId}")
+    public ResponseEntity<TaskFileDTO> deleteFile(
+            @PathVariable Integer taskId,
+            @PathVariable String boardId,
+            @PathVariable Integer fileId,
+            @RequestHeader(name = "Authorization") String accessToken)  {
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boardService.getBoardById(boardId);
+        return ResponseEntity.ok(taskFileService.deleteFileById(boardId,fileId ,taskId , jwtToken));
     }
 
     @PostMapping("/{boardId}/tasks")

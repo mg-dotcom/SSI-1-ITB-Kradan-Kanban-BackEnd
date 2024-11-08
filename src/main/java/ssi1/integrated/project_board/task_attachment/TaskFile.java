@@ -1,5 +1,6 @@
 package ssi1.integrated.project_board.task_attachment;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,8 +32,8 @@ public class TaskFile {
     private ZonedDateTime createdOn;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "taskId", nullable = false)
+    @JsonIgnore
     private Task task;
 }
 

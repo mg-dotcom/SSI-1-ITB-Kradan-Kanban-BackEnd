@@ -1,5 +1,6 @@
 package ssi1.integrated.dtos;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import ssi1.integrated.project_board.task_attachment.TaskFile;
@@ -8,7 +9,7 @@ import java.time.ZonedDateTime;
 
 @Getter
 @Setter
-
+@Data
 public class TaskFileDTO {
     private Integer id;
     private String fileName;

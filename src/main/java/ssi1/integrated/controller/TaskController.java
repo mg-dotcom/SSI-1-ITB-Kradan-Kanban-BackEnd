@@ -63,29 +63,37 @@ public class TaskController {
         return ResponseEntity.ok(taskFileService.getFilesByTaskId(taskId,boardId, accessToken));
     }
 
-    @PostMapping("/{boardId}/tasks/{taskId}/files")
-    public ResponseEntity<String> uploadFiles(
+    @PutMapping("/{boardId}/tasks/{taskId}")
+    public ResponseEntity<NewTaskDTO> updateTaskAndUploadFiles(
             @PathVariable String boardId,
             @PathVariable Integer taskId,
-            @RequestParam("files") MultipartFile[] files,
-            @RequestHeader(name = "Authorization", required = false) String accessToken) throws IOException {
+            @RequestPart(value = "files", required = false) MultipartFile[] files,  // Handle file upload
+            @RequestPart(value = "taskDto", required = false) NewTaskDTO newTaskDTO,
+            @RequestHeader(name = "Authorization") String accessToken) {
 
-        List<TaskFile> fileList = new ArrayList<>();
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boardService.getBoardById(boardId);
 
-        for (MultipartFile file : files) {
-            if (file.isEmpty()) {
-                return ResponseEntity.badRequest().body("One or more files are empty. Please upload valid files.");
-            }
-            TaskFile taskFile = new TaskFile();
-            taskFile.setFileName(file.getOriginalFilename());
-            taskFile.setFileSize(file.getSize());
-            taskFile.setCreatedOn(ZonedDateTime.now());
-            fileList.add(taskFile);
+        if (newTaskDTO != null) {
+            service.updateTask(taskId, newTaskDTO, boardId, jwtToken);
         }
-        taskFileService.saveAllFilesList(taskId, fileList);
-        return ResponseEntity.ok("Files uploaded successfully.");
-    }
 
+        if (files != null && files.length > 0) {
+            List<TaskFile> fileList = new ArrayList<>();
+            for (MultipartFile file : files) {
+                if (file.isEmpty()) {
+                    continue; // Skip empty file and move to the next one
+                }
+                TaskFile taskFile = new TaskFile();
+                taskFile.setFileName(file.getOriginalFilename());
+                taskFile.setFileSize(file.getSize());
+                taskFile.setCreatedOn(ZonedDateTime.now());
+                fileList.add(taskFile);
+            }
+            taskFileService.saveAllFilesList(taskId, fileList);
+        }
+        return ResponseEntity.ok(newTaskDTO);
+    }
 
     @PostMapping("/{boardId}/tasks")
     public ResponseEntity<GeneralTaskDTO> addTask(@RequestBody(required = false) NewTaskDTO newTaskDTO, @PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
@@ -101,10 +109,10 @@ public class TaskController {
         return ResponseEntity.ok(service.removeTask(taskId, boardId, jwtToken));
     }
 
-    @PutMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId, @RequestBody(required = false) NewTaskDTO newTaskDTO, @PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
-        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        boardService.getBoardById(boardId);
-        return ResponseEntity.ok(service.updateTask(taskId, newTaskDTO, boardId, jwtToken));
-    }
+//    @PutMapping("/{boardId}/tasks/{taskId}")
+//    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId, @RequestBody(required = false) NewTaskDTO newTaskDTO, @PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
+//        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+//        boardService.getBoardById(boardId);
+//        return ResponseEntity.ok(service.updateTask(taskId, newTaskDTO, boardId, jwtToken));
+//    }
 }

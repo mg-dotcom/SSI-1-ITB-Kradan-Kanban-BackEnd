@@ -10,6 +10,7 @@ import ssi1.integrated.configs.ListMapper;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
+import ssi1.integrated.dtos.TaskFileDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ForbiddenException;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
@@ -24,11 +25,13 @@ import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task.TaskRepository;
+import ssi1.integrated.project_board.task_attachment.TaskFile;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -54,6 +57,7 @@ public class TaskService {
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
+
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
                 sortBy
@@ -61,9 +65,9 @@ public class TaskService {
 
         Sort sort = Sort.by(sortOrder);
         Visibility visibility = board.getVisibility();
+        List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
 
         if (visibility == Visibility.PUBLIC && filterStatuses == null) {
-            List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
             return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
         }
 
@@ -80,7 +84,6 @@ public class TaskService {
         }
 
         if (filterStatuses == null) {
-            List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
             return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
         }
 

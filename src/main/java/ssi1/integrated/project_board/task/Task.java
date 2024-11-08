@@ -51,6 +51,5 @@ public class Task {
     private Board board;
 
     @OneToMany(mappedBy = "task", fetch = FetchType.EAGER)
-    @JsonIgnore
     private List<TaskFile> files;
 }

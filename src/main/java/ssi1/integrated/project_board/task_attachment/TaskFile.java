@@ -1,5 +1,6 @@
 package ssi1.integrated.project_board.task_attachment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,6 +31,7 @@ public class TaskFile {
     private ZonedDateTime createdOn;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "taskId", nullable = false)
     private Task task;
 }

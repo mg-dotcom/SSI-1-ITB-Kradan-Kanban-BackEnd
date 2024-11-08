@@ -54,7 +54,6 @@ public class TaskFileService {
     private static final int MAX_FILES = 10;
     private static final long MAX_FILE_SIZE = 20 * 1024 * 1024;
 
-
     public List<TaskFileDTO> getFilesByTaskId(Integer taskId, String boardId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
@@ -151,20 +150,17 @@ public class TaskFileService {
         }
 
         if (errorMessages.length() > 0) {
-            // Only add "The following files are not added:" at the end of all error messages
             errorMessages.append(" The following files are not added:");
             throw new FileUploadException(errorMessages.toString(), errorFiles);
         }
     }
 
     private void appendErrorMessage(StringBuilder errorMessages, String message, List<FileInfoDTO> fileInfos, List<FileInfoDTO> errorFiles) {
-        // Add the error message to the builder
         if (errorMessages.length() > 0) {
             errorMessages.append(" , ");
         }
         errorMessages.append(message);
 
-        // Add the files associated with the error
         errorFiles.addAll(fileInfos);
     }
 

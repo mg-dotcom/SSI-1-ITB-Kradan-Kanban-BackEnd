@@ -5,16 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ssi1.integrated.dtos.AccessRightDTO;
-import ssi1.integrated.dtos.AddCollabBoardDTO;
-import ssi1.integrated.dtos.CollabBoardDTO;
-import ssi1.integrated.dtos.CollaboratorDTO;
+import ssi1.integrated.dtos.*;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.CollabBoardService;
+import ssi1.integrated.services.InvitationService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +26,8 @@ public class CollabBoardController {
     private BoardService boardService;
     @Autowired
     private CollabBoardService collabBoardService;
+    @Autowired
+    private InvitationService invitationService;
     @GetMapping("/{boardId}/collabs")
     public ResponseEntity<List<CollaboratorDTO>> getAllCollaborators(
             @PathVariable String boardId,
@@ -56,6 +56,13 @@ public class CollabBoardController {
     @PatchMapping("/{boardId}/collabs/{collab_oid}")
     public CollabBoard updateCollaboratorAccessRight(@RequestHeader(name = "Authorization") String accessToken,@PathVariable String boardId,@PathVariable String collab_oid,@RequestBody AccessRightDTO accessRight){
         return collabBoardService.updateCollaboratorAccessRight(accessToken,boardId,collab_oid,accessRight);
+    }
+    @PatchMapping("/{boardId}/collab/invitation")
+    public CollabBoard invitationCollab(@RequestHeader(name = "Authorization") String accessToken,
+                                        @PathVariable String boardId,
+                                        @RequestBody(required = false) InvitationDTO invitationDTO) {
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        return invitationService.invitationCollab(jwtToken,boardId,invitationDTO);
     }
 
     @DeleteMapping("/{boardId}/collabs/{collab_oid}")

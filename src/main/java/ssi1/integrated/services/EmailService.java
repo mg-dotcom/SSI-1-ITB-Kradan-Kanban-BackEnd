@@ -22,7 +22,7 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject("Board Inviting!!");
-        message.setText(boardId);
+        message.setText(boardId + "สวัสดีนะ");
 
         mailSender.send(message);
         System.out.println("Sent mail successfully!");

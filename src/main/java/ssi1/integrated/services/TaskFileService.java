@@ -89,22 +89,22 @@ public class TaskFileService {
         StringBuilder errorMessages = new StringBuilder();
         List<FileInfoDTO> errorFiles = new ArrayList<>();
 
-        // Define individual error messages
+        // * Define individual error messages
         String duplicateFileMessage = "Filenames must be unique within the task.";
         String maxFilesMessage = "Each task can have at most " + MAX_FILES + " files.";
         String maxFilesExceedMessage = "Each file cannot be larger than " + (MAX_FILE_SIZE / (1024 * 1024)) + " MB.";
 
-        // 1. Check for duplicate filenames
+        // ! 1. Check for duplicate filenames
         List<FileInfoDTO> duplicateFileInfos = fileList.stream()
                 .filter(file -> taskRepository.existsByTaskIdAndFileName(taskId, file.getFileName()))
-                .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
+                .map(file ->  new FileInfoDTO(file.getFileName(), file.getFileSize()))
                 .toList();
 
         if (!duplicateFileInfos.isEmpty()) {
             appendErrorMessage(errorMessages, duplicateFileMessage, duplicateFileInfos, errorFiles);
         }
 
-        // 2. Check for files exceeding the maximum file size
+        // ! 2. Check for files exceeding the maximum file size
         List<FileInfoDTO> exceedFileInfos = fileList.stream()
                 .filter(file -> file.getFileSize() > MAX_FILE_SIZE)
                 .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
@@ -114,12 +114,13 @@ public class TaskFileService {
             appendErrorMessage(errorMessages, maxFilesExceedMessage, exceedFileInfos, errorFiles);
         }
 
-        // 3. Check for exceeding the file count limit
+        // ! 3. Check for exceeding the file count limit
         int currentFileCount = taskRepository.countFilesByTaskId(taskId);
         int allowedFilesCount = MAX_FILES - currentFileCount;
 
         List<FileInfoDTO> excessFiles = fileList.stream()
-                .filter(file -> !isFileInList(file, duplicateFileInfos) && !isFileInList(file, exceedFileInfos))
+                .filter(file -> !duplicateFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName()))
+                        && !exceedFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName())))
                 .skip(allowedFilesCount)
                 .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
                 .toList();
@@ -128,14 +129,12 @@ public class TaskFileService {
             appendErrorMessage(errorMessages, maxFilesMessage, excessFiles, errorFiles);
         }
 
-        // If there are errors, throw an exception with all accumulated error messages
-        if (errorMessages.length() > 0) {
-            throw new FileUploadException(errorMessages.toString(), errorFiles);
-        }
-
-        // Save valid files if no errors
+        // * Save valid files if no errors
         List<TaskFile> validFiles = fileList.stream()
-                .filter(file -> !isFileInList(file, errorFiles))
+                .filter(file -> !duplicateFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName()))
+                        && !exceedFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName()))
+                        && !excessFiles.stream().anyMatch(f -> f.getFileName().equals(file.getFileName())))
+                .limit(MAX_FILES - currentFileCount) // Limit to the maximum allowed file count
                 .map(file -> {
                     TaskFile taskFile = new TaskFile();
                     taskFile.setFileName(file.getFileName());
@@ -146,21 +145,22 @@ public class TaskFileService {
                 })
                 .toList();
 
-        fileRepository.saveAll(validFiles);
+        if (!validFiles.isEmpty()) {
+            fileRepository.saveAll(validFiles);
+            System.out.println("Successfully saved valid files.");
+        }
+
+        if (errorMessages.length() > 0) {
+            throw new FileUploadException(errorMessages.toString(), errorFiles);
+        }
     }
 
-    // Helper method to append error messages and add to error file list
     private void appendErrorMessage(StringBuilder errorMessages, String message, List<FileInfoDTO> fileInfos, List<FileInfoDTO> errorFiles) {
         if (errorMessages.length() > 0) {
             errorMessages.append(" , ");
         }
         errorMessages.append(message);
         errorFiles.addAll(fileInfos);
-    }
-
-    // Helper method to check if a file is already in a list
-    private boolean isFileInList(TaskFile file, List<FileInfoDTO> fileInfoList) {
-        return fileInfoList.contains(new FileInfoDTO(file.getFileName(), file.getFileSize()));
     }
 
     private boolean isBoardOwner(String userOid, String jwtToken) {
@@ -174,6 +174,7 @@ public class TaskFileService {
 
         return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
     }
+
     public boolean isCollaborator(String jwtToken, String boardId){
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());

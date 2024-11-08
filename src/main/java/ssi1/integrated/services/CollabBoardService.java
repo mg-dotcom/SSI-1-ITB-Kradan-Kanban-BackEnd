@@ -181,7 +181,9 @@ public class CollabBoardService {
             throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
         }
 
-        emailService.sendEmail(boardId,addCollabBoardDTO.getEmail());
+        UserLocal boardOwnername = userLocalService.getUserByOid(jwtPayload.getOid());
+
+        emailService.sendEmail(boardId,addCollabBoardDTO.getEmail(),boardOwnername.getName(),addCollabBoardDTO.getAccessRight().toString().toUpperCase(),board.getName());
         UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
 
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();

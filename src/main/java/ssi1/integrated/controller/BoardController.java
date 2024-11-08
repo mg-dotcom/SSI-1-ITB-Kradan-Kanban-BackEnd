@@ -86,14 +86,6 @@ public class BoardController {
         return ResponseEntity.ok(boardService.changeVisibility(boardId, boardVisibilityDTO, jwtToken));
     }
 
-//    @PatchMapping("/{boardId}/verify")
-//    public ResponseEntity<BoardVisibilityDTO> setBoardVisibility(
-//            @PathVariable String boardId,
-//            @RequestBody(required = false) BoardVisibilityDTO boardVisibilityDTO, @RequestHeader(name = "Authorization") String accessToken) {
-//        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-//        return ResponseEntity.ok(boardService.changeVisibility(boardId, boardVisibilityDTO, jwtToken));
-//    }
-
     @GetMapping("/visibility/{boardId}")
     public Visibility getBoardVisibility(@PathVariable String boardId) {
         return boardRepository.findVisibilityByBoardId(boardId);

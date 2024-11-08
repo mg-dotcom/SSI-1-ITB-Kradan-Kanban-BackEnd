@@ -57,7 +57,7 @@ public class CollabBoardController {
     public CollabBoard updateCollaboratorAccessRight(@RequestHeader(name = "Authorization") String accessToken,@PathVariable String boardId,@PathVariable String collab_oid,@RequestBody AccessRightDTO accessRight){
         return collabBoardService.updateCollaboratorAccessRight(accessToken,boardId,collab_oid,accessRight);
     }
-    @PatchMapping("/{boardId}/collab/invitation")
+    @PatchMapping("/{boardId}/collabs/invitations")
     public CollabBoard invitationCollab(@RequestHeader(name = "Authorization") String accessToken,
                                         @PathVariable String boardId,
                                         @RequestBody(required = false) InvitationDTO invitationDTO) {

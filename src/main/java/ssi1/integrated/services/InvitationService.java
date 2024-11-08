@@ -44,7 +44,7 @@ public class InvitationService {
         }
 
         try {
-            collaborator.setStatus(Status.valueOf(invitationDTO.getCoallabStatus().toUpperCase()));
+            collaborator.setStatus(Status.valueOf(invitationDTO.getCollabStatus().toUpperCase()));
         } catch (IllegalArgumentException e) {
             //400
             throw new BadRequestException("Invalid access right provided.");

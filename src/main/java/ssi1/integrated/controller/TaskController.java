@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:5173", "http://ip23ssi1.sit.kmutt.ac.th", "http://intproj23.sit.kmutt.ac.th"})
@@ -45,6 +46,7 @@ public class TaskController {
         return ResponseEntity.ok(service.getAllTasks(sortBy, filterStatuses, direction, boardId, accessToken));
     }
 
+
     @GetMapping("/{boardId}/tasks/{taskId}")
     public ResponseEntity<Task> getTaskById(
             @PathVariable Integer taskId,
@@ -63,6 +65,16 @@ public class TaskController {
         return ResponseEntity.ok(taskFileService.getFilesByTaskId(taskId,boardId, accessToken));
     }
 
+
+    @GetMapping("/{boardId}/tasks/{taskId}/files/{fileId}")
+    public ResponseEntity<TaskFileDTO> getFileById(
+            @PathVariable String boardId,
+            @PathVariable Integer taskId,
+            @PathVariable Integer fileId,
+            @RequestHeader(name = "Authorization", required = false) String accessToken) {
+        return ResponseEntity.ok(taskFileService.getFileById(boardId, taskId,fileId, accessToken));
+    }
+
     @PutMapping("/{boardId}/tasks/{taskId}")
     public ResponseEntity<?> updateTaskAndUploadFiles(
             @PathVariable String boardId,
@@ -77,18 +89,13 @@ public class TaskController {
         if (newTaskDTO == null) {
             return ResponseEntity.badRequest().body("Missing 'taskDto' part");
         }
-
         if (newTaskDTO.getId() == null) {
             newTaskDTO.setId(taskId);
         }
         service.updateTask(taskId, newTaskDTO, boardId, jwtToken);
 
-
         if (files != null && files.length > 0) {
             List<TaskFile> fileList = new ArrayList<>();
-            if (newTaskDTO.getFiles() == null) {
-                newTaskDTO.setFiles(fileList);
-            }
             for (MultipartFile file : files) {
                 TaskFile taskFile = new TaskFile();
                 taskFile.setFileName(file.getOriginalFilename());
@@ -96,8 +103,9 @@ public class TaskController {
                 taskFile.setCreatedOn(ZonedDateTime.now());
                 fileList.add(taskFile);
             }
-            List<TaskFile> taskFiles = taskFileService.saveAllFilesList(taskId, fileList, boardId, jwtToken);
-            newTaskDTO.setFiles(taskFiles);
+            List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, fileList, boardId, jwtToken);
+            List<TaskFileDTO> fileDTOs = savedFiles.stream().map(TaskFileDTO::new).collect(Collectors.toList());
+            newTaskDTO.setFiles(fileDTOs);
         }
         return ResponseEntity.ok(newTaskDTO);
     }

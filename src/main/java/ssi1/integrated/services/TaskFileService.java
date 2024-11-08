@@ -81,6 +81,31 @@ public class TaskFileService {
         return mappedFiles;
     }
 
+    public TaskFileDTO getFileById(String boardId, Integer taskId, Integer fileId, String accessToken) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        TaskFile file = fileRepository.findById(fileId).orElseThrow(() -> new ItemNotFoundException("File not found with FILE ID: " + fileId));
+        Visibility visibility = board.getVisibility();
+
+        if (visibility == Visibility.PUBLIC) {
+            return new TaskFileDTO(file);
+        }
+
+        String jwtToken = accessToken != null && accessToken.startsWith("Bearer ")
+                ? accessToken.substring(7)
+                : accessToken;
+
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken, boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+        return new TaskFileDTO(file);
+    }
+
     public List<TaskFile> saveAllFilesList(Integer taskId, List<TaskFile> fileList, String boardId, String jwtToken) {
         // ! Checking security
         Task existingTask = taskRepository.findById(taskId)

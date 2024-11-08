@@ -27,7 +27,7 @@ public class NewTaskDTO {
     private Integer status;
     private String statusName;
 
-    private List<TaskFile> files;
+    private List<TaskFileDTO> files;
 
     public void setTitle(String title) {
         if (title != null) {

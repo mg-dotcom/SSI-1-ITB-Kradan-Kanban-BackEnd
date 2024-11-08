@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 public class TaskFileDTO {
     private Integer id;
     private String fileName;
-    private Long fileSize; // Consider adding a utility to convert size to KB/MB if needed
+    private Long fileSize;
     private ZonedDateTime createdOn;
     private Integer taskId;
     private String boardId;

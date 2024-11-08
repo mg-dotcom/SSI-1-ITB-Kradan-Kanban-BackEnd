@@ -64,33 +64,40 @@ public class TaskController {
     }
 
     @PutMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<NewTaskDTO> updateTaskAndUploadFiles(
+    public ResponseEntity<?> updateTaskAndUploadFiles(
             @PathVariable String boardId,
             @PathVariable Integer taskId,
-            @RequestPart(value = "files", required = false) MultipartFile[] files,  // Handle file upload
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
             @RequestPart(value = "taskDto", required = false) NewTaskDTO newTaskDTO,
             @RequestHeader(name = "Authorization") String accessToken) {
 
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
 
-        if (newTaskDTO != null) {
-            service.updateTask(taskId, newTaskDTO, boardId, jwtToken);
+        if (newTaskDTO == null) {
+            return ResponseEntity.badRequest().body("Missing 'taskDto' part");
         }
+
+        if (newTaskDTO.getId() == null) {
+            newTaskDTO.setId(taskId);
+        }
+        service.updateTask(taskId, newTaskDTO, boardId, jwtToken);
+
 
         if (files != null && files.length > 0) {
             List<TaskFile> fileList = new ArrayList<>();
+            if (newTaskDTO.getFiles() == null) {
+                newTaskDTO.setFiles(fileList);
+            }
             for (MultipartFile file : files) {
-                if (file.isEmpty()) {
-                    continue; // Skip empty file and move to the next one
-                }
                 TaskFile taskFile = new TaskFile();
                 taskFile.setFileName(file.getOriginalFilename());
                 taskFile.setFileSize(file.getSize());
                 taskFile.setCreatedOn(ZonedDateTime.now());
                 fileList.add(taskFile);
             }
-            taskFileService.saveAllFilesList(taskId, fileList, boardId, jwtToken);
+            List<TaskFile> taskFiles = taskFileService.saveAllFilesList(taskId, fileList, boardId, jwtToken);
+            newTaskDTO.setFiles(taskFiles);
         }
         return ResponseEntity.ok(newTaskDTO);
     }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ssi1.integrated.project_board.task.Task;
+import ssi1.integrated.project_board.task_attachment.TaskFile;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class NewTaskDTO {
     private Integer status;
     private String statusName;
 
-    private List<TaskFileDTO> files;
+    private List<TaskFile> files;
 
     public void setTitle(String title) {
         if (title != null) {

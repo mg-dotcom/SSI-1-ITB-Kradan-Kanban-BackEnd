@@ -81,8 +81,8 @@ public class TaskFileService {
         return mappedFiles;
     }
 
-    public void saveAllFilesList(Integer taskId, List<TaskFile> fileList, String boardId, String jwtToken){
-        // Checking security
+    public List<TaskFile> saveAllFilesList(Integer taskId, List<TaskFile> fileList, String boardId, String jwtToken) {
+        // ! Checking security
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
@@ -92,9 +92,9 @@ public class TaskFileService {
 
         Visibility visibility = board.getVisibility();
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
-        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken, boardId);
 
-        if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaboratorWrite) {
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
@@ -174,13 +174,13 @@ public class TaskFileService {
 
         if (!validFiles.isEmpty()) {
             fileRepository.saveAll(validFiles);
-            System.out.println("Successfully saved valid files.");
         }
 
         if (errorMessages.length() > 0) {
             errorMessages.append(" The following files are not added:");
             throw new FileUploadException(errorMessages.toString(), errorFiles);
         }
+        return validFiles;
     }
 
     private void appendErrorMessage(StringBuilder errorMessages, String message, List<FileInfoDTO> fileInfos, List<FileInfoDTO> errorFiles) {

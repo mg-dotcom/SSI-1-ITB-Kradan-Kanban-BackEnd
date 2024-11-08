@@ -81,9 +81,37 @@ public class TaskFileService {
         return mappedFiles;
     }
 
-    public void saveAllFilesList(Integer taskId, List<TaskFile> fileList) {
+    public void saveAllFilesList(Integer taskId, List<TaskFile> fileList, String boardId, String jwtToken){
+        // Checking security
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
+
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        Visibility visibility = board.getVisibility();
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can edit tasks.");
+        }
+
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
+        }
+
+        boolean isExistingTask = taskRepository.existsById(taskId);
+
+        if (!isExistingTask) {
+            throw new ItemNotFoundException("Task not found with TASK ID: " + taskId);
+        }
 
         StringBuilder errorMessages = new StringBuilder();
         List<FileInfoDTO> errorFiles = new ArrayList<>();

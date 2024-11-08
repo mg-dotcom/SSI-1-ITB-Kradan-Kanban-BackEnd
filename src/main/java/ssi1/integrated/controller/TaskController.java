@@ -90,7 +90,7 @@ public class TaskController {
                 taskFile.setCreatedOn(ZonedDateTime.now());
                 fileList.add(taskFile);
             }
-            taskFileService.saveAllFilesList(taskId, fileList);
+            taskFileService.saveAllFilesList(taskId, fileList, boardId, jwtToken);
         }
         return ResponseEntity.ok(newTaskDTO);
     }

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import ssi1.integrated.project_board.task_attachment.TaskFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -50,5 +51,7 @@ public class NewTaskDTO {
         this.status = (statusId != null) ? statusId : 1;
     }
 
-
+    public void setFiles(List<TaskFile> files) {
+        this.files = (files != null) ? files : new ArrayList<>();
+    }
 }

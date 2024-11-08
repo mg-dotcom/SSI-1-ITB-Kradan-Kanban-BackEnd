@@ -97,7 +97,7 @@ public class TaskFileService {
         // ! 1. Check for duplicate filenames
         List<FileInfoDTO> duplicateFileInfos = fileList.stream()
                 .filter(file -> taskRepository.existsByTaskIdAndFileName(taskId, file.getFileName()))
-                .map(file ->  new FileInfoDTO(file.getFileName(), file.getFileSize()))
+                .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
                 .toList();
 
         if (!duplicateFileInfos.isEmpty()) {
@@ -151,17 +151,24 @@ public class TaskFileService {
         }
 
         if (errorMessages.length() > 0) {
+            // Only add "The following files are not added:" at the end of all error messages
+            errorMessages.append(" The following files are not added:");
             throw new FileUploadException(errorMessages.toString(), errorFiles);
         }
     }
 
     private void appendErrorMessage(StringBuilder errorMessages, String message, List<FileInfoDTO> fileInfos, List<FileInfoDTO> errorFiles) {
+        // Add the error message to the builder
         if (errorMessages.length() > 0) {
             errorMessages.append(" , ");
         }
         errorMessages.append(message);
+
+        // Add the files associated with the error
         errorFiles.addAll(fileInfos);
     }
+
+
 
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);

@@ -23,6 +23,7 @@ public class FileErrorResponse {
     private final String instance;
     private List<ValidationFileError> fileErrors; // List for file errors
 
+
     @Getter
     @RequiredArgsConstructor
     private static class ValidationFileError {

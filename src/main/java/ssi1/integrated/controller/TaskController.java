@@ -1,5 +1,7 @@
 package ssi1.integrated.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -75,37 +77,53 @@ public class TaskController {
     }
 
     @PutMapping("/{boardId}/tasks/{taskId}")
-    public ResponseEntity<?> updateTaskAndUploadFiles(
+    public ResponseEntity<?> updateTaskAndFiles(
             @PathVariable String boardId,
             @PathVariable Integer taskId,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
-            @RequestPart(value = "taskDto", required = false) NewTaskDTO newTaskDTO,
-            @RequestHeader(name = "Authorization") String accessToken) {
+            @RequestPart(value = "taskDto", required = false) String newTaskDTO,
+            @RequestHeader(name = "Authorization") String accessToken) throws JsonProcessingException {
+
+        // Deserialize taskDtoJson to a DTO object
+        ObjectMapper objectMapper = new ObjectMapper();
+        NewTaskDTO taskDto = objectMapper.readValue(newTaskDTO, NewTaskDTO.class);
 
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+
+        // Ensure taskDto is valid
+        if (newTaskDTO == null || taskDto.getTitle() == null || taskDto.getDescription() == null) {
+            return ResponseEntity.badRequest().body("Missing required task details");
+        }
+
+        // Ensure board exists
         boardService.getBoardById(boardId);
 
-        if (newTaskDTO == null) {
-            return ResponseEntity.badRequest().body("Missing 'taskDto' part");
+        // Set task ID if not present
+        if (taskDto.getId() == null) {
+            taskDto.setId(taskId);
         }
-        if (newTaskDTO.getId() == null) {
-            newTaskDTO.setId(taskId);
-        }
-        service.updateTask(taskId, newTaskDTO, boardId, jwtToken);
+
+        // Update task details
+        service.updateTask(taskId, taskDto, boardId, jwtToken);
+
+        List<TaskFile> fileList = new ArrayList<>();
 
         if (files != null && files.length > 0) {
-            List<TaskFile> fileList = new ArrayList<>();
             for (MultipartFile file : files) {
+                if (file.isEmpty() || file.getOriginalFilename().isEmpty()) {
+                    continue;
+                }
                 TaskFile taskFile = new TaskFile();
                 taskFile.setFileName(file.getOriginalFilename());
                 taskFile.setFileSize(file.getSize());
                 taskFile.setCreatedOn(ZonedDateTime.now());
                 fileList.add(taskFile);
             }
+            // Save the files and associate them with the task
             List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, fileList, boardId, jwtToken);
-            newTaskDTO.setFiles(savedFiles);
+            taskDto.setFiles(savedFiles); // Set the taskDto with the new files
         }
-        return ResponseEntity.ok(newTaskDTO);
+        return ResponseEntity.ok(taskDto); // Return taskDto as the response body
     }
 
     @DeleteMapping("/{boardId}/tasks/{taskId}/files/{fileId}")

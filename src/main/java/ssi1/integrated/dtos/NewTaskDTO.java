@@ -23,7 +23,7 @@ public class NewTaskDTO {
     @Size(max = 30, message = "size must be between 0 and 30")
     private String assignees;
 
-    private Integer status;
+    private Integer statusId;
     private String statusName;
 
     private List<TaskFile> files;
@@ -46,8 +46,8 @@ public class NewTaskDTO {
         this.assignees = (trimmedAssignees != null && !trimmedAssignees.isEmpty()) ? trimmedAssignees : null;
     }
 
-    public void setStatus(Integer statusId) {
-        this.status = (statusId != null) ? statusId : 1;
+    public void setStatusId(Integer statusId) {
+        this.statusId = (statusId != null) ? statusId : 1;
     }
 
 

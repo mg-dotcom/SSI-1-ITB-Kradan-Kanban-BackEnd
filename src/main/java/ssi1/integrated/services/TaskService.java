@@ -158,7 +158,7 @@ public class TaskService {
             };
         }
 
-        Status status = statusRepository.findById(newTask.getStatus())
+        Status status = statusRepository.findById(newTask.getStatusId())
                 .orElseThrow(() -> new BadRequestException("status does not exist"));
 
         if (board.getLimitMaximumTask() && !"No Status".equals(status.getName())
@@ -205,7 +205,7 @@ public class TaskService {
         if (!isExistingTask) {
             throw new ItemNotFoundException("Task not found with TASK ID: " + taskId);
         }
-        Status status = statusRepository.findById(inputTask.getStatus())
+        Status status = statusRepository.findById(inputTask.getStatusId())
                 .orElseThrow(() -> new BadRequestException("Status does not exist"));
 
         if (board.getLimitMaximumTask() && !"No Status".equals(status.getName())
@@ -229,7 +229,7 @@ public class TaskService {
         newTaskDTO.setTitle(existingTask.getTitle());
         newTaskDTO.setDescription(existingTask.getDescription());
         newTaskDTO.setAssignees(existingTask.getAssignees());
-        newTaskDTO.setStatus(existingTask.getStatus().getId());
+        newTaskDTO.setStatusId(existingTask.getStatus().getId());
         newTaskDTO.setStatusName(status.getName());
         return newTaskDTO;
     }

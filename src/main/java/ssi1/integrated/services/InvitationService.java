@@ -29,6 +29,8 @@ public class InvitationService {
     private CollabBoardRepository collabBoardRepository;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private CollabBoardService collabBoardService;
 
     @Transactional
     public CollabBoard invitationCollab(String accessToken, String boardId, InvitationDTO invitationDTO){
@@ -41,6 +43,10 @@ public class InvitationService {
         //404
         if(collaborator==null){
             throw new ItemNotFoundException("The "+jwtPayload.getOid()+" is not a collaborator on the board.");
+        }
+        if (invitationDTO.getCollabStatus() != Status.ACTIVE.toString().toUpperCase()){
+            collabBoardService.deleteCollaborator(accessToken,boardId,collaborator.getUser().getOid());
+            return collaborator;
         }
 
         try {

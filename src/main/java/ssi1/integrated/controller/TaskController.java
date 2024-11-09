@@ -85,10 +85,6 @@ public class TaskController {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
 
-        // ! Edit Task
-        if (files == null || files.length == 0) {
-            newTaskDTO.setFiles(new ArrayList<>());  // Ensure files is never null
-        }
         if (newTaskDTO == null) {
             return ResponseEntity.badRequest().body("Missing 'taskDto' part");
         }
@@ -97,13 +93,9 @@ public class TaskController {
         }
         service.updateTask(taskId, newTaskDTO, boardId, jwtToken);
 
-        // ! Edit Attachment
         if (files != null && files.length > 0) {
             List<TaskFile> fileList = new ArrayList<>();
             for (MultipartFile file : files) {
-                if (file.isEmpty() || file.getOriginalFilename().isEmpty()) {
-                    continue;
-                }
                 TaskFile taskFile = new TaskFile();
                 taskFile.setFileName(file.getOriginalFilename());
                 taskFile.setFileSize(file.getSize());

@@ -125,10 +125,8 @@ public class TaskFileService {
             throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
         }
 
-
         StringBuilder errorMessages = new StringBuilder();
         List<FileInfoDTO> errorFiles = new ArrayList<>();
-
 
         // * Define individual error messages
         String duplicateFileMessage = "Filenames must be unique within the task.";

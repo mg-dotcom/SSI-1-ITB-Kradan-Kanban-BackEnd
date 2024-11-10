@@ -91,7 +91,7 @@ public class TaskController {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
 
         // Ensure taskDto is valid
-        if (newTaskDTO == null || taskDto.getTitle() == null || taskDto.getDescription() == null) {
+        if (newTaskDTO == null || taskDto.getTitle() == null) {
             return ResponseEntity.badRequest().body("Missing required task details");
         }
 

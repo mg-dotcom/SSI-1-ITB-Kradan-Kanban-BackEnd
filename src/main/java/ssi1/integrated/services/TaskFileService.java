@@ -178,6 +178,8 @@ public class TaskFileService {
                     TaskFile taskFile = new TaskFile();
                     taskFile.setFileName(file.getFileName());
                     taskFile.setFileSize(file.getFileSize());
+                    taskFile.setFileData(file.getFileData());
+                    taskFile.setContentType(file.getContentType());
                     taskFile.setCreatedOn(ZonedDateTime.now());
                     taskFile.setTask(existingTask);
                     return taskFile;

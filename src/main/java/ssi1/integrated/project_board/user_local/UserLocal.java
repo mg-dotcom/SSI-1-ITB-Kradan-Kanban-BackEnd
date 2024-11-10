@@ -11,7 +11,6 @@ import lombok.ToString;
 @Entity
 @Table(name = "userLocal", schema = "integrated2")
 public class UserLocal {
-
     @Id
     @Column(name = "oid", nullable = false, unique = true, length = 36)
     private String oid;
@@ -24,6 +23,4 @@ public class UserLocal {
 
     @Column(name = "email", nullable = false, length = 50)
     private String email;
-
-
 }

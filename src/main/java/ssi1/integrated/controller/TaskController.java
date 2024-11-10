@@ -72,6 +72,7 @@ public class TaskController {
             @PathVariable String boardId,
             @PathVariable Integer fileId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
+        System.out.println("sdfsdfsf");
         return ResponseEntity.ok(taskFileService.getFileById(boardId,fileId, accessToken));
     }
 
@@ -81,7 +82,7 @@ public class TaskController {
             @PathVariable Integer taskId,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
             @RequestPart(value = "taskDto", required = false) String newTaskDTO,
-            @RequestHeader(name = "Authorization") String accessToken) throws JsonProcessingException {
+            @RequestHeader(name = "Authorization") String accessToken) throws IOException {
 
         // Deserialize taskDtoJson to a DTO object
         ObjectMapper objectMapper = new ObjectMapper();
@@ -129,6 +130,9 @@ public class TaskController {
                     TaskFile newFile = new TaskFile();
                     newFile.setFileName(fileName);
                     newFile.setFileSize(file.getSize());
+                    newFile.setFileData(file.getBytes());
+                    System.out.println(file.getContentType());
+                    newFile.setContentType(file.getContentType());
                     newFile.setCreatedOn(ZonedDateTime.now());
                     filesToSave.add(newFile);
                 }

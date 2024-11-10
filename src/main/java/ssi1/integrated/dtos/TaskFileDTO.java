@@ -6,6 +6,7 @@ import lombok.Setter;
 import ssi1.integrated.project_board.task_attachment.TaskFile;
 
 import java.time.ZonedDateTime;
+import java.util.Base64;
 
 @Getter
 @Setter
@@ -17,6 +18,8 @@ public class TaskFileDTO {
     private ZonedDateTime createdOn;
     private Integer taskId;
     private String boardId;
+    private byte[] fileData;
+    private String contentType;
 
     public TaskFileDTO(TaskFile taskFile) {
         this.id = taskFile.getId();
@@ -25,5 +28,8 @@ public class TaskFileDTO {
         this.createdOn = taskFile.getCreatedOn();
         this.taskId = taskFile.getTask().getId();
         this.boardId = taskFile.getTask().getBoard().getId();
+        this.fileData = taskFile.getFileData();
+        this.contentType = taskFile.getContentType();
     }
+
 }

@@ -1,6 +1,5 @@
 package ssi1.integrated.project_board.task_attachment;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,29 +10,37 @@ import java.time.ZonedDateTime;
 
 @Getter
 @Setter
-@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = "task") // Exclude the task from the toString to prevent potential circular reference issues
 @Entity
 @Table(name = "task_attachment", schema = "integrated2")
 public class TaskFile {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "attachmentId", unique = true)
+    @Column(name = "attachmentId", unique = true, nullable = false, updatable = false)
     private Integer id;
 
-
-    @Column(name = "fileName", nullable = false)
+    @Column(name = "fileName", nullable = false, length = 255)
     private String fileName;
 
     @Column(name = "fileSize", nullable = false)
     private Long fileSize;
 
+    @Column(name = "contentType", nullable = false, length = 100)
+    private String contentType;
+
+    @Lob
+    @Column(name = "fileData", nullable = false)
+    private byte[] fileData;
+
     @CreationTimestamp
     @Column(name = "createdOn", nullable = false, updatable = false)
     private ZonedDateTime createdOn;
 
-    @ManyToOne
+    @ManyToOne // Lazy fetching to optimize loading
     @JoinColumn(name = "taskId", nullable = false)
     @JsonIgnore
     private Task task;
 }
-

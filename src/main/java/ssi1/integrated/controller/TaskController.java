@@ -22,8 +22,7 @@ import ssi1.integrated.services.TaskService;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -106,25 +105,57 @@ public class TaskController {
         // Update task details
         service.updateTask(taskId, taskDto, boardId, jwtToken);
 
-        List<TaskFile> fileList = new ArrayList<>();
+        // Retrieve existing files
+        List<TaskFileDTO> existingFiles = taskFileService.getFilesByTaskId(taskId, boardId, accessToken);
+        Map<String, TaskFileDTO> existingFileMap = existingFiles.stream()
+                .collect(Collectors.toMap(TaskFileDTO::getFileName, file -> file));
 
-        if (files != null && files.length > 0) {
+        List<TaskFile> filesToSave = new ArrayList<>();
+        Set<String> updatedFileNames = new HashSet<>();
+
+        // Process input files array
+        if (files != null) {
             for (MultipartFile file : files) {
-                if (file.isEmpty() || file.getOriginalFilename().isEmpty()) {
+                String fileName = file.getOriginalFilename();
+                // Skip if filename is empty or null
+                if (file.isEmpty() || fileName == null || fileName.isEmpty()) {
                     continue;
                 }
-                TaskFile taskFile = new TaskFile();
-                taskFile.setFileName(file.getOriginalFilename());
-                taskFile.setFileSize(file.getSize());
-                taskFile.setCreatedOn(ZonedDateTime.now());
-                fileList.add(taskFile);
+
+                updatedFileNames.add(fileName);
+
+                // If the file is not in existing files, it's a new file to add
+                if (!existingFileMap.containsKey(fileName)) {
+                    TaskFile newFile = new TaskFile();
+                    newFile.setFileName(fileName);
+                    newFile.setFileSize(file.getSize());
+                    newFile.setCreatedOn(ZonedDateTime.now());
+                    filesToSave.add(newFile);
+                }
             }
-            // Save the files and associate them with the task
-            List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, fileList, boardId, jwtToken);
-            taskDto.setFiles(savedFiles); // Set the taskDto with the new files
+
+            // Delete files that are no longer in the updated list
+            for (TaskFileDTO existingFile : existingFiles) {
+                if (!updatedFileNames.contains(existingFile.getFileName())) {
+                    taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
+                }
+            }
+
+        } else {
+            // If files is null, clear all existing files
+            for (TaskFileDTO existingFile : existingFiles) {
+                taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
+            }
         }
+
+
+        // Save new files to the task
+        List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, filesToSave, boardId, jwtToken);
+        taskDto.setFiles(savedFiles); // Set the taskDto with the new files
+
         return ResponseEntity.ok(taskDto); // Return taskDto as the response body
     }
+
 
     @DeleteMapping("/{boardId}/tasks/{taskId}/files/{fileId}")
     public ResponseEntity<TaskFileDTO> deleteFile(

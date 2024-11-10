@@ -44,8 +44,8 @@ public class InvitationService {
         if(collaborator==null){
             throw new ItemNotFoundException("The "+jwtPayload.getOid()+" is not a collaborator on the board.");
         }
-        if (invitationDTO.getCollabStatus() != Status.ACTIVE.toString().toUpperCase()){
-            collabBoardService.deleteCollaborator(accessToken,boardId,collaborator.getUser().getOid());
+        if (!invitationDTO.getCollabStatus().equalsIgnoreCase(Status.ACTIVE.toString())) {
+            collabBoardService.deleteCollaborator(accessToken, boardId, collaborator.getUser().getOid());
             return collaborator;
         }
 
@@ -53,7 +53,7 @@ public class InvitationService {
             collaborator.setStatus(Status.valueOf(invitationDTO.getCollabStatus().toUpperCase()));
         } catch (IllegalArgumentException e) {
             //400
-            throw new BadRequestException("Invalid access right provided.");
+            throw new BadRequestException("Invalid Status provided.");
         }
 
         return collaborator;

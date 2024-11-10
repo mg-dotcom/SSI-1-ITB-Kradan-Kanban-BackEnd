@@ -302,7 +302,7 @@ public class StatusService {
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
-        return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
+        return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE && collaborator.getStatus() == ssi1.integrated.project_board.collab_management.Status.ACTIVE;
     }
 
     public boolean isCollaborator(String jwtToken, String boardId){

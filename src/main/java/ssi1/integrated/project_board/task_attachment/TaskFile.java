@@ -39,7 +39,7 @@ public class TaskFile {
     @Column(name = "createdOn", nullable = false, updatable = false)
     private ZonedDateTime createdOn;
 
-    @ManyToOne // Lazy fetching to optimize loading
+    @ManyToOne
     @JoinColumn(name = "taskId", nullable = false)
     @JsonIgnore
     private Task task;

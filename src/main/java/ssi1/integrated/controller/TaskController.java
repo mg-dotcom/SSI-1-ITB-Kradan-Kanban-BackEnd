@@ -129,8 +129,6 @@ public class TaskController {
 
                 // If the file is not in existing files, it's a new file to add
                 if (!existingFileMap.containsKey(fileName)) {
-
-                    System.out.println("HIT2");
                     TaskFile newFile = new TaskFile();
                     newFile.setFileName(fileName);
                     newFile.setFileSize(file.getSize());

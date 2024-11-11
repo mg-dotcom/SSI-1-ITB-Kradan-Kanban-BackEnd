@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.collab_management.AccessRight;
+import ssi1.integrated.project_board.collab_management.Status;
 
 import java.time.ZonedDateTime;
 
@@ -20,8 +21,10 @@ public class ContributorBoardDTO {
     @NotNull(message = "Visibility cannot be null")
     private Visibility visibility;
     private String ownerName;
+    private String ownerUserName;
     private String color;
     private String emoji;
+    private Status status;
     private AccessRight accessRight;
     private ZonedDateTime addedOn;
 

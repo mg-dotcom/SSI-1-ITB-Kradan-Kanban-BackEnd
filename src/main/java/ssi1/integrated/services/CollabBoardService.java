@@ -1,5 +1,6 @@
 package ssi1.integrated.services;
 
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,13 @@ import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
+import ssi1.integrated.project_board.collab_management.Status;
 import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +49,8 @@ public class CollabBoardService {
     private ModelMapper modelMapper;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private EmailService emailService;
 
     public List<CollaboratorDTO> getAllCollabsBoard(String accessToken, String boardId){
         Board board = boardRepository.findById(boardId).orElseThrow(
@@ -62,6 +67,7 @@ public class CollabBoardService {
             collaboratorDTO.setEmail(foundedUserLocal.getEmail());
             collaboratorDTO.setAccessRight(collabBoard.getAccessRight());
             collaboratorDTO.setAddedOn(collabBoard.getAddedOn());
+            collaboratorDTO.setStatus(collabBoard.getStatus());
 
             collaboratorDTOList.add(collaboratorDTO);
         }
@@ -123,7 +129,7 @@ public class CollabBoardService {
         return collaboratorDTO;
     }
 
-    public CollabBoardDTO addCollabBoard(String accessToken, String boardId, AddCollabBoardDTO addCollabBoardDTO){
+    public CollabBoardDTO addCollabBoard(String accessToken, String boardId, AddCollabBoardDTO addCollabBoardDTO) throws MessagingException, UnsupportedEncodingException {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
@@ -177,6 +183,10 @@ public class CollabBoardService {
         if (foundedUserByEmail == null) {
             throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
         }
+
+        UserLocal boardOwnername = userLocalService.getUserByOid(jwtPayload.getOid());
+
+        emailService.sendEmail(boardId,addCollabBoardDTO.getEmail(),boardOwnername.getName(),addCollabBoardDTO.getAccessRight().toString().toUpperCase(),board.getName(),addCollabBoardDTO.getUrl());
         UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
 
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();
@@ -184,12 +194,15 @@ public class CollabBoardService {
             newCollabBoard.setUser(savedUserToLocal);
             newCollabBoard.setAccessRight(addCollabBoardDTO.getAccessRight());
             newCollabBoard.setBoard(board);
+            newCollabBoard.setStatus(Status.PENDING);
 
             collabBoardDTO.setOid(savedUserToLocal.getOid());
             collabBoardDTO.setBoardId(boardId);
             collabBoardDTO.setName(savedUserToLocal.getName());
             collabBoardDTO.setEmail(addCollabBoardDTO.getEmail());
             collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
+            collabBoardDTO.setStatus(Status.PENDING);
+
             System.out.println("Unsave.");
             collabBoardRepository.save(newCollabBoard);
             System.out.println("Saved." + newCollabBoard.getUser().getEmail());
@@ -248,6 +261,8 @@ public class CollabBoardService {
         return collaborator;
     }
 
+    
+
     @Transactional
     public void deleteCollaborator(String accessToken, String boardId,String collabsOid){
         Board board = boardRepository.findById(boardId)
@@ -262,7 +277,6 @@ public class CollabBoardService {
         if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
-
 
         if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
             throw new ForbiddenException("Only board owner and collaborators with write access can add tasks.");
@@ -288,8 +302,6 @@ public class CollabBoardService {
         }
 
         collabBoardRepository.delete(collaborator);
-
-
     }
 
     private boolean isBoardOwner(String userOid, String jwtToken) {
@@ -303,7 +315,7 @@ public class CollabBoardService {
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
-        return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
+        return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE && collaborator.getStatus() == ssi1.integrated.project_board.collab_management.Status.ACTIVE;
     }
 
     public boolean isCollaborator(String jwtToken, String boardId){

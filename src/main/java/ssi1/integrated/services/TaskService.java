@@ -50,44 +50,49 @@ public class TaskService {
     private CollabBoardRepository collabBoardRepository;
 
     public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId, String accessToken) {
+        // Fetch the board by ID
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
+        // Determine the sort order
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
                 sortBy
         );
-
         Sort sort = Sort.by(sortOrder);
+
+        // Check board visibility
         Visibility visibility = board.getVisibility();
 
+        // If the board is public and no filter is applied, return all tasks sorted
         if (visibility == Visibility.PUBLIC && filterStatuses == null) {
             List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
             return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
         }
 
+        // If the board is public with filters applied, return filtered tasks
         if (visibility == Visibility.PUBLIC) {
             return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
         }
 
+        // Extract the token if prefixed with "Bearer"
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+<<<<<<< Updated upstream
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 //        if (!isOwner && !isPending(jwtToken,boardId)) {
 //            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
 //        }
+=======
 
-        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
+        // Check if the user is pending and not the owner
+        if (isPendingAndNotOwner(jwtToken, boardId, board.getUserOid())) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
+>>>>>>> Stashed changes
 
-
-        if (filterStatuses == null) {
-            List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
-            return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
-        }
-
+        // Return filtered tasks for private boards
         return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
     }
 
@@ -110,17 +115,25 @@ public class TaskService {
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken, boardId);
 
+<<<<<<< Updated upstream
 //        if (!isOwner && !isPending(jwtToken,boardId)) {
 //            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
 //        }
 //        if (isPending(jwtToken,boardId)){
 //            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
 //        }
+=======
+>>>>>>> Stashed changes
 
         // Check access for private boards
         if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
+
+        if (isPendingAndNotOwner(jwtToken, boardId, board.getUserOid())) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
 
         // If the board is private and the user has access, fetch the task
         return taskRepository.findByIdAndBoardId(taskId, boardId);
@@ -149,6 +162,7 @@ public class TaskService {
         if (!isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
         }
+
 
         if (newTask == null) {
             throw new BadRequestException("Invalid task data.");
@@ -200,6 +214,7 @@ public class TaskService {
         if (!isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
         }
+
 
         boolean isExistingTask = taskRepository.existsById(taskId);
 
@@ -279,7 +294,34 @@ public class TaskService {
     public boolean isCollaboratorWriteAccess(String jwtToken, String boardId) {
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+        System.out.println(collaborator);
         return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE && collaborator.getStatus() == ssi1.integrated.project_board.collab_management.Status.ACTIVE;
+    }
+
+    public boolean isPendingAndNotOwner(String jwtToken, String boardId, String userOid) {
+        // Extract the user's information from the JWT token
+        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+
+        // Fetch the user based on the provided userOid
+        User user = userService.getUserByOid(userOid);
+
+        // Check if the user is the owner
+        if (user.getOid().equals(jwtPayload.getOid())) {
+            return false; // User is the owner, not pending
+        }
+
+        // Fetch the collaborator record for the given board and user from the token
+        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+
+        // Debugging prints (can be removed later)
+        System.out.println("Collaborator Status: " + (collaborator != null ? collaborator.getStatus() : "null"));
+        System.out.println("User Oid: " + user.getOid());
+        System.out.println("JwtPayload Oid: " + jwtPayload.getOid());
+
+        // Check if collaborator exists and is in a "PENDING" state
+        return collaborator != null
+                && collaborator.getStatus() == ssi1.integrated.project_board.collab_management.Status.PENDING
+                && !user.getOid().equals(jwtPayload.getOid());
     }
 
     public boolean isCollaborator(String jwtToken, String boardId){
@@ -288,6 +330,9 @@ public class TaskService {
         return collaborator != null;
     }
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 
 }

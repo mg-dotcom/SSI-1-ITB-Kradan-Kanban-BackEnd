@@ -61,12 +61,14 @@ public class StatusService {
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
+
+
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
-        if (isPending(jwtToken,boardId)){
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
+//        if (!isOwner && !isPending(jwtToken,boardId) ) {
+//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+//        }
 
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         return statusRepository.findByBoardId(boardId, sort);
@@ -93,9 +95,9 @@ public class StatusService {
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
 
-        if (isPending(jwtToken,boardId)){
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
+//        if (!isOwner && !isPending(jwtToken,boardId)) {
+//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+//        }
 
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
@@ -318,11 +320,11 @@ public class StatusService {
         return collaborator!=null;
     }
 
-    public boolean isPending(String jwtToken, String boardId){
-        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-        return collaborator.getStatus()== ssi1.integrated.project_board.collab_management.Status.PENDING;
-    }
+//    public boolean isPending(String jwtToken, String boardId){
+//        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+//        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
+//        return collaborator.getStatus()== ssi1.integrated.project_board.collab_management.Status.PENDING;
+//    }
 
     // Helper method to check board access rights
     private void authorizeBoardAccess(String boardId, String jwtToken, boolean requireWriteAccess) {

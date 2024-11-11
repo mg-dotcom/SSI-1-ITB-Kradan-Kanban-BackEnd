@@ -74,10 +74,9 @@ public class TaskService {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
-
-        if (isPending(jwtToken,boardId)){
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
+//        if (!isOwner && !isPending(jwtToken,boardId)) {
+//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+//        }
 
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
@@ -111,9 +110,12 @@ public class TaskService {
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken, boardId);
 
-        if (isPending(jwtToken,boardId)){
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
+//        if (!isOwner && !isPending(jwtToken,boardId)) {
+//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+//        }
+//        if (isPending(jwtToken,boardId)){
+//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+//        }
 
         // Check access for private boards
         if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
@@ -286,10 +288,6 @@ public class TaskService {
         return collaborator != null;
     }
 
-    public boolean isPending(String jwtToken, String boardId){
-        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-        return collaborator.getStatus()== ssi1.integrated.project_board.collab_management.Status.PENDING;
-    }
+
 
 }

@@ -131,7 +131,6 @@ public class TaskController {
                     newFile.setFileName(fileName);
                     newFile.setFileSize(file.getSize());
                     newFile.setFileData(file.getBytes());
-                    System.out.println(file.getContentType());
                     newFile.setContentType(file.getContentType());
                     newFile.setCreatedOn(ZonedDateTime.now());
                     filesToSave.add(newFile);

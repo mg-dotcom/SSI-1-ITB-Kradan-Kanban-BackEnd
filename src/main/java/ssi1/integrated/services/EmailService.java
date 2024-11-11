@@ -1,11 +1,13 @@
 package ssi1.integrated.services;
 
-import org.springframework.security.core.AuthenticationException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import ssi1.integrated.dtos.SendEmailDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import ssi1.integrated.dtos.SendEmailDTO;
+
 
 @Service
 public class EmailService {
@@ -24,6 +26,7 @@ public class EmailService {
         message.setSubject(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'");
         message.setText(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'."+ "You can accept or decline this invitation at "+"http://localhost:8080/v3/boards/"+boardId+"/collabs/invitations");
         message.setReplyTo("noreply@intproj23.sit.kmutt.ac.th");
+
         mailSender.send(message);
         System.out.println("Sent mail successfully!");
     }

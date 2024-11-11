@@ -23,7 +23,7 @@ public class EmailService {
         message.setTo(to);
         message.setSubject(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'");
         message.setText(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'."+ "You can accept or decline this invitation at "+"http://localhost:8080/v3/boards/"+boardId+"/collabs/invitations");
-
+        message.setReplyTo("noreply@intproj23.sit.kmutt.ac.th");
         mailSender.send(message);
         System.out.println("Sent mail successfully!");
     }

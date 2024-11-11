@@ -12,5 +12,6 @@ public class AddCollabBoardDTO {
     private String email;
     @NotNull(message = "Access right must not be null")
     private AccessRight accessRight;
+    private String url;
 
 }

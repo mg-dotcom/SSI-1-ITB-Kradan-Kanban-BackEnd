@@ -186,7 +186,7 @@ public class CollabBoardService {
 
         UserLocal boardOwnername = userLocalService.getUserByOid(jwtPayload.getOid());
 
-        emailService.sendEmail(boardId,addCollabBoardDTO.getEmail(),boardOwnername.getName(),addCollabBoardDTO.getAccessRight().toString().toUpperCase(),board.getName());
+        emailService.sendEmail(boardId,addCollabBoardDTO.getEmail(),boardOwnername.getName(),addCollabBoardDTO.getAccessRight().toString().toUpperCase(),board.getName(),addCollabBoardDTO.getUrl());
         UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
 
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();

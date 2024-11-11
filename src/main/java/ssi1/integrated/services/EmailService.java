@@ -26,7 +26,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendEmail(String boardId,String to,String boardOwner,String accessRight,String boardName) throws MessagingException, UnsupportedEncodingException {
+    public void sendEmail(String boardId,String to,String boardOwner,String accessRight,String boardName,String url) throws MessagingException, UnsupportedEncodingException {
 
         MimeMessage mailMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mailMessage, false, "UTF-8");
@@ -36,13 +36,13 @@ public class EmailService {
 //        message.setText(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'."+ "You can accept or decline this invitation at "+"https://intproj23.sit.kmutt.ac.th/ssi1/board/"+boardId+"/collab/invitations");
 //        String replyTo = "DO_NOT_REPLY_" + NO_REPLY_SUFFIX;
 //        message.setReplyTo(replyTo);
-        String replyTo = "DO_NOT_REPLY_" + NO_REPLY_SUFFIX;
+        String replyTo =  NO_REPLY_SUFFIX;
 
         String fromDisplayName = "ITBKK-SSI1";
         helper.setFrom(fromEmailId, fromDisplayName);
         helper.setReplyTo(replyTo);
         helper.setTo(to);
-        helper.setText(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'."+ "You can accept or decline this invitation at "+"https://intproj23.sit.kmutt.ac.th/ssi1/board/"+boardId+"/collab/invitations");
+        helper.setText(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'."+ "You can accept or decline this invitation at "+url);
         helper.setSubject(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'");
 
         mailSender.send(mailMessage);

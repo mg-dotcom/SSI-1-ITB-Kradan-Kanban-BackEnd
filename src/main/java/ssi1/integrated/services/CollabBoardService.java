@@ -65,6 +65,7 @@ public class CollabBoardService {
             collaboratorDTO.setEmail(foundedUserLocal.getEmail());
             collaboratorDTO.setAccessRight(collabBoard.getAccessRight());
             collaboratorDTO.setAddedOn(collabBoard.getAddedOn());
+            collaboratorDTO.setStatus(collabBoard.getStatus());
 
             collaboratorDTOList.add(collaboratorDTO);
         }

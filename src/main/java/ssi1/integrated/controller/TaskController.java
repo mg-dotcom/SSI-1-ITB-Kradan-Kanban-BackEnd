@@ -84,6 +84,7 @@ public class TaskController {
             @RequestPart(value = "taskDto", required = false) String newTaskDTO,
             @RequestHeader(name = "Authorization") String accessToken) throws IOException {
 
+
         // Deserialize taskDtoJson to a DTO object
         ObjectMapper objectMapper = new ObjectMapper();
         NewTaskDTO taskDto = objectMapper.readValue(newTaskDTO, NewTaskDTO.class);
@@ -118,8 +119,9 @@ public class TaskController {
         if (files != null) {
             for (MultipartFile file : files) {
                 String fileName = file.getOriginalFilename();
+
                 // Skip if filename is empty or null
-                if (file.isEmpty() || fileName == null || fileName.isEmpty()) {
+                if ( fileName == null || fileName.isEmpty()) {
                     continue;
                 }
 
@@ -127,6 +129,8 @@ public class TaskController {
 
                 // If the file is not in existing files, it's a new file to add
                 if (!existingFileMap.containsKey(fileName)) {
+
+                    System.out.println("HIT2");
                     TaskFile newFile = new TaskFile();
                     newFile.setFileName(fileName);
                     newFile.setFileSize(file.getSize());
@@ -155,6 +159,7 @@ public class TaskController {
         // Save new files to the task
         List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, filesToSave, boardId, jwtToken);
         taskDto.setFiles(savedFiles); // Set the taskDto with the new files
+        updatedFileNames.clear();
 
         return ResponseEntity.ok(taskDto); // Return taskDto as the response body
     }

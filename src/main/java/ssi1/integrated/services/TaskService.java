@@ -78,19 +78,17 @@ public class TaskService {
 
         // Extract the token if prefixed with "Bearer"
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-<<<<<<< Updated upstream
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
-//        if (!isOwner && !isPending(jwtToken,boardId)) {
-//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-//        }
-=======
+
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
 
         // Check if the user is pending and not the owner
         if (isPendingAndNotOwner(jwtToken, boardId, board.getUserOid())) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
->>>>>>> Stashed changes
 
         // Return filtered tasks for private boards
         return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
@@ -115,15 +113,6 @@ public class TaskService {
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken, boardId);
 
-<<<<<<< Updated upstream
-//        if (!isOwner && !isPending(jwtToken,boardId)) {
-//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-//        }
-//        if (isPending(jwtToken,boardId)){
-//            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-//        }
-=======
->>>>>>> Stashed changes
 
         // Check access for private boards
         if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
@@ -330,9 +319,6 @@ public class TaskService {
         return collaborator != null;
     }
 
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
 
 }

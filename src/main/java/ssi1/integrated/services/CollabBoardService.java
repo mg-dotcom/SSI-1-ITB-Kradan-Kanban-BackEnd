@@ -198,6 +198,8 @@ public class CollabBoardService {
             collabBoardDTO.setName(savedUserToLocal.getName());
             collabBoardDTO.setEmail(addCollabBoardDTO.getEmail());
             collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
+            collabBoardDTO.setStatus(Status.PENDING);
+
             System.out.println("Unsave.");
             collabBoardRepository.save(newCollabBoard);
             System.out.println("Saved." + newCollabBoard.getUser().getEmail());

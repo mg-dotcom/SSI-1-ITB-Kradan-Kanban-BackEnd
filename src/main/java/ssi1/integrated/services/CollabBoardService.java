@@ -276,7 +276,6 @@ public class CollabBoardService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-
         if (visibility == Visibility.PUBLIC && !isOwner && !isCollaborator) {
             throw new ForbiddenException("Only board owner and collaborators with write access can add tasks.");
         }

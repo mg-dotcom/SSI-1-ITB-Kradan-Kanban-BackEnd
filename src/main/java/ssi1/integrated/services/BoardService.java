@@ -74,7 +74,9 @@ public class BoardService {
             contributorBoardDTO.setBoardName(board.get().getName());
             contributorBoardDTO.setVisibility(board.get().getVisibility());
             contributorBoardDTO.setOwnerName(ownerOfBoard.getName());
+            contributorBoardDTO.setOwnerUserName(ownerOfBoard.getUsername());
             contributorBoardDTO.setAccessRight(eachCollabsBoard.getAccessRight());
+            contributorBoardDTO.setStatus(eachCollabsBoard.getStatus());
             contributorBoardDTO.setAddedOn(eachCollabsBoard.getAddedOn());
 
             collabsBoardDTOs.add(contributorBoardDTO);

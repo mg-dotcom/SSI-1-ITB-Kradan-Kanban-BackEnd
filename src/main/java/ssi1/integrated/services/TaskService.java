@@ -95,16 +95,15 @@ public class TaskService {
         if (filterStatuses == null) {
             return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
             // Check if the user is pending and not the owner
-            if (isPendingAndNotOwner(jwtToken, boardId, board.getUserOid())) {
-                throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-
-            }
-
-            // Return filtered tasks for private boards
-            return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
         }
-    }
 
+        if (isPendingAndNotOwner(jwtToken, boardId, board.getUserOid())) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+
+        }
+
+        return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
+        }
 
         public Task getTaskById (Integer taskId, String boardId, String accessToken){
             // Fetch the board by ID

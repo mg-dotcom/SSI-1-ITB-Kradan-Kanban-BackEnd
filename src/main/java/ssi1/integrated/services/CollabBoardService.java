@@ -323,4 +323,5 @@ public class CollabBoardService {
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
         return collaborator!=null;
     }
+
 }

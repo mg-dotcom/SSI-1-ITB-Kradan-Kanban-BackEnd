@@ -92,14 +92,14 @@ public class TaskService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
+        if (isPendingAndNotOwner(jwtToken, boardId, board.getUserOid())) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
         if (filterStatuses == null) {
             return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
             // Check if the user is pending and not the owner
-        }
-
-        if (isPendingAndNotOwner(jwtToken, boardId, board.getUserOid())) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-
         }
 
         return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);

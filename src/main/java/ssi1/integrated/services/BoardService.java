@@ -56,6 +56,7 @@ public class BoardService {
             throw new IllegalStateException("JWT Payload is null");
         }
 
+
         User user = userService.getUserByOid(jwtPayload.getOid());
         List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOidOrderByCreatedOnAsc(user.getOid());
         List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_OidOrderByAddedOnAsc(user.getOid());
@@ -161,8 +162,10 @@ public class BoardService {
             return boardDTO;
         }
 
+
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
+        
 
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
@@ -277,6 +280,5 @@ public class BoardService {
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
         return collaborator!=null;
     }
-
 
 }

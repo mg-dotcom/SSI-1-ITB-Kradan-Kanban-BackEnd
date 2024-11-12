@@ -52,7 +52,6 @@ public class StatusService {
         Visibility visibility = board.getVisibility();
 
         if (visibility == Visibility.PUBLIC) {
-            System.out.println("test");
             Sort sort = Sort.by(Sort.Direction.ASC, "id");
             return statusRepository.findByBoardId(boardId, sort);
         }
@@ -63,14 +62,11 @@ public class StatusService {
 
 
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
+            System.out.println("visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator");
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
         if (isPendingAndNotOwner(jwtToken, boardId, board.getUserOid())) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
-
-        if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 

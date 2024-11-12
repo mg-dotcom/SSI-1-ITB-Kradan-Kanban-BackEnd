@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.AccessRightDTO;
+import ssi1.integrated.dtos.BoardInvitationDTO;
 import ssi1.integrated.dtos.CollaboratorDTO;
 import ssi1.integrated.dtos.InvitationDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
@@ -20,6 +21,7 @@ import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
+import ssi1.integrated.user_account.UserRepository;
 
 @Service
 public class InvitationService {
@@ -31,6 +33,8 @@ public class InvitationService {
     private JwtService jwtService;
     @Autowired
     private CollabBoardService collabBoardService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional
     public CollabBoard invitationCollab(String accessToken, String boardId, InvitationDTO invitationDTO){
@@ -58,4 +62,25 @@ public class InvitationService {
 
         return collaborator;
     }
+
+    public BoardInvitationDTO getInvitaionStatus(String accessToken, String boardId){
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
+
+        JwtPayload jwtPayload=jwtService.extractPayload(accessToken);
+        User owner = userRepository.findByOid(board.getUserOid());
+
+        CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(board.getId(),jwtPayload.getOid());
+        //404
+        if(collaborator==null){
+            throw new ItemNotFoundException("The "+jwtPayload.getOid()+" is not a collaborator on the board.");
+        }
+        BoardInvitationDTO boardInvitationDTO = new BoardInvitationDTO();
+        boardInvitationDTO.setAccessRight(collaborator.getAccessRight().toString());
+        boardInvitationDTO.setInvitationStatus(collaborator.getStatus().toString());
+        boardInvitationDTO.setOwnerName(owner.getName());
+        boardInvitationDTO.setBoardName(board.getName());
+        return boardInvitationDTO;
+    }
+
 }

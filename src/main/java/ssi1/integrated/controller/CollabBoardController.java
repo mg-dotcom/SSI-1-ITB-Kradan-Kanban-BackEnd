@@ -67,6 +67,13 @@ public class CollabBoardController {
         return invitationService.invitationCollab(jwtToken,boardId,invitationDTO);
     }
 
+    @GetMapping("/{boardId}/collabs/invitations")
+    public BoardInvitationDTO getInvitation(@RequestHeader(name = "Authorization") String accessToken,
+                                        @PathVariable String boardId) {
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        return invitationService.getInvitaionStatus(jwtToken,boardId);
+    }
+
     @DeleteMapping("/{boardId}/collabs/{collab_oid}")
     public void deleteCollaborator(@RequestHeader(name = "Authorization") String accessToken,@PathVariable String boardId,@PathVariable String collab_oid){
         collabBoardService.deleteCollaborator(accessToken,boardId,collab_oid);

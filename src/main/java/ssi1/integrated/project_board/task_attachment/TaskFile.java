@@ -31,10 +31,6 @@ public class TaskFile {
     @Column(name = "contentType", nullable = false, length = 100)
     private String contentType;
 
-    @Lob
-    @Column(name = "fileData", nullable = false)
-    private byte[] fileData;
-
     @CreationTimestamp
     @Column(name = "createdOn", nullable = false, updatable = false)
     private ZonedDateTime createdOn;

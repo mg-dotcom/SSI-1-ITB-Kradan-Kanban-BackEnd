@@ -18,7 +18,6 @@ public class TaskFileDTO {
     private ZonedDateTime createdOn;
     private Integer taskId;
     private String boardId;
-    private byte[] fileData;
     private String contentType;
 
     public TaskFileDTO(TaskFile taskFile) {
@@ -28,7 +27,6 @@ public class TaskFileDTO {
         this.createdOn = taskFile.getCreatedOn();
         this.taskId = taskFile.getTask().getId();
         this.boardId = taskFile.getTask().getBoard().getId();
-        this.fileData = taskFile.getFileData();
         this.contentType = taskFile.getContentType();
     }
 

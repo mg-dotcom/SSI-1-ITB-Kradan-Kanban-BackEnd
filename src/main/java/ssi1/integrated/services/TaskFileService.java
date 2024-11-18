@@ -211,8 +211,8 @@ public class TaskFileService {
                     try {
                         // Attempt to copy the file to the target location
                         Path targetLocation = this.fileStorageLocation.resolve(file.getOriginalFilename());
-                        System.out.println(targetLocation);
                         Files.copy(file.getInputStream(), targetLocation);
+
 
                         // If copying is successful, save the file metadata to the database
                         fileRepository.save(taskFile);
@@ -237,8 +237,8 @@ public class TaskFileService {
     }
 
     @Transactional
-    public TaskFileDTO deleteFileById(String boardId, Integer fileId, Integer taskId,String jwtToken){
-        // ! Checking security
+    public TaskFileDTO deleteFileById(String boardId, Integer fileId, Integer taskId, String jwtToken) {
+        // Checking security
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
@@ -264,10 +264,25 @@ public class TaskFileService {
             throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
         }
 
+        // Deleting the file from the file system
+        try {
+            // Define the path of the file in the storage location
+            Path targetLocation = this.fileStorageLocation.resolve(file.getFileName()); // Assuming `file.getFileName()` gives the file name
+
+            // Delete the file from the file system
+            Files.delete(targetLocation); // This will delete the file from the storage
+        } catch (IOException e) {
+            e.printStackTrace(); // Log the exception
+            throw new RuntimeException("Error deleting file from filesystem", e);
+        }
+
+        // Now delete the file from the database
         fileRepository.delete(file);
 
+        // Return a TaskFileDTO for the deleted file (if needed)
         return new TaskFileDTO(file);
     }
+
 
     private void appendErrorMessage(StringBuilder errorMessages, String message, List<FileInfoDTO> fileInfos, List<FileInfoDTO> errorFiles) {
         if (errorMessages.length() > 0) {

@@ -2,6 +2,7 @@ package ssi1.integrated.project_board.task_attachment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.Path;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import ssi1.integrated.project_board.task.Task;
@@ -27,6 +28,9 @@ public class TaskFile {
 
     @Column(name = "fileSize", nullable = false)
     private Long fileSize;
+
+    @Column(name = "filePath", nullable = false, length = 500)
+    private String filePath;
 
     @Column(name = "contentType", nullable = false, length = 100)
     private String contentType;

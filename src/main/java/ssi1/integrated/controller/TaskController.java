@@ -4,7 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -14,6 +18,7 @@ import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.dtos.TaskFileDTO;
 import ssi1.integrated.exception.handler.FileUploadException;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task_attachment.TaskFile;
 import ssi1.integrated.services.BoardService;
@@ -21,6 +26,10 @@ import ssi1.integrated.services.TaskFileService;
 import ssi1.integrated.services.TaskService;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -66,15 +75,20 @@ public class TaskController {
         return ResponseEntity.ok(taskFileService.getFilesByTaskId(taskId,boardId, accessToken));
     }
 
-
-    @GetMapping("/{boardId}/tasks/{taskId}/files/{fileId}")
-    public ResponseEntity<TaskFileDTO> getFileById(
+    @GetMapping("/{boardId}/tasks/{taskId}/files/{fileName}")
+    public ResponseEntity<Resource> getFile(
             @PathVariable String boardId,
-            @PathVariable Integer fileId,
+            @PathVariable Integer taskId,
+            @PathVariable String fileName,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
-        System.out.println("sdfsdfsf");
-        return ResponseEntity.ok(taskFileService.getFileById(boardId,fileId, accessToken));
+        try {
+            // Fetch the file resource from the service
+            return taskFileService.getFileForPreview(boardId, taskId, fileName, accessToken);
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving file: " + fileName, e);
+        }
     }
+
 
     @PutMapping("/{boardId}/tasks/{taskId}")
     public ResponseEntity<?> updateTaskAndFiles(

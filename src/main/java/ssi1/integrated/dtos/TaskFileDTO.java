@@ -19,11 +19,13 @@ public class TaskFileDTO {
     private Integer taskId;
     private String boardId;
     private String contentType;
+    private String filePath;
 
     public TaskFileDTO(TaskFile taskFile) {
         this.id = taskFile.getId();
         this.fileName = taskFile.getFileName();
         this.fileSize = taskFile.getFileSize();
+        this.filePath = taskFile.getFilePath();
         this.createdOn = taskFile.getCreatedOn();
         this.taskId = taskFile.getTask().getId();
         this.boardId = taskFile.getTask().getBoard().getId();

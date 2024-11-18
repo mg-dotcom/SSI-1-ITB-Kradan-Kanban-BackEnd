@@ -4,6 +4,10 @@ import jakarta.transaction.Transactional;
 import lombok.Getter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssi1.integrated.FileStorageProperties;
@@ -73,6 +77,61 @@ public class TaskFileService {
         }
     }
 
+    public ResponseEntity<Resource> getFileForPreview(
+            String boardId, Integer taskId, String fileName, String accessToken) {
+
+        // Step 1: Fetch the board and validate access
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
+
+        // Step 2: Access control for visibility of the board
+        Visibility visibility = board.getVisibility();
+
+        // Extract the JWT token if available
+        String jwtToken = (accessToken != null && accessToken.startsWith("Bearer "))
+                ? accessToken.substring(7)
+                : accessToken;
+
+        // Check if the user is the board owner or a collaborator
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaborator = isCollaborator(jwtToken, boardId);
+
+        // If the board is private and the user is neither the owner nor a collaborator, deny access
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+        // Step 3: Resolve the file path
+        Path filePath = Paths.get("C:/Users/User/Desktop/SSI-1-ITB-Kradan-Kanban-BackEnd/files")
+                .resolve(fileName)
+                .normalize();
+
+        Resource resource = new FileSystemResource(filePath);
+
+        // Check if the file exists
+        if (!resource.exists()) {
+            throw new ItemNotFoundException("File not found: " + fileName);
+        }
+
+        try {
+            // Step 4: Determine the content type of the file
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream"; // Default content type if not detected
+            }
+
+            // Step 5: Return the file as a downloadable resource
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(resource);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error loading file: " + fileName, e);
+        }
+    }
+
+
+
     public List<TaskFileDTO> getFilesByTaskId(Integer taskId, String boardId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
@@ -100,30 +159,6 @@ public class TaskFileService {
         return mappedFiles;
     }
 
-    public TaskFileDTO getFileById(String boardId, Integer fileId, String accessToken) {
-        Board board = boardRepository.findById(boardId).orElseThrow(
-                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
-        );
-
-        TaskFile file = fileRepository.findById(fileId).orElseThrow(() -> new ItemNotFoundException("File not found with FILE ID: " + fileId));
-        Visibility visibility = board.getVisibility();
-
-        if (visibility == Visibility.PUBLIC) {
-            return new TaskFileDTO(file);
-        }
-
-        String jwtToken = accessToken != null && accessToken.startsWith("Bearer ")
-                ? accessToken.substring(7)
-                : accessToken;
-
-        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
-        boolean isCollaborator = isCollaborator(jwtToken, boardId);
-
-        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
-            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
-        }
-        return new TaskFileDTO(file);
-    }
 
     @Transactional
     public List<TaskFile> saveAllFilesList(Integer taskId, List<MultipartFile> fileList, String boardId, String jwtToken) {
@@ -201,16 +236,19 @@ public class TaskFileService {
                         && !excessFiles.stream().anyMatch(f -> f.getFileName().equals(file.getName())))
                 .limit(allowedFilesCount)
                 .map(file -> {
+                    Path targetLocation = this.fileStorageLocation.resolve(file.getOriginalFilename());
+
                     TaskFile taskFile = new TaskFile();
                     taskFile.setFileName(file.getOriginalFilename());
                     taskFile.setFileSize(file.getSize());
+                    taskFile.setFilePath(targetLocation.toString());
                     taskFile.setContentType(file.getContentType());
                     taskFile.setCreatedOn(ZonedDateTime.now());
                     taskFile.setTask(existingTask);
 
                     try {
                         // Attempt to copy the file to the target location
-                        Path targetLocation = this.fileStorageLocation.resolve(file.getOriginalFilename());
+
                         Files.copy(file.getInputStream(), targetLocation);
 
 

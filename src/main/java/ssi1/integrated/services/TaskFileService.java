@@ -1,9 +1,12 @@
 package ssi1.integrated.services;
 
 import jakarta.transaction.Transactional;
+import lombok.Getter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import ssi1.integrated.FileStorageProperties;
 import ssi1.integrated.configs.ListMapper;
 import ssi1.integrated.dtos.FileInfoDTO;
 import ssi1.integrated.dtos.TaskFileDTO;
@@ -23,6 +26,11 @@ import ssi1.integrated.project_board.task_attachment.TaskFileRepository;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +38,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Getter
 public class TaskFileService {
     @Autowired
     private TaskFileRepository fileRepository;
@@ -46,6 +55,23 @@ public class TaskFileService {
 
     private static final int MAX_FILES = 10;
     private static final long MAX_FILE_SIZE = 20 * 1024 * 1024;
+    private final Path fileStorageLocation;
+
+    // create folder product-image
+    @Autowired
+    public TaskFileService(FileStorageProperties fileStorageProperties) {
+        this.fileStorageLocation = Paths.get(fileStorageProperties
+                .getUploadDir()).toAbsolutePath().normalize();
+        try {
+            // if have same folder not create
+            if (!Files.exists(this.fileStorageLocation)) {
+                Files.createDirectories(this.fileStorageLocation);
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(
+                    "Could not create the directory where the uploaded files will be stored.", ex);
+        }
+    }
 
     public List<TaskFileDTO> getFilesByTaskId(Integer taskId, String boardId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
@@ -100,7 +126,7 @@ public class TaskFileService {
     }
 
     @Transactional
-    public List<TaskFile> saveAllFilesList(Integer taskId, List<TaskFile> fileList, String boardId, String jwtToken) {
+    public List<TaskFile> saveAllFilesList(Integer taskId, List<MultipartFile> fileList, String boardId, String jwtToken) {
         // ! Checking security
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
@@ -135,8 +161,8 @@ public class TaskFileService {
 
         // ! 1. Check for duplicate filenames
         List<FileInfoDTO> duplicateFileInfos = fileList.stream()
-                .filter(file -> taskRepository.existsByTaskIdAndFileName(taskId, file.getFileName()))
-                .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
+                .filter(file -> taskRepository.existsByTaskIdAndFileName(taskId, file.getName()))
+                .map(file -> new FileInfoDTO(file.getName(), file.getSize()))
                 .toList();
 
         if (!duplicateFileInfos.isEmpty()) {
@@ -145,8 +171,8 @@ public class TaskFileService {
 
         // ! 2. Check for files exceeding the maximum file size
         List<FileInfoDTO> exceedFileInfos = fileList.stream()
-                .filter(file -> file.getFileSize() > MAX_FILE_SIZE)
-                .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
+                .filter(file -> file.getSize() > MAX_FILE_SIZE)
+                .map(file -> new FileInfoDTO(file.getName(), file.getSize()))
                 .toList();
 
         if (!exceedFileInfos.isEmpty()) {
@@ -158,10 +184,10 @@ public class TaskFileService {
         int allowedFilesCount = MAX_FILES - currentFileCount;
 
         List<FileInfoDTO> excessFiles = fileList.stream()
-                .filter(file -> !duplicateFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName()))
-                        && !exceedFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName())))
+                .filter(file -> !duplicateFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getName()))
+                        && !exceedFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getName())))
                 .skip(allowedFilesCount)
-                .map(file -> new FileInfoDTO(file.getFileName(), file.getFileSize()))
+                .map(file -> new FileInfoDTO(file.getName(), file.getSize()))
                 .toList();
 
         if (!excessFiles.isEmpty()) {
@@ -170,19 +196,32 @@ public class TaskFileService {
 
         // * Save valid files if no errors
         List<TaskFile> validFiles = fileList.stream()
-                .filter(file -> !duplicateFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName()))
-                        && !exceedFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getFileName()))
-                        && !excessFiles.stream().anyMatch(f -> f.getFileName().equals(file.getFileName())))
+                .filter(file -> !duplicateFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getName()))
+                        && !exceedFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getName()))
+                        && !excessFiles.stream().anyMatch(f -> f.getFileName().equals(file.getName())))
                 .limit(allowedFilesCount)
                 .map(file -> {
                     TaskFile taskFile = new TaskFile();
-                    taskFile.setFileName(file.getFileName());
-                    taskFile.setFileSize(file.getFileSize());
-                    taskFile.setFileData(file.getFileData());
+                    taskFile.setFileName(file.getOriginalFilename());
+                    taskFile.setFileSize(file.getSize());
                     taskFile.setContentType(file.getContentType());
                     taskFile.setCreatedOn(ZonedDateTime.now());
                     taskFile.setTask(existingTask);
-                    return taskFile;
+
+                    try {
+                        // Attempt to copy the file to the target location
+                        Path targetLocation = this.fileStorageLocation.resolve(file.getOriginalFilename());
+                        System.out.println(targetLocation);
+                        Files.copy(file.getInputStream(), targetLocation);
+
+                        // If copying is successful, save the file metadata to the database
+                        fileRepository.save(taskFile);
+                    } catch (IOException ex) {
+                        // Handle the error appropriately (logging, custom exception, etc.)
+                        throw new RuntimeException("Could not store file " + file.getName(), ex);
+                    }
+
+                    return taskFile; // Return the TaskFile object
                 })
                 .toList();
 

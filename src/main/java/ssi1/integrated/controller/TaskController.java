@@ -84,7 +84,6 @@ public class TaskController {
             @RequestPart(value = "taskDto", required = false) String newTaskDTO,
             @RequestHeader(name = "Authorization") String accessToken) throws IOException {
 
-
         // Deserialize taskDtoJson to a DTO object
         ObjectMapper objectMapper = new ObjectMapper();
         NewTaskDTO taskDto = objectMapper.readValue(newTaskDTO, NewTaskDTO.class);
@@ -112,8 +111,8 @@ public class TaskController {
         Map<String, TaskFileDTO> existingFileMap = existingFiles.stream()
                 .collect(Collectors.toMap(TaskFileDTO::getFileName, file -> file));
 
-        List<TaskFile> filesToSave = new ArrayList<>();
         Set<String> updatedFileNames = new HashSet<>();
+        List<MultipartFile> filesToSave = new ArrayList<>(); // A list of MultipartFile objects
 
         // Process input files array
         if (files != null) {
@@ -121,7 +120,7 @@ public class TaskController {
                 String fileName = file.getOriginalFilename();
 
                 // Skip if filename is empty or null
-                if ( fileName == null || fileName.isEmpty()) {
+                if (fileName == null || fileName.isEmpty()) {
                     continue;
                 }
 
@@ -129,13 +128,8 @@ public class TaskController {
 
                 // If the file is not in existing files, it's a new file to add
                 if (!existingFileMap.containsKey(fileName)) {
-                    TaskFile newFile = new TaskFile();
-                    newFile.setFileName(fileName);
-                    newFile.setFileSize(file.getSize());
-                    newFile.setFileData(file.getBytes());
-                    newFile.setContentType(file.getContentType());
-                    newFile.setCreatedOn(ZonedDateTime.now());
-                    filesToSave.add(newFile);
+                    // Add the file to the list of files to save (MultipartFile)
+                    filesToSave.add(file);
                 }
             }
 
@@ -145,7 +139,6 @@ public class TaskController {
                     taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
                 }
             }
-
         } else {
             // If files is null, clear all existing files
             for (TaskFileDTO existingFile : existingFiles) {
@@ -153,14 +146,16 @@ public class TaskController {
             }
         }
 
-
-        // Save new files to the task
+        // Save new files to the task using the service
         List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, filesToSave, boardId, jwtToken);
-        taskDto.setFiles(savedFiles); // Set the taskDto with the new files
-        updatedFileNames.clear();
+
+        // Set the saved files in the taskDto
+        taskDto.setFiles(savedFiles);
 
         return ResponseEntity.ok(taskDto); // Return taskDto as the response body
     }
+
+
 
 
     @DeleteMapping("/{boardId}/tasks/{taskId}/files/{fileId}")

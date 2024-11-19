@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+import ssi1.integrated.FileStorageProperties;
 import ssi1.integrated.configs.ListMapper;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
@@ -31,6 +32,10 @@ import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +59,23 @@ public class TaskService {
     private CollabBoardRepository collabBoardRepository;
     @Autowired
     private TaskFileRepository fileRepository;
+    private final Path fileStorageLocation;
+
+    // create folder product-image
+    @Autowired
+    public TaskService(FileStorageProperties fileStorageProperties) {
+        this.fileStorageLocation = Paths.get(fileStorageProperties
+                .getUploadDir()).toAbsolutePath().normalize();
+        try {
+            // if have same folder not create
+            if (!Files.exists(this.fileStorageLocation)) {
+                Files.createDirectories(this.fileStorageLocation);
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(
+                    "Could not create the directory where the uploaded files will be stored.", ex);
+        }
+    }
 
     public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId, String accessToken) {
         // Fetch the board by ID
@@ -284,7 +306,17 @@ public class TaskService {
 
             for (TaskFile file : task.getFiles()) {
                 fileRepository.delete(file);
+                try {
+                    // Define the path of the file in the storage location
+                    Path targetLocation = this.fileStorageLocation.resolve(file.getFileName()); // Assuming `file.getFileName()` gives the file name
+                    Files.delete(targetLocation);
+                } catch (IOException e) {
+                    e.printStackTrace(); // Log the exception
+                    throw new RuntimeException("Error deleting file from filesystem", e);
+                }
             }
+
+
             TaskDTO deletedTask = modelMapper.map(task, TaskDTO.class);
             taskRepository.delete(task);
             return deletedTask;

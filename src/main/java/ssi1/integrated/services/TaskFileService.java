@@ -102,9 +102,9 @@ public class TaskFileService {
         }
 
         // Step 3: Resolve the file path
-        Path filePath = Paths.get("C:/Users/User/Desktop/SSI-1-ITB-Kradan-Kanban-BackEnd/files")
-                .resolve(fileName)
-                .normalize();
+        Path targetLocation = this.fileStorageLocation.resolve(fileName).normalize();
+
+        Path filePath = targetLocation;
 
         Resource resource = new FileSystemResource(filePath);
 

@@ -1,5 +1,6 @@
 package ssi1.integrated.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import ssi1.integrated.project_board.microsoftUser.MicrosoftUser;
 import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.project_board.user_local.UserLocalRepository;
 import ssi1.integrated.security.dtos.AccessToken;
@@ -48,7 +50,7 @@ public class AuthenticationService {
                 .build();
     }
 
-    public String MicrosoftGraphService(String accessToken) {
+    public AuthenticationResponse MicrosoftGraphService(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
@@ -64,7 +66,18 @@ public class AuthenticationService {
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                return response.getBody();
+                ObjectMapper objectMapper = new ObjectMapper();
+                MicrosoftUser user = objectMapper.readValue(response.getBody(), MicrosoftUser.class);
+                User existingUser = userRepository.findByOid(user.getId());
+                if (existingUser != null) {
+                    userLocalService.addUserToUserLocal(existingUser);
+                }
+                var jwtToken = jwtService.generateToken(existingUser);
+                var refreshToken = jwtService.generateRefreshToken(existingUser);
+                return AuthenticationResponse.builder()
+                        .accessToken(jwtToken)
+                        .refreshToken(refreshToken)
+                        .build();
             } else {
                 throw new RuntimeException("Failed to fetch user profile. Status: " + response.getStatusCode());
             }

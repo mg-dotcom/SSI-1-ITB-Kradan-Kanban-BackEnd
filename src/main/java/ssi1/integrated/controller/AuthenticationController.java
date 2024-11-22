@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.security.AuthenticationService;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
@@ -27,9 +28,9 @@ public class AuthenticationController {
     }
 
     @GetMapping("/login/microsoft")
-    public String authenticateMicrosoft(@RequestHeader(name = "Authorization") String accessToken){
+    public ResponseEntity<AuthenticationResponse> authenticateMicrosoft(@RequestHeader(name = "Authorization") String accessToken){
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        return authService.MicrosoftGraphService(jwtToken);
+        return ResponseEntity.ok(authService.MicrosoftGraphService(jwtToken));
     }
 
     @PostMapping("/token")

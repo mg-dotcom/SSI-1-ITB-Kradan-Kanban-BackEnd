@@ -28,7 +28,8 @@ public class AuthenticationController {
 
     @GetMapping("/login/microsoft")
     public String authenticateMicrosoft(@RequestHeader(name = "Authorization") String accessToken){
-        return authService.MicrosoftGraphService(accessToken);
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        return authService.MicrosoftGraphService(jwtToken);
     }
 
     @PostMapping("/token")

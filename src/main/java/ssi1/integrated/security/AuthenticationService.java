@@ -54,15 +54,25 @@ public class AuthenticationService {
         headers.setBearerAuth(accessToken);
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(
-                "https://graph.microsoft.com/v1.0/me",
-                HttpMethod.GET,
-                request,
-                String.class
-        );
 
-        return response.getBody();
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    "https://graph.microsoft.com/v1.0/me",
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                throw new RuntimeException("Failed to fetch user profile. Status: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error communicating with Microsoft Graph API: " + e.getMessage(), e);
+        }
     }
+
 
     public AccessToken instantAccess(JwtPayload jwtPayload) {
         User user = userRepository.findByOid(jwtPayload.getOid());

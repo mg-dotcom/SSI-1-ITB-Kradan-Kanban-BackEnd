@@ -33,6 +33,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login", "/v3/**").permitAll() // Permit access to /login
                         .anyRequest().authenticated()) // Require authentication for all other requests
+                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
+                )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Set session to stateless
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

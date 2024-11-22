@@ -26,6 +26,11 @@ public class AuthenticationController {
         return ResponseEntity.ok(authService.authenticate(request));
     }
 
+    @GetMapping("/login/microsoft")
+    public String authenticateMicrosoft(@RequestHeader(name = "Authorization") String accessToken){
+        return authService.MicrosoftGraphService(accessToken);
+    }
+
     @PostMapping("/token")
     public AccessToken instantAccess(@RequestHeader(name = "Authorization") String refreshToken) {
         String jwtToken = refreshToken.startsWith("Bearer ") ? refreshToken.substring(7) : refreshToken;

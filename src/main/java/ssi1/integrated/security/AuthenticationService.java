@@ -1,9 +1,14 @@
 package ssi1.integrated.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.project_board.user_local.UserLocalRepository;
 import ssi1.integrated.security.dtos.AccessToken;
@@ -41,6 +46,22 @@ public class AuthenticationService {
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public String MicrosoftGraphService(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        ResponseEntity<String> response = restTemplate.exchange(
+                "https://graph.microsoft.com/v1.0/me",
+                HttpMethod.GET,
+                request,
+                String.class
+        );
+
+        return response.getBody();
     }
 
     public AccessToken instantAccess(JwtPayload jwtPayload) {

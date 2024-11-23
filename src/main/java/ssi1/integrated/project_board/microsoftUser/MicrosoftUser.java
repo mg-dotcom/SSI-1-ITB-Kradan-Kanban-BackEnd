@@ -12,5 +12,4 @@ public class MicrosoftUser {
     private String givenName;
     private String displayName;
     private String mail;
-
 }

@@ -1,5 +1,6 @@
 package ssi1.integrated.security;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -107,6 +108,33 @@ public class AuthenticationService {
         } catch (Exception e) {
             throw new RuntimeException("Error communicating with Microsoft Graph API: " + e.getMessage(), e);
         }
+    }
+
+    public MicrosoftUser getUserFromMicrosoftGraph(String email, String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        try {
+            String url = "https://graph.microsoft.com/v1.0/users?$filter=mail eq '" + email + "'";
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode root = objectMapper.readTree(response.getBody());
+                JsonNode userNode = root.get("value").elements().next();
+
+                if (userNode != null) {
+                    return objectMapper.treeToValue(userNode, MicrosoftUser.class);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching user from Microsoft Graph API: " + e.getMessage(), e);
+        }
+
+        return null;
     }
 
 

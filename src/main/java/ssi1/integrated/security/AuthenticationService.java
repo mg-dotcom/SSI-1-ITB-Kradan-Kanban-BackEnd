@@ -1,9 +1,16 @@
 package ssi1.integrated.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import ssi1.integrated.project_board.microsoftUser.MicrosoftUser;
 import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.project_board.user_local.UserLocalRepository;
 import ssi1.integrated.security.dtos.AccessToken;
@@ -42,6 +49,43 @@ public class AuthenticationService {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+    public AuthenticationResponse MicrosoftGraphService(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    "https://graph.microsoft.com/v1.0/me",
+                    HttpMethod.GET,
+                    request,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                MicrosoftUser user = objectMapper.readValue(response.getBody(), MicrosoftUser.class);
+                User existingUser = userRepository.findByOid(user.getId());
+                if (existingUser != null) {
+                    userLocalService.addUserToUserLocal(existingUser);
+                }
+                var jwtToken = jwtService.generateToken(existingUser);
+                var refreshToken = jwtService.generateRefreshToken(existingUser);
+                return AuthenticationResponse.builder()
+                        .accessToken(jwtToken)
+                        .refreshToken(refreshToken)
+                        .build();
+            } else {
+                throw new RuntimeException("Failed to fetch user profile. Status: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error communicating with Microsoft Graph API: " + e.getMessage(), e);
+        }
+    }
+
 
     public AccessToken instantAccess(JwtPayload jwtPayload) {
         User user = userRepository.findByOid(jwtPayload.getOid());

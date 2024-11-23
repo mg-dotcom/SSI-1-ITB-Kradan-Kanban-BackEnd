@@ -12,6 +12,8 @@ import ssi1.integrated.security.dtos.AccessToken;
 import ssi1.integrated.security.dtos.AuthenticationRequest;
 import ssi1.integrated.security.dtos.AuthenticationResponse;
 
+import java.util.Map;
+
 @RestController
 @CrossOrigin(origins = {"http://localhost:5174", "http://ip23ssi1.sit.kmutt.ac.th", "http://intproj23.sit.kmutt.ac.th", "http://localhost:5173"})
 @RequestMapping("")
@@ -28,7 +30,9 @@ public class AuthenticationController {
     }
 
     @GetMapping("/login/microsoft")
-    public ResponseEntity<AuthenticationResponse> authenticateMicrosoft(@RequestHeader(name = "Authorization") String accessToken){
+    public ResponseEntity<AuthenticationResponse> authenticateMicrosoft(@RequestHeader(name = "Authorization", required = false) String accessToken){
+        System.out.println("Here");
+        System.out.println(accessToken);
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return ResponseEntity.ok(authService.MicrosoftGraphService(jwtToken));
     }

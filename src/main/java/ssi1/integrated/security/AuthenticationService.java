@@ -2,6 +2,7 @@ package ssi1.integrated.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,10 +25,11 @@ import ssi1.integrated.user_account.UserRepository;
 @RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository userRepository;
+    private final UserLocalRepository userLocalRepository;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserLocalService userLocalService;
-
+    private final ModelMapper modelMapper;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
 
@@ -53,7 +55,7 @@ public class AuthenticationService {
     public AuthenticationResponse MicrosoftGraphService(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
+        headers.setBearerAuth(accessToken); // Set Bearer token in the headers
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
@@ -66,14 +68,35 @@ public class AuthenticationService {
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
+                // Deserialize the Microsoft Graph API response
                 ObjectMapper objectMapper = new ObjectMapper();
-                MicrosoftUser user = objectMapper.readValue(response.getBody(), MicrosoftUser.class);
-                User existingUser = userRepository.findByOid(user.getId());
-                if (existingUser != null) {
-                    userLocalService.addUserToUserLocal(existingUser);
+                MicrosoftUser microsoftUser = objectMapper.readValue(response.getBody(), MicrosoftUser.class);
+
+                if (microsoftUser.getId() == null || microsoftUser.getDisplayName() == null) {
+                    throw new RuntimeException("Incomplete Microsoft user data received.");
                 }
-                var jwtToken = jwtService.generateToken(existingUser);
-                var refreshToken = jwtService.generateRefreshToken(existingUser);
+
+                // Check if the user already exists
+                UserLocal existingUser = userLocalRepository.findByOid(microsoftUser.getId());
+                if (existingUser == null) {
+                    // Create a new UserLocal if it doesn't exist
+                    existingUser = new UserLocal();
+                    existingUser.setOid(microsoftUser.getId());
+                    existingUser.setName(microsoftUser.getDisplayName());
+                    existingUser.setUsername(microsoftUser.getDisplayName());
+                    existingUser.setEmail(microsoftUser.getMail());
+
+                    // Persist the new UserLocal
+                    userLocalRepository.save(existingUser);
+                }
+
+                // Map UserLocal to User
+                User newUser = modelMapper.map(existingUser, User.class);
+
+                // Generate tokens
+                var jwtToken = jwtService.generateToken(newUser);
+                var refreshToken = jwtService.generateRefreshToken(newUser);
+
                 return AuthenticationResponse.builder()
                         .accessToken(jwtToken)
                         .refreshToken(refreshToken)
@@ -85,6 +108,7 @@ public class AuthenticationService {
             throw new RuntimeException("Error communicating with Microsoft Graph API: " + e.getMessage(), e);
         }
     }
+
 
 
     public AccessToken instantAccess(JwtPayload jwtPayload) {

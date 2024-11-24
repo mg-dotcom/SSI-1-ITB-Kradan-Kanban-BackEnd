@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ssi1.integrated.dtos.EditLimitDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
@@ -65,5 +66,20 @@ public class StatusController {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boardService.getBoardById(boardId);
         return ResponseEntity.ok(statusService.transferStatus(boardId, statusId, newStatusId, jwtToken));
+    }
+
+    @PutMapping("/{boardId}/maximum-task")
+    public ResponseEntity<String> updateMaximumTask(
+            @PathVariable("boardId") String boardId,
+            @RequestBody EditLimitDTO editLimitDTO,
+            @RequestHeader(name = "Authorization") String accessToken) {
+        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        boolean isUpdated = statusService.updateMaximumTask(boardId, editLimitDTO, jwtToken);
+
+        if (isUpdated) {
+            return ResponseEntity.ok("Maximum task updated successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update maximum task");
+        }
     }
 }

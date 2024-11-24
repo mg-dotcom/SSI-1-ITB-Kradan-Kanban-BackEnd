@@ -197,10 +197,5 @@ public class TaskController {
         return ResponseEntity.ok(service.removeTask(taskId, boardId, jwtToken));
     }
 
-//    @PutMapping("/{boardId}/tasks/{taskId}")
-//    public ResponseEntity<NewTaskDTO> updateTask(@Valid @PathVariable Integer taskId, @RequestBody(required = false) NewTaskDTO newTaskDTO, @PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken) {
-//        String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-//        boardService.getBoardById(boardId);
-//        return ResponseEntity.ok(service.updateTask(taskId, newTaskDTO, boardId, jwtToken));
-//    }
+
 }

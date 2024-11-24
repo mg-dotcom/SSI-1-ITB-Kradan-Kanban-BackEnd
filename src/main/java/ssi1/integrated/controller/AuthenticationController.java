@@ -31,8 +31,6 @@ public class AuthenticationController {
 
     @GetMapping("/login/microsoft")
     public ResponseEntity<AuthenticationResponse> authenticateMicrosoft(@RequestHeader(name = "Authorization", required = false) String accessToken){
-        System.out.println("Here");
-        System.out.println(accessToken);
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return ResponseEntity.ok(authService.MicrosoftGraphService(jwtToken));
     }

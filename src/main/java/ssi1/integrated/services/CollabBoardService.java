@@ -28,6 +28,7 @@ import ssi1.integrated.project_board.user_local.UserLocalRepository;
 import ssi1.integrated.security.AuthenticationService;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
+import ssi1.integrated.security.dtos.AuthenticationResponse;
 import ssi1.integrated.user_account.User;
 
 import java.io.UnsupportedEncodingException;
@@ -186,6 +187,7 @@ public class CollabBoardService {
         // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // Query Microsoft Entra (Azure AD) first
         MicrosoftUser microsoftUser = authenticationService.getUserFromMicrosoftGraph(addCollabBoardDTO.getEmail(), accessToken);
+        System.out.println("Add collaborator : "+microsoftUser);
         UserLocal userLocal;
 
         if (microsoftUser != null) {

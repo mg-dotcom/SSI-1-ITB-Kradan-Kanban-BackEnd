@@ -135,6 +135,38 @@ public class AuthenticationService {
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    public MicrosoftUser getUserFromMicrosoftGraph(String email, String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        System.out.println(accessToken);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        try {
+            String url = "https://graph.microsoft.com/v1.0/users/"+email;
+            System.out.println(url);
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+            System.out.println(response);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode root = objectMapper.readTree(response.getBody());
+                JsonNode userNode = root.get("value").elements().next();
+
+                if (userNode != null) {
+                    return objectMapper.treeToValue(userNode, MicrosoftUser.class);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching user from Microsoft Graph API: " + e.getMessage(), e);
+        }
+
+        return null;
+    }
+
+>>>>>>> Stashed changes
     public AccessToken instantAccess(JwtPayload jwtPayload) {
         User user = userRepository.findByOid(jwtPayload.getOid());
         return AccessToken.builder().accessToken(jwtService.generateToken(user)).build();

@@ -99,9 +99,8 @@ public class AuthenticationService {
 
                 if(existingUser==null){
                     System.out.println("case 1");
-                    UserLocal userLocal=userLocalRepository.findByOid(microsoftUser.getOid());
-
-                    User newUser=modelMapper.map(userLocal,User.class);
+                    
+                    User newUser=modelMapper.map(microsoftUser,User.class);
                     newUser.setRole(Role.STUDENT);
                     userLocalService.addUserToUserLocal(newUser);
                     System.out.println(newUser);

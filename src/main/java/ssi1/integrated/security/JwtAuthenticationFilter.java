@@ -24,6 +24,7 @@ import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.services.BoardService;
+import ssi1.integrated.services.UserService;
 import ssi1.integrated.user_account.UserRepository;
 import ssi1.integrated.utils.UriExtractor;
 
@@ -35,6 +36,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final UserService userService;
     @Autowired
     private BoardService boardService;
     @Autowired
@@ -90,8 +92,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        System.out.println("jwt= "+jwt);
         if (userName != null && authentication == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userName);
+            UserDetails userDetails = userService.loadUserByUsername(userName);
+//            System.out.println("here");
+//            System.out.println("username= "+userName);
+//            System.out.println("userDetail= "+userDetails);
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -101,6 +107,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } else {
+                System.out.println("bro");
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return;
             }

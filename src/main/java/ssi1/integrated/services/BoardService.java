@@ -103,7 +103,6 @@ public class BoardService {
 
         // Find the user associated with the OID from the JWT payload
         User user = userService.getUserByOid(jwtPayload.getOid());
-        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
 
         // Create a new Board object and set its name and user
         Board newBoard = new Board();

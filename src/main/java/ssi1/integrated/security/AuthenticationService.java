@@ -107,9 +107,9 @@ public class AuthenticationService {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
-
+        System.out.println(accessToken);
         HttpEntity<Void> request = new HttpEntity<>(headers);
-        String url = "https://graph.microsoft.com/v1.0/users?$filter=mail eq '" + email + "'";
+        String url = "https://graph.microsoft.com/v1.0/users/" + email;
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);

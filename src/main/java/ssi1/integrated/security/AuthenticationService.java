@@ -3,6 +3,7 @@ package ssi1.integrated.security;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +30,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final UserLocalService userLocalService;
     private final UserService userService;
+    private final ModelMapper modelMapper;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
 
@@ -51,11 +53,16 @@ public class AuthenticationService {
                 .build();
     }
 
-    public String getUserIdFromResponse(String jsonResponse) {
+    public UserLocal getUserFromResponse(String jsonResponse) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
-            return rootNode.path("id").asText(); // Extracts the 'id' field
+            UserLocal userLocal=new UserLocal();
+            userLocal.setOid(rootNode.path("id").asText());
+            userLocal.setName(rootNode.path("displayName").asText());
+            userLocal.setUsername(rootNode.path("givenName").asText());
+            userLocal.setEmail(rootNode.path("mail").asText());
+            return userLocal;
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse JSON response", e);
         }
@@ -79,22 +86,26 @@ public class AuthenticationService {
             if (response.getStatusCode().is2xxSuccessful()) {
                 // Deserialize the Microsoft Graph API response
                 String jsonResponse = response.getBody();
-                String microsoftUserId=getUserIdFromResponse(jsonResponse);
+                System.out.println(jsonResponse);
+                UserLocal microsoftUser=getUserFromResponse(jsonResponse);
 
-                if (microsoftUserId == null ) {
+                if (microsoftUser.getOid() == null ) {
                     System.out.println("Not found user");
                     throw new ItemNotFoundException("Not found this microsoft user");
                 }
 
-                User existingUser=userService.getUserByOid(microsoftUserId);
-                UserLocal userLocal=userLocalRepository.findByOid(existingUser.getOid());
-                if(userLocal==null){
-                    userLocalService.addUserToUserLocal(existingUser);
+                User existingUser=userService.getUserByOid(microsoftUser.getOid());
+
+                if(existingUser==null){
+                    userLocalRepository.save(microsoftUser);
                 }
 
+                UserLocal userLocal=userLocalRepository.findByOid(microsoftUser.getOid());
+
+                User newUser=modelMapper.map(userLocal,User.class);
                 // Generate tokens
-                var jwtToken = jwtService.generateToken(existingUser);
-                var refreshToken = jwtService.generateRefreshToken(existingUser);
+                var jwtToken = jwtService.generateToken(newUser);
+                var refreshToken = jwtService.generateRefreshToken(newUser);
 
                 return AuthenticationResponse.builder()
                         .accessToken(jwtToken)

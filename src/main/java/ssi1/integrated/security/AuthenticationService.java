@@ -1,17 +1,15 @@
 package ssi1.integrated.security;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ssi1.integrated.project_board.microsoftUser.MicrosoftUser;
+import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.project_board.user_local.UserLocalRepository;
 import ssi1.integrated.security.dtos.AccessToken;
@@ -30,7 +28,6 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserLocalService userLocalService;
-    private final ModelMapper modelMapper;
     private final UserService userService;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -54,6 +51,16 @@ public class AuthenticationService {
                 .build();
     }
 
+    public String getUserIdFromResponse(String jsonResponse) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(jsonResponse);
+            return rootNode.path("id").asText(); // Extracts the 'id' field
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse JSON response", e);
+        }
+    }
+
     public AuthenticationResponse MicrosoftGraphService(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -71,14 +78,15 @@ public class AuthenticationService {
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 // Deserialize the Microsoft Graph API response
-                ObjectMapper objectMapper = new ObjectMapper();
-                MicrosoftUser microsoftUser = objectMapper.readValue(response.getBody(), MicrosoftUser.class);
+                String jsonResponse = response.getBody();
+                String microsoftUserId=getUserIdFromResponse(jsonResponse);
 
-                if (microsoftUser.getId() == null || microsoftUser.getDisplayName() == null) {
-                    throw new RuntimeException("Incomplete Microsoft user data received.");
+                if (microsoftUserId == null ) {
+                    System.out.println("Not found user");
+                    throw new ItemNotFoundException("Not found this microsoft user");
                 }
 
-                User existingUser=userService.getUserByOid(microsoftUser.getId());
+                User existingUser=userService.getUserByOid(microsoftUserId);
                 UserLocal userLocal=userLocalRepository.findByOid(existingUser.getOid());
                 if(userLocal==null){
                     userLocalService.addUserToUserLocal(existingUser);
@@ -96,11 +104,10 @@ public class AuthenticationService {
                 throw new RuntimeException("Failed to fetch user profile. Status: " + response.getStatusCode());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error communicating with Microsoft Graph API: " + e.getMessage(), e);
+            throw new AuthenticationException("Invalid access token", e) {
+            };
         }
     }
-
-
 
     public AccessToken instantAccess(JwtPayload jwtPayload) {
         User user = userRepository.findByOid(jwtPayload.getOid());

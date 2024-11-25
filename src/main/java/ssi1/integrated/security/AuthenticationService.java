@@ -19,6 +19,7 @@ import ssi1.integrated.security.dtos.AccessToken;
 import ssi1.integrated.security.dtos.AuthenticationRequest;
 import ssi1.integrated.security.dtos.AuthenticationResponse;
 import ssi1.integrated.services.UserLocalService;
+import ssi1.integrated.services.UserService;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
 
@@ -31,6 +32,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final UserLocalService userLocalService;
     private final ModelMapper modelMapper;
+    private final UserService userService;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
 
@@ -57,7 +59,7 @@ public class AuthenticationService {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken); // Set Bearer token in the headers
-
+        System.out.println("Microsoft service");
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         try {
@@ -77,26 +79,15 @@ public class AuthenticationService {
                     throw new RuntimeException("Incomplete Microsoft user data received.");
                 }
 
-                // Check if the user already exists
-                UserLocal existingUser = userLocalRepository.findByOid(microsoftUser.getId());
-                if (existingUser == null) {
-                    // Create a new UserLocal if it doesn't exist
-                    existingUser = new UserLocal();
-                    existingUser.setOid(microsoftUser.getId());
-                    existingUser.setName(microsoftUser.getDisplayName());
-                    existingUser.setUsername(microsoftUser.getDisplayName());
-                    existingUser.setEmail(microsoftUser.getMail());
-
-                    // Persist the new UserLocal
-                    userLocalRepository.save(existingUser);
+                User existingUser=userService.getUserByOid(microsoftUser.getId());
+                UserLocal userLocal=userLocalRepository.findByOid(existingUser.getOid());
+                if(userLocal==null){
+                    userLocalService.addUserToUserLocal(existingUser);
                 }
 
-                // Map UserLocal to User
-                User newUser = modelMapper.map(existingUser, User.class);
-
                 // Generate tokens
-                var jwtToken = jwtService.generateToken(newUser);
-                var refreshToken = jwtService.generateRefreshToken(newUser);
+                var jwtToken = jwtService.generateToken(existingUser);
+                var refreshToken = jwtService.generateRefreshToken(existingUser);
 
                 return AuthenticationResponse.builder()
                         .accessToken(jwtToken)

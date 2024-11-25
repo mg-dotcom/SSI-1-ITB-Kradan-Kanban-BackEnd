@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+import ssi1.integrated.dtos.EditLimitDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ForbiddenException;
@@ -297,6 +298,49 @@ public class StatusService {
         }
         deleteStatus(boardId, oldStatusId, jwtToken);
         return transferStatus;
+    }
+
+    @Transactional
+    public boolean updateMaximumTask(String boardId, EditLimitDTO editLimitDTO, String jwtToken) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        Visibility visibility = board.getVisibility();
+
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private.");
+        }
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can delete status.");
+        }
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new AuthenticationException("JWT token is required") {
+            };
+        }
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
+        if (editLimitDTO.getLimitMaximumTask() != null) {
+            board.setLimitMaximumTask(editLimitDTO.getLimitMaximumTask());
+            boardRepository.save(board);
+
+            if (editLimitDTO.getLimitMaximumTask()) {
+                board.setMaximumTask(10);
+                boardRepository.save(board);
+            }
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // Check if user is the board owner

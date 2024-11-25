@@ -92,6 +92,7 @@ public class BoardService {
 
     @Transactional
     public Board createBoard(String jwtToken, CreateBoardDTO createBoardDTO) {
+        System.out.println("create board");
         if (createBoardDTO == null) {
             throw new BadRequestException("Invalid board create body");
         }

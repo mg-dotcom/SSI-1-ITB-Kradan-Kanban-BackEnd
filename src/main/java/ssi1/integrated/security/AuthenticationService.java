@@ -18,6 +18,7 @@ import ssi1.integrated.security.dtos.AuthenticationRequest;
 import ssi1.integrated.security.dtos.AuthenticationResponse;
 import ssi1.integrated.services.UserLocalService;
 import ssi1.integrated.services.UserService;
+import ssi1.integrated.user_account.Role;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
 
@@ -60,7 +61,7 @@ public class AuthenticationService {
             UserLocal userLocal=new UserLocal();
             userLocal.setOid(rootNode.path("id").asText());
             userLocal.setName(rootNode.path("displayName").asText());
-            userLocal.setUsername(rootNode.path("givenName").asText());
+            userLocal.setUsername(rootNode.path("givenName").asText()+"."+rootNode.path("surname").asText());
             userLocal.setEmail(rootNode.path("mail").asText());
             return userLocal;
         } catch (Exception e) {
@@ -97,20 +98,35 @@ public class AuthenticationService {
                 User existingUser=userService.getUserByOid(microsoftUser.getOid());
 
                 if(existingUser==null){
-                    userLocalRepository.save(microsoftUser);
+                    System.out.println("case 1");
+                    UserLocal userLocal=userLocalRepository.findByOid(microsoftUser.getOid());
+
+                    User newUser=modelMapper.map(userLocal,User.class);
+                    newUser.setRole(Role.STUDENT);
+                    userLocalService.addUserToUserLocal(newUser);
+                    System.out.println(newUser);
+                    var jwtToken = jwtService.generateToken(newUser);
+                    var refreshToken = jwtService.generateRefreshToken(newUser);
+
+                    return AuthenticationResponse.builder()
+                            .accessToken(jwtToken)
+                            .refreshToken(refreshToken)
+                            .build();
+
+                }else {
+                    System.out.println("case 2");
+                    userLocalService.addUserToUserLocal(existingUser);
+                    // Generate tokens
+                    var jwtToken = jwtService.generateToken(existingUser);
+                    var refreshToken = jwtService.generateRefreshToken(existingUser);
+
+                    return AuthenticationResponse.builder()
+                            .accessToken(jwtToken)
+                            .refreshToken(refreshToken)
+                            .build();
                 }
 
-                UserLocal userLocal=userLocalRepository.findByOid(microsoftUser.getOid());
 
-                User newUser=modelMapper.map(userLocal,User.class);
-                // Generate tokens
-                var jwtToken = jwtService.generateToken(newUser);
-                var refreshToken = jwtService.generateRefreshToken(newUser);
-
-                return AuthenticationResponse.builder()
-                        .accessToken(jwtToken)
-                        .refreshToken(refreshToken)
-                        .build();
             } else {
                 throw new RuntimeException("Failed to fetch user profile. Status: " + response.getStatusCode());
             }

@@ -87,16 +87,13 @@ public class AuthenticationService {
             if (response.getStatusCode().is2xxSuccessful()) {
                 // Deserialize the Microsoft Graph API response
                 String jsonResponse = response.getBody();
-                System.out.println(jsonResponse);
                 UserLocal microsoftUser=getUserFromResponse(jsonResponse);
 
                 if (microsoftUser.getOid() == null ) {
                     System.out.println("Not found user");
                     throw new ItemNotFoundException("Not found this microsoft user");
                 }
-
-                User existingUser=userService.getUserByOid(microsoftUser.getOid());
-
+                User existingUser=userRepository.findByOid(microsoftUser.getOid());
                 if(existingUser==null){
                     System.out.println("case 1");
                     

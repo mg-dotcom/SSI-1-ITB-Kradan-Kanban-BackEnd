@@ -21,6 +21,7 @@ import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task.TaskRepository;
+import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
@@ -44,6 +45,8 @@ public class StatusService {
     private UserService userService;
     @Autowired
     private CollabBoardRepository collabBoardRepository;
+    @Autowired
+    private UserLocalService userLocalService;
 
     public List<Status> getAllStatus(String boardId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
@@ -347,6 +350,7 @@ public class StatusService {
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
         User user = userService.getUserByOid(userOid);
+
         return user.getOid().equals(jwtPayload.getOid());
     }
 

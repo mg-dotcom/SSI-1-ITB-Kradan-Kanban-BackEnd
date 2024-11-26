@@ -58,8 +58,10 @@ public class BoardService {
 
 
         User user = userService.getUserByOid(jwtPayload.getOid());
-        List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOidOrderByCreatedOnAsc(user.getOid());
-        List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_OidOrderByAddedOnAsc(user.getOid());
+        UserLocal userLocal=userLocalService.getUserByOid(jwtPayload.getOid());
+        String userOid= user.getOid()==null? userLocal.getOid() : user.getOid();
+        List<Board> toReturnPersonalBoard = boardRepository.findAllByUserOidOrderByCreatedOnAsc(userOid);
+        List<CollabBoard> listCollabsBoard = collabBoardRepository.findByUser_OidOrderByAddedOnAsc(userOid);
 
         ArrayList<ContributorBoardDTO> collabsBoardDTOs = new ArrayList<>();
         for (CollabBoard eachCollabsBoard: listCollabsBoard){
@@ -92,15 +94,12 @@ public class BoardService {
 
     @Transactional
     public Board createBoard(String jwtToken, CreateBoardDTO createBoardDTO) {
-        System.out.println("create board");
         if (createBoardDTO == null) {
             throw new BadRequestException("Invalid board create body");
         }
 
         // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-
-
         // Find the user associated with the OID from the JWT payload
         User user = userService.getUserByOid(jwtPayload.getOid());
 
@@ -137,12 +136,10 @@ public class BoardService {
         done.setName("Done");
         done.setDescription("The task has been completed");
         done.setStatusColor("#008000");
-
         statusService.insertNewStatus(newBoard.getId(), noStatus, jwtToken);
         statusService.insertNewStatus(newBoard.getId(), todo, jwtToken);
         statusService.insertNewStatus(newBoard.getId(), doing, jwtToken);
         statusService.insertNewStatus(newBoard.getId(), done, jwtToken);
-
         return newBoard;
 
     }

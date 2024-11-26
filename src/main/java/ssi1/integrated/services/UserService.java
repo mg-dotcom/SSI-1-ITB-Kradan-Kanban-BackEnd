@@ -27,7 +27,12 @@ public class UserService implements UserDetailsService {
     }
 
     public User getUserByOid(String oid) {
-        return userRepository.findByOid(oid);
+        User user= userRepository.findByOid(oid);
+        if(user==null){
+            UserLocal userLocal=userLocalRepository.findByOid(oid);
+            user=modelMapper.map(userLocal,User.class);
+        }
+        return user;
     }
 
     public User getUserByEmail(String email){ return userRepository.findByEmail(email); }

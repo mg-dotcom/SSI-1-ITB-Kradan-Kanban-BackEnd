@@ -1,5 +1,6 @@
 package ssi1.integrated.controller;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import ssi1.integrated.security.JwtService;
 import ssi1.integrated.security.dtos.AccessToken;
 import ssi1.integrated.security.dtos.AuthenticationRequest;
 import ssi1.integrated.security.dtos.AuthenticationResponse;
+import ssi1.integrated.services.UserService;
 
 import java.util.Map;
 
@@ -21,6 +23,7 @@ import java.util.Map;
 public class AuthenticationController {
     private final AuthenticationService authService;
     private final JwtService jwtService;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
@@ -35,10 +38,14 @@ public class AuthenticationController {
         return ResponseEntity.ok(authService.MicrosoftGraphService(jwtToken));
     }
 
+
+
     @PostMapping("/token")
     public AccessToken instantAccess(@RequestHeader(name = "Authorization") String refreshToken) {
         String jwtToken = refreshToken.startsWith("Bearer ") ? refreshToken.substring(7) : refreshToken;
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         return authService.instantAccess(jwtPayload);
     }
+
+
 }

@@ -90,13 +90,11 @@ public class AuthenticationService {
                 UserLocal microsoftUser=getUserFromResponse(jsonResponse);
 
                 if (microsoftUser.getOid() == null ) {
-                    System.out.println("Not found user");
                     throw new ItemNotFoundException("Not found this microsoft user");
                 }
+
                 User existingUser=userRepository.findByOid(microsoftUser.getOid());
                 if(existingUser==null){
-                    System.out.println("case 1");
-                    
                     User newUser=modelMapper.map(microsoftUser,User.class);
                     newUser.setRole(Role.STUDENT);
                     userLocalService.addUserToUserLocal(newUser);

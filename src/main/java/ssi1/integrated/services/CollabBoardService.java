@@ -1,12 +1,13 @@
 package ssi1.integrated.services;
 
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import ssi1.integrated.dtos.AccessRightDTO;
 import ssi1.integrated.dtos.AddCollabBoardDTO;
 import ssi1.integrated.dtos.CollabBoardDTO;
@@ -22,13 +23,9 @@ import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
 import ssi1.integrated.project_board.collab_management.Status;
-import ssi1.integrated.project_board.microsoftUser.MicrosoftUser;
 import ssi1.integrated.project_board.user_local.UserLocal;
-import ssi1.integrated.project_board.user_local.UserLocalRepository;
-import ssi1.integrated.security.AuthenticationService;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
-import ssi1.integrated.security.dtos.AuthenticationResponse;
 import ssi1.integrated.user_account.User;
 
 import java.io.UnsupportedEncodingException;
@@ -50,15 +47,11 @@ public class CollabBoardService {
     @Autowired
     private UserLocalService userLocalService;
     @Autowired
-    private UserLocalRepository userLocalRepository;
-    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private JwtService jwtService;
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private AuthenticationService authenticationService;
 
     public List<CollaboratorDTO> getAllCollabsBoard(String accessToken, String boardId){
         Board board = boardRepository.findById(boardId).orElseThrow(
@@ -137,7 +130,7 @@ public class CollabBoardService {
         return collaboratorDTO;
     }
 
-    public CollabBoardDTO addCollabBoard(String accessToken, String boardId, AddCollabBoardDTO addCollabBoardDTO) throws MessagingException, UnsupportedEncodingException {
+    public CollabBoardDTO addCollabBoard(String accessToken,String accessTokenMS, String boardId, AddCollabBoardDTO addCollabBoardDTO) throws MessagingException, UnsupportedEncodingException {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
@@ -145,32 +138,35 @@ public class CollabBoardService {
 
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
-        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken, boardId);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
 
-        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
+        if (visibility == Visibility.PRIVATE && !isOwner&& !isCollaboratorWrite) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
+
 
         if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException("Only board owner and collaborators with write access can add tasks.");
         }
 
         if (!isOwner && !isCollaboratorWrite) {
-            throw new ForbiddenException(boardId + " this board ID is private. Only the board owner can add collaborators.");
+            throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
         }
 
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
-            throw new AuthenticationException("JWT token is required.") {};
+            throw new AuthenticationException("JWT token is required.") {
+            };
         }
 
+        // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
+        // Find the user associated with the OID from the JWT payload
         User userOwner = userService.getUserByOid(jwtPayload.getOid());
-
-        if (!userOwner.getOid().equals(board.getUserOid())) {
+        if (!userOwner.getOid().equals(board.getUserOid())){
             throw new ForbiddenException("You do not have permission to modify this board.");
         }
 
-        if (addCollabBoardDTO.getEmail().equals(userOwner.getEmail())) {
+        if (addCollabBoardDTO.getEmail().equals(userOwner.getEmail())){
             throw new ConflictException("The email belongs to the board owner.");
         }
 
@@ -185,35 +181,36 @@ public class CollabBoardService {
             }
         }
 
-            User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail());
-            if (foundedUserByEmail == null) {
-                throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
-            }
-            UserLocal  userLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
+        User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail(),accessTokenMS);
+        if (foundedUserByEmail == null) {
+            throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
+        }
 
+        UserLocal boardOwnername = userLocalService.getUserByOid(jwtPayload.getOid());
 
-        emailService.sendEmail(boardId, addCollabBoardDTO.getEmail(), userOwner.getName(),
-                addCollabBoardDTO.getAccessRight().toString().toUpperCase(), board.getName(), addCollabBoardDTO.getUrl());
+        emailService.sendEmail(boardId,addCollabBoardDTO.getEmail(),boardOwnername.getName(),addCollabBoardDTO.getAccessRight().toString().toUpperCase(),board.getName(),addCollabBoardDTO.getUrl());
+        UserLocal savedUserToLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
 
         CollabBoardDTO collabBoardDTO = new CollabBoardDTO();
-        CollabBoard newCollabBoard = new CollabBoard();
-        newCollabBoard.setUser(userLocal);
-        newCollabBoard.setAccessRight(addCollabBoardDTO.getAccessRight());
-        newCollabBoard.setBoard(board);
-        newCollabBoard.setStatus(Status.PENDING);
+            CollabBoard newCollabBoard = new CollabBoard();
+            newCollabBoard.setUser(savedUserToLocal);
+            newCollabBoard.setAccessRight(addCollabBoardDTO.getAccessRight());
+            newCollabBoard.setBoard(board);
+            newCollabBoard.setStatus(Status.PENDING);
 
-        collabBoardDTO.setOid(userLocal.getOid());
-        collabBoardDTO.setBoardId(boardId);
-        collabBoardDTO.setName(userLocal.getName());
-        collabBoardDTO.setEmail(addCollabBoardDTO.getEmail());
-        collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
-        collabBoardDTO.setStatus(Status.PENDING);
+            collabBoardDTO.setOid(savedUserToLocal.getOid());
+            collabBoardDTO.setBoardId(boardId);
+            collabBoardDTO.setName(savedUserToLocal.getName());
+            collabBoardDTO.setEmail(addCollabBoardDTO.getEmail());
+            collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
+            collabBoardDTO.setStatus(Status.PENDING);
 
-        collabBoardRepository.save(newCollabBoard);
+            System.out.println("Unsave.");
+            collabBoardRepository.save(newCollabBoard);
+            System.out.println("Saved." + newCollabBoard.getUser().getEmail());
 
         return collabBoardDTO;
     }
-
 
     @Transactional
     public CollabBoard updateCollaboratorAccessRight(String accessToken, String boardId, String collabsOid, AccessRightDTO accessRight){
@@ -308,8 +305,6 @@ public class CollabBoardService {
 
         collabBoardRepository.delete(collaborator);
     }
-
-
 
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);

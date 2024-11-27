@@ -184,31 +184,13 @@ public class CollabBoardService {
                 throw new ConflictException("The email belongs to an existing collaborator.");
             }
         }
-        // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        // Query Microsoft Entra (Azure AD) first
-        MicrosoftUser microsoftUser = authenticationService.getUserFromMicrosoftGraph(addCollabBoardDTO.getEmail(), accessToken);
-        System.out.println("Add collaborator : "+microsoftUser);
-        UserLocal userLocal;
 
-        if (microsoftUser != null) {
-            // Create a UserLocal from MicrosoftUser if not already in UserLocal
-            userLocal = userLocalRepository.findByOid(microsoftUser.getId());
-            if (userLocal == null) {
-                userLocal = new UserLocal();
-                userLocal.setOid(microsoftUser.getId());
-                userLocal.setName(microsoftUser.getDisplayName());
-                userLocal.setUsername(microsoftUser.getDisplayName());
-                userLocal.setEmail(microsoftUser.getMail());
-                userLocalRepository.save(userLocal);
-            }
-        } else {
-            // Fallback to querying ITBKK-SHARE
             User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail());
             if (foundedUserByEmail == null) {
                 throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
             }
-            userLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
-        }
+            UserLocal  userLocal = userLocalService.addUserToUserLocal(foundedUserByEmail);
+
 
         emailService.sendEmail(boardId, addCollabBoardDTO.getEmail(), userOwner.getName(),
                 addCollabBoardDTO.getAccessRight().toString().toUpperCase(), board.getName(), addCollabBoardDTO.getUrl());

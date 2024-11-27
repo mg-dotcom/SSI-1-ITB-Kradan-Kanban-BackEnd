@@ -1,6 +1,7 @@
 package ssi1.integrated.services;
 
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,7 +130,7 @@ public class CollabBoardService {
         return collaboratorDTO;
     }
 
-    public CollabBoardDTO addCollabBoard(String accessToken, String boardId, AddCollabBoardDTO addCollabBoardDTO) throws MessagingException, UnsupportedEncodingException {
+    public CollabBoardDTO addCollabBoard(String accessToken,String accessTokenMS, String boardId, AddCollabBoardDTO addCollabBoardDTO) throws MessagingException, UnsupportedEncodingException {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
@@ -179,7 +180,8 @@ public class CollabBoardService {
                 throw new ConflictException("The email belongs to an existing collaborator.");
             }
         }
-        User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail());
+
+        User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail(),accessTokenMS);
         if (foundedUserByEmail == null) {
             throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
         }

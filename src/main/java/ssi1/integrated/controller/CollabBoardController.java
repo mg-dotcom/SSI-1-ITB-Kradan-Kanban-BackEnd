@@ -51,8 +51,8 @@ public class CollabBoardController {
     }
 
     @PostMapping("/{boardId}/collabs")
-    public ResponseEntity<CollabBoardDTO> addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken, @RequestBody AddCollabBoardDTO addCollabBoardDTO) throws MessagingException, UnsupportedEncodingException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(accessToken,boardId,addCollabBoardDTO));
+    public ResponseEntity<CollabBoardDTO> addCollabBoard(@PathVariable String boardId, @RequestHeader(name = "Authorization") String accessToken , @RequestHeader(name = "AccessTokenMS") String accessTokenMS , @RequestBody AddCollabBoardDTO addCollabBoardDTO) throws MessagingException, UnsupportedEncodingException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(collabBoardService.addCollabBoard(accessToken,accessTokenMS,boardId,addCollabBoardDTO));
     }
 
     @PatchMapping("/{boardId}/collabs/{collab_oid}")

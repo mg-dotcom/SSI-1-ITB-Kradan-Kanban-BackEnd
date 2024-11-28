@@ -131,12 +131,14 @@ public class CollabBoardService {
     }
 
     public CollabBoardDTO addCollabBoard(String accessToken,String accessTokenMS, String boardId, AddCollabBoardDTO addCollabBoardDTO) throws MessagingException, UnsupportedEncodingException {
+
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
         Visibility visibility = board.getVisibility();
 
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+        System.out.println("JWT TOKEN : "+jwtToken);
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
 
@@ -180,8 +182,14 @@ public class CollabBoardService {
                 throw new ConflictException("The email belongs to an existing collaborator.");
             }
         }
+        User foundedUserByEmail;
+        
+        if (accessTokenMS.isEmpty()){
+            foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail());
+        }else {
+            foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail(), accessTokenMS);
+        }
 
-        User foundedUserByEmail = userService.getUserByEmail(addCollabBoardDTO.getEmail(),accessTokenMS);
         if (foundedUserByEmail == null) {
             throw new ItemNotFoundException("User Email Not Found with email: " + addCollabBoardDTO.getEmail());
         }

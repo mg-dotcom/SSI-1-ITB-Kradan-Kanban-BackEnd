@@ -49,7 +49,6 @@ public class UserService implements UserDetailsService {
     }
 
     public User getUserByEmail(String email, String accessTokenMS) {
-        System.out.println("Access token: " + accessTokenMS);
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessTokenMS); // Set Bearer token in the headers

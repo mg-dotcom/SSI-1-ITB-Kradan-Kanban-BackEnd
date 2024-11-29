@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+import ssi1.integrated.dtos.EditLimitDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ForbiddenException;
@@ -20,6 +21,7 @@ import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.project_board.status.StatusRepository;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task.TaskRepository;
+import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.security.JwtPayload;
 import ssi1.integrated.security.JwtService;
 import ssi1.integrated.user_account.User;
@@ -43,6 +45,8 @@ public class StatusService {
     private UserService userService;
     @Autowired
     private CollabBoardRepository collabBoardRepository;
+    @Autowired
+    private UserLocalService userLocalService;
 
     public List<Status> getAllStatus(String boardId, String accessToken) {
         Board board = boardRepository.findById(boardId).orElseThrow(
@@ -299,10 +303,54 @@ public class StatusService {
         return transferStatus;
     }
 
+    @Transactional
+    public boolean updateMaximumTask(String boardId, EditLimitDTO editLimitDTO, String jwtToken) {
+        Board board = boardRepository.findById(boardId).orElseThrow(
+                () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
+        );
+
+        Visibility visibility = board.getVisibility();
+
+        boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
+        boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
+
+        if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException(boardId + " this board id is private.");
+        }
+
+        if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Only board owner and collaborators with write access can delete status.");
+        }
+
+        if (jwtToken == null || jwtToken.trim().isEmpty()) {
+            throw new AuthenticationException("JWT token is required") {
+            };
+        }
+        if (!isOwner && !isCollaboratorWrite) {
+            throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
+        }
+
+
+        if (editLimitDTO.getLimitMaximumTask() != null) {
+            board.setLimitMaximumTask(editLimitDTO.getLimitMaximumTask());
+            boardRepository.save(board);
+
+            if (editLimitDTO.getLimitMaximumTask()) {
+                board.setMaximumTask(10);
+                boardRepository.save(board);
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     // Check if user is the board owner
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
         User user = userService.getUserByOid(userOid);
+
         return user.getOid().equals(jwtPayload.getOid());
     }
 

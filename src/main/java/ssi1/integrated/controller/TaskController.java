@@ -126,9 +126,8 @@ public class TaskController {
                 .collect(Collectors.toMap(TaskFileDTO::getFileName, file -> file));
 
         Set<String> updatedFileNames = new HashSet<>();
-        List<MultipartFile> filesToSave = new ArrayList<>(); // A list of MultipartFile objects
+        List<MultipartFile> filesToSave = new ArrayList<>();
 
-        // Process input files array
         if (files != null) {
             for (MultipartFile file : files) {
                 String fileName = file.getOriginalFilename();
@@ -140,28 +139,33 @@ public class TaskController {
 
                 updatedFileNames.add(fileName);
 
-                // If the file is not in existing files, it's a new file to add
-                if (!existingFileMap.containsKey(fileName)) {
-                    // Add the file to the list of files to save (MultipartFile)
-                    filesToSave.add(file);
+                // Check if the file already exists
+                if (existingFileMap.containsKey(fileName)) {
+                    // Remove the existing file
+                    TaskFileDTO existingFile = existingFileMap.get(fileName);
+                    taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
                 }
+
+                // Add the new file to the list of files to save
+                filesToSave.add(file);
             }
 
-            // Delete files that are no longer in the updated list
+            // Delete files that are not included in the updated files list
             for (TaskFileDTO existingFile : existingFiles) {
                 if (!updatedFileNames.contains(existingFile.getFileName())) {
                     taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
                 }
             }
         } else {
-            // If files is null, clear all existing files
+            // If no files are provided, delete all existing files for the task
             for (TaskFileDTO existingFile : existingFiles) {
                 taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
             }
         }
 
-        // Save new files to the task using the service
+// Save all new files to the task
         List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, filesToSave, boardId, jwtToken);
+
 
         // Set the saved files in the taskDto
         taskDto.setFiles(savedFiles);

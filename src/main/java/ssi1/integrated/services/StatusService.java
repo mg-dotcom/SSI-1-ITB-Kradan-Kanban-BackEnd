@@ -112,7 +112,6 @@ public class StatusService {
     @Transactional
     public NewStatusDTO updateStatus(String boardId, Integer statusId, NewStatusDTO updateStatusDTO, String jwtToken) {
 
-        // Early JWT Token check
         if (jwtToken == null || jwtToken.trim().isEmpty()) {
             throw new AuthenticationException("JWT token is required") {
             };
@@ -130,28 +129,23 @@ public class StatusService {
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken, boardId);
 
-        // Check if collaborator exists and if they have read-only access
         if (collaborator != null && collaborator.getAccessRight() == AccessRight.READ && !isOwner) {
             throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
         }
 
-        // Handle board visibility and access
         if (board.getVisibility() == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException(boardId + " this board is private.");
         } else if (board.getVisibility() == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
             throw new ForbiddenException("Only board owner and collaborators with write access can edit status.");
         }
 
-        // Ensure the status being modified is not restricted
         if (statusId.equals(1) || statusId.equals(4)) {
             throw new BadRequestException("This status cannot be modified.");
         }
 
-        // Fetch status to update (throws exception if not found)
         Status toUpdateStatus = statusRepository.findById(statusId)
                 .orElseThrow(() -> new ItemNotFoundException("Status not found with STATUS ID: " + statusId));
 
-        // Update the status fields
         toUpdateStatus.setStatusColor(
                 (updateStatusDTO.getStatusColor() == null || updateStatusDTO.getStatusColor().isEmpty())
                         ? "#CCCCCC"
@@ -160,7 +154,6 @@ public class StatusService {
         toUpdateStatus.setName(updateStatusDTO.getName());
         toUpdateStatus.setDescription(updateStatusDTO.getDescription());
 
-        // Save updated status and map to DTO
         Status updatedStatus = statusRepository.save(toUpdateStatus);
         return modelMapper.map(updatedStatus, NewStatusDTO.class);
     }
@@ -243,7 +236,6 @@ public class StatusService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-        //validate status Id
         List<Task> taskList = taskRepository.findByStatusIdAndBoardId(statusId, boardId);
 
         if (taskList.isEmpty()) {
@@ -342,7 +334,6 @@ public class StatusService {
         }
     }
 
-    // Check if user is the board owner
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
         User user = userService.getUserByOid(userOid);
@@ -350,7 +341,6 @@ public class StatusService {
         return user.getOid().equals(jwtPayload.getOid());
     }
 
-    // Check if collaborator has write access
     public boolean isCollaboratorWriteAccess(String jwtToken, String boardId) {
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
@@ -365,27 +355,21 @@ public class StatusService {
     }
 
     public boolean isPendingAndNotOwner(String jwtToken, String boardId, String userOid) {
-        // Extract the user's information from the JWT token
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
 
-        // Fetch the user based on the provided userOid
         User user = userService.getUserByOid(userOid);
 
-        // Check if the user is the owner
         if (user.getOid().equals(jwtPayload.getOid())) {
-            return false; // User is the owner, not pending
+            return false;
         }
 
-        // Fetch the collaborator record for the given board and user from the token
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
-        // Check if collaborator exists and is in a "PENDING" state
         return collaborator != null
                 && collaborator.getStatus() == ssi1.integrated.project_board.collab_management.Status.PENDING
                 && !user.getOid().equals(jwtPayload.getOid());
     }
 
-    // Helper method to check board access rights
     private void authorizeBoardAccess(String boardId, String jwtToken, boolean requireWriteAccess) {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));

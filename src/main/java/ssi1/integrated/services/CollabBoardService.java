@@ -231,17 +231,14 @@ public class CollabBoardService {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
 
         CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
-        //404
         if(collaborator==null){
             throw new ItemNotFoundException("The "+collabsOid+" is not a collaborator on the board.");
         }
 
-        //403
         if(!board.getUserOid().equals(jwtPayload.getOid())){
             throw new ForbiddenException("Only board owner can edit access right.");
         }
 
-        //400 
         try {
             collaborator.setAccessRight(AccessRight.valueOf(accessRight.getAccessRight().toUpperCase()));
         } catch (IllegalArgumentException e) {
@@ -281,12 +278,10 @@ public class CollabBoardService {
         CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(boardId,collabsOid);
 
 
-        //403
         if(!(jwtPayload.getOid().equals(board.getUserOid())||jwtPayload.getOid().equals(collaborator.getUser().getOid()))){
             throw new ForbiddenException("Only board owner can delete collaborators and only collaborator can delete themself");
         }
 
-        //404
         if(collaborator==null){
             throw new ItemNotFoundException("The "+collabsOid+" is not a collaborator on the board.");
         }
@@ -300,7 +295,6 @@ public class CollabBoardService {
         return user.getOid().equals(jwtPayload.getOid());
     }
 
-    // Check if collaborator has write access
     public boolean isCollaboratorWriteAccess(String jwtToken, String boardId) {
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());

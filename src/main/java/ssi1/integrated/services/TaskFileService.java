@@ -60,13 +60,11 @@ public class TaskFileService {
     private static final long MAX_FILE_SIZE = 20 * 1024 * 1024;
     private final Path fileStorageLocation;
 
-    // create folder product-image
     @Autowired
     public TaskFileService(FileStorageProperties fileStorageProperties) {
         this.fileStorageLocation = Paths.get(fileStorageProperties
                 .getUploadDir()).toAbsolutePath().normalize();
         try {
-            // if have same folder not create
             if (!Files.exists(this.fileStorageLocation)) {
                 Files.createDirectories(this.fileStorageLocation);
             }
@@ -81,28 +79,22 @@ public class TaskFileService {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
-        // Step 1: Fetch the board and validate access
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId));
 
-        // Step 2: Access control for visibility of the board
         Visibility visibility = board.getVisibility();
 
-        // Extract the JWT token if available
         String jwtToken = (accessToken != null && accessToken.startsWith("Bearer "))
                 ? accessToken.substring(7)
                 : accessToken;
 
-        // Check if the user is the board owner or a collaborator
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken, boardId);
 
-        // If the board is private and the user is neither the owner nor a collaborator, deny access
         if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-        // Step 3: Resolve the file path
         Path taskDirectory = this.fileStorageLocation.resolve(existingTask.getId().toString());
 
         Path targetLocation = taskDirectory.resolve(fileName);
@@ -111,19 +103,16 @@ public class TaskFileService {
 
         Resource resource = new FileSystemResource(filePath);
 
-        // Check if the file exists
         if (!resource.exists()) {
             throw new ItemNotFoundException("File not found: " + fileName);
         }
 
         try {
-            // Step 4: Determine the content type of the file
             String contentType = Files.probeContentType(filePath);
             if (contentType == null) {
-                contentType = "application/octet-stream"; // Default content type if not detected
+                contentType = "application/octet-stream";
             }
 
-            // Step 5: Return the file as a downloadable resource
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .body(resource);
@@ -165,7 +154,6 @@ public class TaskFileService {
 
     @Transactional
     public List<TaskFile> saveAllFilesList(Integer taskId, List<MultipartFile> fileList, String boardId, String jwtToken) {
-        // ! Checking security
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
@@ -192,12 +180,10 @@ public class TaskFileService {
         StringBuilder errorMessages = new StringBuilder();
         List<FileInfoDTO> errorFiles = new ArrayList<>();
 
-        // * Define individual error messages
         String duplicateFileMessage = "Filenames must be unique within the task.";
         String maxFilesMessage = "Each task can have at most " + MAX_FILES + " files.";
         String maxFilesExceedMessage = "Each file cannot be larger than " + (MAX_FILE_SIZE / (1024 * 1024)) + " MB.";
 
-        // ! 1. Check for duplicate filenames
         List<FileInfoDTO> duplicateFileInfos = fileList.stream()
                 .filter(file -> taskRepository.existsByTaskIdAndFileName(taskId, file.getName()))
                 .map(file -> new FileInfoDTO(file.getName(), file.getSize()))
@@ -207,7 +193,6 @@ public class TaskFileService {
             appendErrorMessage(errorMessages, duplicateFileMessage, duplicateFileInfos, errorFiles);
         }
 
-        // ! 2. Check for files exceeding the maximum file size
         List<FileInfoDTO> exceedFileInfos = fileList.stream()
                 .filter(file -> file.getSize() > MAX_FILE_SIZE)
                 .map(file -> new FileInfoDTO(file.getName(), file.getSize()))
@@ -217,7 +202,6 @@ public class TaskFileService {
             appendErrorMessage(errorMessages, maxFilesExceedMessage, exceedFileInfos, errorFiles);
         }
 
-        // ! 3. Check for exceeding the file count limit
         int currentFileCount = taskRepository.countFilesByTaskId(taskId);
         int allowedFilesCount = MAX_FILES - currentFileCount;
 
@@ -232,18 +216,17 @@ public class TaskFileService {
             appendErrorMessage(errorMessages, maxFilesMessage, excessFiles, errorFiles);
         }
 
-        // * Save valid files if no errors
         List<TaskFile> validFiles = fileList.stream()
                 .filter(file -> !duplicateFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getName()))
                         && !exceedFileInfos.stream().anyMatch(f -> f.getFileName().equals(file.getName()))
                         && !excessFiles.stream().anyMatch(f -> f.getFileName().equals(file.getName())))
                 .limit(allowedFilesCount)
                 .map(file -> {
-                    // Create a subdirectory named after the task ID
+
                     Path taskDirectory = this.fileStorageLocation.resolve(existingTask.getId().toString());
 
                     try {
-                        // Create the directory for the task if it doesn't exist
+
                         if (!Files.exists(taskDirectory)) {
                             Files.createDirectories(taskDirectory);
                         }
@@ -251,10 +234,10 @@ public class TaskFileService {
                         throw new RuntimeException("Could not create directory for task ID: " + taskId, ex);
                     }
 
-                    // Resolve the file path within the task-specific directory
+
                     Path targetLocation = taskDirectory.resolve(file.getOriginalFilename());
 
-                    // Create the TaskFile object
+
                     TaskFile taskFile = new TaskFile();
                     taskFile.setFileName(file.getOriginalFilename());
                     taskFile.setFileSize(file.getSize());
@@ -264,7 +247,7 @@ public class TaskFileService {
                     taskFile.setTask(existingTask);
 
                     try {
-                        // Copy the file to the task-specific directory
+
                         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
                         fileRepository.save(taskFile);
@@ -289,7 +272,6 @@ public class TaskFileService {
 
     @Transactional
     public TaskFileDTO deleteFileById(String boardId, Integer fileId, Integer taskId, String jwtToken) {
-        // Checking security
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
@@ -315,24 +297,20 @@ public class TaskFileService {
             throw new ForbiddenException(boardId + " this board id is private. Only board owner can collaborator can access");
         }
 
-        // Deleting the file from the file system
         try {
-            // Define the path of the file in the storage location
+
             Path taskDirectory = this.fileStorageLocation.resolve(existingTask.getId().toString());
 
-            Path targetLocation = taskDirectory.resolve(file.getFileName()); // Assuming `file.getFileName()` gives the file name
+            Path targetLocation = taskDirectory.resolve(file.getFileName());
 
-            // Delete the file from the file system
-            Files.delete(targetLocation); // This will delete the file from the storage
+            Files.delete(targetLocation);
         } catch (IOException e) {
-            e.printStackTrace(); // Log the exception
+            e.printStackTrace();
             throw new RuntimeException("Error deleting file from filesystem", e);
         }
 
-        // Now delete the file from the database
         fileRepository.delete(file);
 
-        // Return a TaskFileDTO for the deleted file (if needed)
         return new TaskFileDTO(file);
     }
 

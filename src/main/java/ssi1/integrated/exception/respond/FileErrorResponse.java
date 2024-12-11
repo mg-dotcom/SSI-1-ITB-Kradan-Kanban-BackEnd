@@ -21,18 +21,17 @@ public class FileErrorResponse {
     private final int status;
     private final String message;
     private final String instance;
-    private List<ValidationFileError> fileErrors; // List for file errors
+    private List<ValidationFileError> fileErrors;
 
 
     @Getter
     @RequiredArgsConstructor
     private static class ValidationFileError {
-        private final String fileName; // Store the file name for errors
+        private final String fileName;
         private final String fileSize;
     }
 
 
-    // Method to add a file error
     public void addValidationFileError(FileInfoDTO fileInfo) {
         if (fileErrors == null) {
             fileErrors = new ArrayList<>();

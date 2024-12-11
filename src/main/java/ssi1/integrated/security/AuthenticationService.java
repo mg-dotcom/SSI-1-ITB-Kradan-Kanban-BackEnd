@@ -68,7 +68,7 @@ public class AuthenticationService {
     public AuthenticationResponse MicrosoftGraphService(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken); // Set Bearer token in the headers
+        headers.setBearerAuth(accessToken);
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         try {
@@ -80,7 +80,6 @@ public class AuthenticationService {
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                // Deserialize the Microsoft Graph API response
                 String jsonResponse = response.getBody();
                 UserLocal microsoftUser=getUserFromResponse(jsonResponse);
 
@@ -103,7 +102,6 @@ public class AuthenticationService {
 
                 }else {
                     userLocalService.addUserToUserLocal(existingUser);
-                    // Generate tokens
                     var jwtToken = jwtService.generateToken(existingUser);
                     var refreshToken = jwtService.generateRefreshToken(existingUser);
 

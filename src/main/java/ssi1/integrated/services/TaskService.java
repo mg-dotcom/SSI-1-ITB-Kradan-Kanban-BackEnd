@@ -58,13 +58,11 @@ public class TaskService {
     private TaskFileRepository fileRepository;
     private final Path fileStorageLocation;
 
-//     create folder product-image
     @Autowired
     public TaskService(FileStorageProperties fileStorageProperties) {
         this.fileStorageLocation = Paths.get(fileStorageProperties
                 .getUploadDir()).toAbsolutePath().normalize();
         try {
-            // if have same folder not create
             if (!Files.exists(this.fileStorageLocation)) {
                 Files.createDirectories(this.fileStorageLocation);
             }
@@ -75,33 +73,27 @@ public class TaskService {
     }
 
     public List<GeneralTaskDTO> getAllTasks(String sortBy, List<String> filterStatuses, String direction, String boardId, String accessToken) {
-        // Fetch the board by ID
         Board board = boardRepository.findById(boardId).orElseThrow(
                 () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
         );
 
-        // Determine the sort order
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
                 sortBy
         );
         Sort sort = Sort.by(sortOrder);
 
-        // Check board visibility
         Visibility visibility = board.getVisibility();
         List<Task> allTaskSorted = taskRepository.getAllSortBy(sort, boardId);
 
-        // If the board is public and no filter is applied, return all tasks sorted
         if (visibility == Visibility.PUBLIC && filterStatuses == null) {
             return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
         }
 
-        // If the board is public with filters applied, return filtered tasks
         if (visibility == Visibility.PUBLIC) {
             return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
         }
 
-        // Extract the token if prefixed with "Bearer"
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken, boardId);
@@ -122,7 +114,6 @@ public class TaskService {
         }
 
         public Task getTaskById (Integer taskId, String boardId, String accessToken){
-            // Fetch the board by ID
             Board board = boardRepository.findById(boardId).orElseThrow(
                     () -> new ItemNotFoundException("Board not found with BOARD ID: " + boardId)
             );
@@ -130,20 +121,15 @@ public class TaskService {
             taskRepository.findById(taskId).orElseThrow(
                     () -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
-            // Check the board's visibility
             Visibility visibility = board.getVisibility();
-            // If the board is public, you can return the task without needing a token
             if (visibility == Visibility.PUBLIC) {
                 return taskRepository.findByIdAndBoardId(taskId, boardId);
             }
 
-            // Extract the JWT token if present
             String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
             boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
             boolean isCollaborator = isCollaborator(jwtToken, boardId);
 
-
-            // Check access for private boards
             if (visibility == Visibility.PRIVATE && !isOwner && !isCollaborator) {
                 throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
             }
@@ -152,8 +138,6 @@ public class TaskService {
                 throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
             }
 
-
-            // If the board is private and the user has access, fetch the task
             return taskRepository.findByIdAndBoardId(taskId, boardId);
         }
 
@@ -318,15 +302,12 @@ public class TaskService {
             return deletedTask;
         }
 
-
-        // Check if user is the board owner
         private boolean isBoardOwner (String userOid, String jwtToken){
             JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
             User user = userService.getUserByOid(userOid);
             return user.getOid().equals(jwtPayload.getOid());
         }
 
-        // Check if collaborator has write access
         public boolean isCollaboratorWriteAccess (String jwtToken, String boardId){
             JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
             CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
@@ -334,21 +315,16 @@ public class TaskService {
         }
 
         public boolean isPendingAndNotOwner (String jwtToken, String boardId, String userOid){
-            // Extract the user's information from the JWT token
             JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
 
-            // Fetch the user based on the provided userOid
             User user = userService.getUserByOid(userOid);
 
-            // Check if the user is the owner
             if (user.getOid().equals(jwtPayload.getOid())) {
-                return false; // User is the owner, not pending
+                return false;
             }
 
-            // Fetch the collaborator record for the given board and user from the token
             CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
 
-            // Check if collaborator exists and is in a "PENDING" state
             return collaborator != null
                     && collaborator.getStatus() == ssi1.integrated.project_board.collab_management.Status.PENDING
                     && !user.getOid().equals(jwtPayload.getOid());

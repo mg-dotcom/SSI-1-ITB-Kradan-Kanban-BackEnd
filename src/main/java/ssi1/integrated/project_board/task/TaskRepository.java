@@ -29,7 +29,6 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
     void deleteByStatusId(Integer statusId);
 
-    // Method to check if a file with a given name exists for a specific task
     @Query("SELECT COUNT(tf) > 0 FROM TaskFile tf WHERE tf.task.id = :taskId AND tf.fileName = :fileName")
     boolean existsByTaskIdAndFileName(@Param("taskId") Integer taskId, @Param("fileName") String fileName);
 }

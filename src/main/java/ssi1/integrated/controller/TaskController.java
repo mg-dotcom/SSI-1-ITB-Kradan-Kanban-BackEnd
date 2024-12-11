@@ -69,7 +69,6 @@ public class TaskController {
             @PathVariable String fileName,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
         try {
-            // Fetch the file resource from the service
             return taskFileService.getFileForPreview(boardId, taskId, fileName, accessToken);
         } catch (Exception e) {
             throw new RuntimeException("Error retrieving file: " + fileName, e);
@@ -89,23 +88,18 @@ public class TaskController {
 
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
 
-        // Ensure taskDto is valid
         if (newTaskDTO == null || taskDto.getTitle() == null) {
             return ResponseEntity.badRequest().body("Missing required task details");
         }
 
-        // Ensure board exists
         boardService.getBoardById(boardId);
 
-        // Set task ID if not present
         if (taskDto.getId() == null) {
             taskDto.setId(taskId);
         }
 
-        // Update task details
         service.updateTask(taskId, taskDto, boardId, jwtToken);
 
-        // Retrieve existing files
         List<TaskFileDTO> existingFiles = taskFileService.getFilesByTaskId(taskId, boardId, accessToken);
         Map<String, TaskFileDTO> existingFileMap = existingFiles.stream()
                 .collect(Collectors.toMap(TaskFileDTO::getFileName, file -> file));
@@ -117,32 +111,26 @@ public class TaskController {
             for (MultipartFile file : files) {
                 String fileName = file.getOriginalFilename();
 
-                // Skip if filename is empty or null
                 if (fileName == null || fileName.isEmpty()) {
                     continue;
                 }
 
                 updatedFileNames.add(fileName);
 
-                // Check if the file already exists
                 if (existingFileMap.containsKey(fileName)) {
-                    // Remove the existing file
                     TaskFileDTO existingFile = existingFileMap.get(fileName);
                     taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
                 }
 
-                // Add the new file to the list of files to save
                 filesToSave.add(file);
             }
 
-            // Delete files that are not included in the updated files list
             for (TaskFileDTO existingFile : existingFiles) {
                 if (!updatedFileNames.contains(existingFile.getFileName())) {
                     taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
                 }
             }
         } else {
-            // If no files are provided, delete all existing files for the task
             for (TaskFileDTO existingFile : existingFiles) {
                 taskFileService.deleteFileById(boardId, existingFile.getId(), taskId, jwtToken);
             }
@@ -150,11 +138,9 @@ public class TaskController {
 
         List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, filesToSave, boardId, jwtToken);
 
-
-        // Set the saved files in the taskDto
         taskDto.setFiles(savedFiles);
 
-        return ResponseEntity.ok(taskDto); // Return taskDto as the response body
+        return ResponseEntity.ok(taskDto);
     }
 
 

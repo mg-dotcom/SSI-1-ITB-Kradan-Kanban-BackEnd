@@ -49,10 +49,9 @@ public class UserService implements UserDetailsService {
     public User getUserByEmail(String email, String accessTokenMS) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessTokenMS); // Set Bearer token in the headers
+        headers.setBearerAuth(accessTokenMS);
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
-        // Call Microsoft Graph API to get the user by email
         String url = "https://graph.microsoft.com/v1.0/users/" + email;
 
         try {
@@ -65,20 +64,16 @@ public class UserService implements UserDetailsService {
             String jsonResponse = response.getBody();
             User microsoftUser = getUserFromResponse(jsonResponse);
 
-            // Process response if successful
             if (response.getStatusCode().is2xxSuccessful()) {
                 return microsoftUser;
             }
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                // Handle 404 Not Found
             } else {
-                // Re-throw other exceptions for handling upstream
                 throw e;
             }
         }
 
-        // Fallback to local database search
         return userRepository.findByEmail(email);
     }
 

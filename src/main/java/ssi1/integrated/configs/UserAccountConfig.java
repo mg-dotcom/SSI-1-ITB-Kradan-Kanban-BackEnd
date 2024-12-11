@@ -44,7 +44,6 @@ public class UserAccountConfig {
     @Bean
     public EntityManagerFactoryBuilder entityManagerFactoryBuilder() {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        // Disable automatic generation of tables
         vendorAdapter.setGenerateDdl(false);
         return new EntityManagerFactoryBuilder(vendorAdapter, new HashMap<>(), null);
     }
@@ -63,7 +62,6 @@ public class UserAccountConfig {
             final @Qualifier("userAccountEntityManager")
             LocalContainerEntityManagerFactoryBean userAccountEntityManager) {
         return new JpaTransactionManager(
-                // Use to throw NullPointerException if userAccountEntityManagerFactory.getObject() is null
                 Objects.requireNonNull(
                         userAccountEntityManager.getObject()
                 )

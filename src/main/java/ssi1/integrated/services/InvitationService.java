@@ -41,7 +41,6 @@ public class InvitationService {
         JwtPayload jwtPayload=jwtService.extractPayload(accessToken);
 
         CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(board.getId(),jwtPayload.getOid());
-        //404
         if(collaborator==null){
             throw new ItemNotFoundException("The "+jwtPayload.getOid()+" is not a collaborator on the board.");
         }
@@ -53,7 +52,6 @@ public class InvitationService {
         try {
             collaborator.setStatus(Status.valueOf(invitationDTO.getCollabStatus().toUpperCase()));
         } catch (IllegalArgumentException e) {
-            //400
             throw new BadRequestException("Invalid Status provided.");
         }
 
@@ -68,7 +66,6 @@ public class InvitationService {
         User owner = userRepository.findByOid(board.getUserOid());
 
         CollabBoard collaborator=collabBoardRepository.findByBoard_IdAndUser_Oid(board.getId(),jwtPayload.getOid());
-        //404
         if(collaborator==null){
             throw new ItemNotFoundException("The "+jwtPayload.getOid()+" is not a collaborator on the board.");
         }

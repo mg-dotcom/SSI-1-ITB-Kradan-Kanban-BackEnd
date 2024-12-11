@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if ("GET".equalsIgnoreCase(request.getMethod()) && boardService.boardExists(boardId)) {
                 Board board = boardService.getBoardById(boardId);
                 if (board.getVisibility() == Visibility.PUBLIC) {
-                    filterChain.doFilter(request, response); // Public access granted
+                    filterChain.doFilter(request, response);
                     return;
                 } else {
                     sendErrorResponse(response, "Access denied to private board with ID: " + boardId, request, HttpStatus.FORBIDDEN);
@@ -66,9 +66,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } else {
             jwt = authHeader.substring(7);
             try {
-                userName = jwtService.extractUsername(jwt); // Extract the username from the token
+                userName = jwtService.extractUsername(jwt);
             } catch (ExpiredJwtException e) {
-                // Handle expired JWT token case and return 401 Unauthorized
                 sendErrorResponse(response, "Token has expired. Please use refresh token.", request, HttpStatus.UNAUTHORIZED);
                 return;
             } catch (JwtException e) {

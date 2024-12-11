@@ -55,7 +55,6 @@ public class ProjectBoardConfig {
     public PlatformTransactionManager projectManagementTransactionManager(
             final @Qualifier("projectManagementEntityManager") LocalContainerEntityManagerFactoryBean projectManagementEntityManager) {
         return new JpaTransactionManager(
-                // Use to throw NullPointerException if userAccountEntityManagerFactory.getObject() is null
                 Objects.requireNonNull(
                         projectManagementEntityManager.getObject()
                 )

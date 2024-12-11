@@ -6,10 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.EditLimitDTO;
 import ssi1.integrated.dtos.NewStatusDTO;
-import ssi1.integrated.exception.handler.ItemNotFoundException;
-import ssi1.integrated.project_board.board.Board;
-import ssi1.integrated.project_board.board.BoardRepository;
-import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.project_board.status.Status;
 import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.StatusService;
@@ -27,8 +23,7 @@ public class StatusController {
 
     @Autowired
     private BoardService boardService;
-    @Autowired
-    private BoardRepository boardRepository;
+
 
     @GetMapping("/{boardId}/statuses")
     public ResponseEntity<List<Status>> getAllStatus(@PathVariable String boardId, @RequestHeader(name = "Authorization", required = false) String accessToken) {

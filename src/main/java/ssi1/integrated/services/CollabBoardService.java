@@ -1,12 +1,8 @@
 package ssi1.integrated.services;
 
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.AccessRightDTO;

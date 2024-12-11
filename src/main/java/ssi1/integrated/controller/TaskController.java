@@ -1,24 +1,16 @@
 package ssi1.integrated.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import ssi1.integrated.dtos.GeneralTaskDTO;
 import ssi1.integrated.dtos.NewTaskDTO;
 import ssi1.integrated.dtos.TaskDTO;
 import ssi1.integrated.dtos.TaskFileDTO;
-import ssi1.integrated.exception.handler.FileUploadException;
-import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.task.Task;
 import ssi1.integrated.project_board.task_attachment.TaskFile;
 import ssi1.integrated.services.BoardService;
@@ -26,11 +18,6 @@ import ssi1.integrated.services.TaskFileService;
 import ssi1.integrated.services.TaskService;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 

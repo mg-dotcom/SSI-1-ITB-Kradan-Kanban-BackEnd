@@ -6,15 +6,12 @@ import org.springframework.stereotype.Service;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.user_account.User;
-import ssi1.integrated.user_account.UserRepository;
 import ssi1.integrated.project_board.user_local.UserLocalRepository;
 
 import java.util.List;
 
 @Service
 public class UserLocalService {
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private UserLocalRepository userLocalRepository;

@@ -2,7 +2,6 @@ package ssi1.integrated.services;
 
 import jakarta.transaction.Transactional;
 import lombok.Getter;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ssi1.integrated.FileStorageProperties;
-import ssi1.integrated.configs.ListMapper;
 import ssi1.integrated.dtos.FileInfoDTO;
 import ssi1.integrated.dtos.TaskFileDTO;
 import ssi1.integrated.exception.handler.FileUploadException;

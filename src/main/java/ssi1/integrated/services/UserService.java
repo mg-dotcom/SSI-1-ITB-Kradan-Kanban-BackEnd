@@ -2,7 +2,6 @@ package ssi1.integrated.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import ssi1.integrated.project_board.user_local.UserLocal;
 import ssi1.integrated.project_board.user_local.UserLocalRepository;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
-
 import java.util.List;
 
 @Service

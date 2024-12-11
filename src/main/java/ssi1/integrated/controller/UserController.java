@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ssi1.integrated.services.UserService;
 import ssi1.integrated.user_account.User;
-
 import java.util.List;
 
 @RestController

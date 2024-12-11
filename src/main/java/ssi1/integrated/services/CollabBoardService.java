@@ -3,6 +3,7 @@ package ssi1.integrated.services;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -35,22 +36,13 @@ import java.util.List;
 import static ssi1.integrated.project_board.board.Visibility.*;
 
 @Service
+@AllArgsConstructor
 public class CollabBoardService {
-    @Autowired
     private CollabBoardRepository collabBoardRepository;
-    @Autowired
-    private BoardService boardService;
-    @Autowired
     private BoardRepository boardRepository;
-    @Autowired
     private UserService userService;
-    @Autowired
     private UserLocalService userLocalService;
-    @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
     private JwtService jwtService;
-    @Autowired
     private EmailService emailService;
 
     public List<CollaboratorDTO> getAllCollabsBoard(String accessToken, String boardId){
@@ -75,12 +67,10 @@ public class CollabBoardService {
 
         Visibility visibility = board.getVisibility();
         if (visibility == Visibility.PUBLIC) {
-            System.out.println("ok");
             return collaboratorDTOList;
         }
 
         if (accessToken == null || accessToken.trim().isEmpty()) {
-            System.out.println("okok");
             throw new AuthenticationException("JWT token is required.") {
             };
         }
@@ -126,7 +116,6 @@ public class CollabBoardService {
         if (visibility == Visibility.PUBLIC) {
             return collaboratorDTO;
         }
-
         return collaboratorDTO;
     }
 
@@ -138,7 +127,6 @@ public class CollabBoardService {
         Visibility visibility = board.getVisibility();
 
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-        System.out.println("JWT TOKEN : "+jwtToken);
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaboratorWrite = isCollaboratorWriteAccess(jwtToken,boardId);
 
@@ -160,9 +148,7 @@ public class CollabBoardService {
             };
         }
 
-        // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        // Find the user associated with the OID from the JWT payload
         User userOwner = userService.getUserByOid(jwtPayload.getOid());
         if (!userOwner.getOid().equals(board.getUserOid())){
             throw new ForbiddenException("You do not have permission to modify this board.");
@@ -213,9 +199,7 @@ public class CollabBoardService {
             collabBoardDTO.setAccessRight(addCollabBoardDTO.getAccessRight());
             collabBoardDTO.setStatus(Status.PENDING);
 
-            System.out.println("Unsave.");
             collabBoardRepository.save(newCollabBoard);
-            System.out.println("Saved." + newCollabBoard.getUser().getEmail());
 
         return collabBoardDTO;
     }

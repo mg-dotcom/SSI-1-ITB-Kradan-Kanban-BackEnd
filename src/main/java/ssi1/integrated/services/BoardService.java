@@ -3,10 +3,9 @@ package ssi1.integrated.services;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ssi1.integrated.dtos.*;
 import ssi1.integrated.exception.handler.BadRequestException;
 import ssi1.integrated.exception.handler.ForbiddenException;
@@ -28,22 +27,40 @@ import ssi1.integrated.user_account.UserDTO;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class BoardService {
-    private BoardRepository boardRepository;
-    private UserService userService;
-    private ModelMapper modelMapper;
-    private JwtService jwtService;
-    private StatusService statusService;
-    private TaskRepository taskRepository;
-    private StatusRepository statusRepository;
-    private CollabBoardRepository collabBoardRepository;
-    private UserLocalService userLocalService;
+    private final BoardRepository boardRepository;
+    private final UserService userService;
+    private final ModelMapper modelMapper;
+    private final JwtService jwtService;
+    private final StatusService statusService;
+    private final TaskRepository taskRepository;
+    private final StatusRepository statusRepository;
+    private final CollabBoardRepository collabBoardRepository;
+    private final UserLocalService userLocalService;
+
+    @Autowired
+    public BoardService(BoardRepository boardRepository,
+                        UserService userService,
+                        ModelMapper modelMapper,
+                        JwtService jwtService,
+                        StatusService statusService,
+                        TaskRepository taskRepository,
+                        StatusRepository statusRepository,
+                        CollabBoardRepository collabBoardRepository,
+                        UserLocalService userLocalService) {
+        this.boardRepository = boardRepository;
+        this.userService = userService;
+        this.modelMapper = modelMapper;
+        this.jwtService = jwtService;
+        this.statusService = statusService;
+        this.taskRepository = taskRepository;
+        this.statusRepository = statusRepository;
+        this.collabBoardRepository = collabBoardRepository;
+        this.userLocalService = userLocalService;
+    }
 
     public List<Board> getAllBoards() {
         return boardRepository.findAll();

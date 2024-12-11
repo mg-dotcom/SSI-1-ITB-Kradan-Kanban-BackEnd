@@ -66,7 +66,6 @@ public class StatusService {
 
 
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
-            System.out.println("visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator");
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
@@ -382,11 +381,6 @@ public class StatusService {
 
         // Fetch the collaborator record for the given board and user from the token
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-
-        // Debugging prints (can be removed later)
-        System.out.println("Collaborator Status: " + (collaborator != null ? collaborator.getStatus() : "null"));
-        System.out.println("User Oid: " + user.getOid());
-        System.out.println("JwtPayload Oid: " + jwtPayload.getOid());
 
         // Check if collaborator exists and is in a "PENDING" state
         return collaborator != null

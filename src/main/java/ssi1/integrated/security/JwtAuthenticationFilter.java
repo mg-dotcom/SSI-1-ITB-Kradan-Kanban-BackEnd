@@ -93,10 +93,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return;
-}
+            }
         }
                 filterChain.doFilter(request, response);
-                }
+    }
 
 
     private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request, HttpStatus status) throws IOException {

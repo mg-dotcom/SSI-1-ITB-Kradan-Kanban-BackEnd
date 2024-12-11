@@ -331,7 +331,6 @@ public class TaskService {
         public boolean isCollaboratorWriteAccess (String jwtToken, String boardId){
             JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
             CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-            System.out.println(collaborator);
             return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE && collaborator.getStatus() == ssi1.integrated.project_board.collab_management.Status.ACTIVE;
         }
 
@@ -349,11 +348,6 @@ public class TaskService {
 
             // Fetch the collaborator record for the given board and user from the token
             CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-
-            // Debugging prints (can be removed later)
-            System.out.println("Collaborator Status: " + (collaborator != null ? collaborator.getStatus() : "null"));
-            System.out.println("User Oid: " + user.getOid());
-            System.out.println("JwtPayload Oid: " + jwtPayload.getOid());
 
             // Check if collaborator exists and is in a "PENDING" state
             return collaborator != null

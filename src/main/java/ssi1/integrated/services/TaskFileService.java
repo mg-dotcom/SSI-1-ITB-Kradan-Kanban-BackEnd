@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +80,8 @@ public class TaskFileService {
 
     public ResponseEntity<Resource> getFileForPreview(
             String boardId, Integer taskId, String fileName, String accessToken) {
+        Task existingTask = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ItemNotFoundException("Task not found with TASK ID: " + taskId));
 
         // Step 1: Fetch the board and validate access
         Board board = boardRepository.findById(boardId)
@@ -102,7 +105,9 @@ public class TaskFileService {
         }
 
         // Step 3: Resolve the file path
-        Path targetLocation = this.fileStorageLocation.resolve(fileName).normalize();
+        Path taskDirectory = this.fileStorageLocation.resolve(existingTask.getId().toString());
+
+        Path targetLocation = taskDirectory.resolve(fileName);
 
         Path filePath = targetLocation;
 
@@ -236,8 +241,22 @@ public class TaskFileService {
                         && !excessFiles.stream().anyMatch(f -> f.getFileName().equals(file.getName())))
                 .limit(allowedFilesCount)
                 .map(file -> {
-                    Path targetLocation = this.fileStorageLocation.resolve(file.getOriginalFilename());
+                    // Create a subdirectory named after the task ID
+                    Path taskDirectory = this.fileStorageLocation.resolve(existingTask.getId().toString());
 
+                    try {
+                        // Create the directory for the task if it doesn't exist
+                        if (!Files.exists(taskDirectory)) {
+                            Files.createDirectories(taskDirectory);
+                        }
+                    } catch (IOException ex) {
+                        throw new RuntimeException("Could not create directory for task ID: " + taskId, ex);
+                    }
+
+                    // Resolve the file path within the task-specific directory
+                    Path targetLocation = taskDirectory.resolve(file.getOriginalFilename());
+
+                    // Create the TaskFile object
                     TaskFile taskFile = new TaskFile();
                     taskFile.setFileName(file.getOriginalFilename());
                     taskFile.setFileSize(file.getSize());
@@ -247,19 +266,15 @@ public class TaskFileService {
                     taskFile.setTask(existingTask);
 
                     try {
-                        // Attempt to copy the file to the target location
+                        // Copy the file to the task-specific directory
+                        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-                        Files.copy(file.getInputStream(), targetLocation);
-
-
-                        // If copying is successful, save the file metadata to the database
                         fileRepository.save(taskFile);
                     } catch (IOException ex) {
-                        // Handle the error appropriately (logging, custom exception, etc.)
-                        throw new RuntimeException("Could not store file " + file.getName(), ex);
+                        throw new RuntimeException("Could not store file " + file.getName() + " in task directory " + taskId, ex);
                     }
 
-                    return taskFile; // Return the TaskFile object
+                    return taskFile;
                 })
                 .toList();
 
@@ -305,7 +320,9 @@ public class TaskFileService {
         // Deleting the file from the file system
         try {
             // Define the path of the file in the storage location
-            Path targetLocation = this.fileStorageLocation.resolve(file.getFileName()); // Assuming `file.getFileName()` gives the file name
+            Path taskDirectory = this.fileStorageLocation.resolve(existingTask.getId().toString());
+
+            Path targetLocation = taskDirectory.resolve(file.getFileName()); // Assuming `file.getFileName()` gives the file name
 
             // Delete the file from the file system
             Files.delete(targetLocation); // This will delete the file from the storage

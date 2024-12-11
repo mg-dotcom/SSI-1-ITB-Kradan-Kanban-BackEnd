@@ -89,7 +89,6 @@ public class TaskController {
         }
     }
 
-
     @PutMapping("/{boardId}/tasks/{taskId}")
     public ResponseEntity<?> updateTaskAndFiles(
             @PathVariable String boardId,
@@ -98,7 +97,6 @@ public class TaskController {
             @RequestPart(value = "taskDto", required = false) String newTaskDTO,
             @RequestHeader(name = "Authorization") String accessToken) throws IOException {
 
-        // Deserialize taskDtoJson to a DTO object
         ObjectMapper objectMapper = new ObjectMapper();
         NewTaskDTO taskDto = objectMapper.readValue(newTaskDTO, NewTaskDTO.class);
 
@@ -163,7 +161,6 @@ public class TaskController {
             }
         }
 
-// Save all new files to the task
         List<TaskFile> savedFiles = taskFileService.saveAllFilesList(taskId, filesToSave, boardId, jwtToken);
 
 

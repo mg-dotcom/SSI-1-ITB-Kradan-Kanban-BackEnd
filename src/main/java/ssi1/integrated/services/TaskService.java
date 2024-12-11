@@ -81,7 +81,6 @@ public class TaskService {
         );
 
         // Determine the sort order
-
         Sort.Order sortOrder = new Sort.Order(
                 direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
                 sortBy
@@ -115,10 +114,8 @@ public class TaskService {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
 
-
         if (filterStatuses == null) {
             return listMapper.mapList(allTaskSorted, GeneralTaskDTO.class);
-            // Check if the user is pending and not the owner
         }
 
         return listMapper.mapList(taskRepository.findByStatusId(sort, filterStatuses, boardId), GeneralTaskDTO.class);
@@ -210,7 +207,6 @@ public class TaskService {
             task.setBoard(board);
             Task insertedTask = taskRepository.save(task);
             return modelMapper.map(insertedTask, GeneralTaskDTO.class);
-
         }
 
         @Transactional
@@ -226,7 +222,6 @@ public class TaskService {
             if (visibility == Visibility.PRIVATE && !isOwner && !isCollaboratorWrite) {
                 throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
             }
-
 
             if (visibility == Visibility.PUBLIC && !isOwner && !isCollaboratorWrite) {
                 throw new ForbiddenException("Only board owner and collaborators with write access can edit tasks.");
@@ -298,19 +293,23 @@ public class TaskService {
                 throw new ItemNotFoundException("Task not found with TASK ID: " + taskId);
             }
 
-
             Task task = taskRepository.findByIdAndBoardId(taskId, boardId);
+            try {
+                Path taskDirectory = this.fileStorageLocation.resolve(task.getId().toString());
 
-            for (TaskFile file : task.getFiles()) {
-                fileRepository.delete(file);
-                try {
-                    // Define the path of the file in the storage location
-                    Path targetLocation = this.fileStorageLocation.resolve(file.getFileName()); // Assuming `file.getFileName()` gives the file name
-                    Files.delete(targetLocation);
-                } catch (IOException e) {
-                    e.printStackTrace(); // Log the exception
-                    throw new RuntimeException("Error deleting file from filesystem", e);
+                for (TaskFile file : task.getFiles()) {
+
+                    fileRepository.delete(file);
+
+                    Path targetLocation = taskDirectory.resolve(file.getFileName());
+                    Files.deleteIfExists(targetLocation);
                 }
+
+                if (Files.exists(taskDirectory)) {
+                    Files.delete(taskDirectory);
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException("Could not delete file or folder for task ID: " + task.getId(), ex);
             }
 
 

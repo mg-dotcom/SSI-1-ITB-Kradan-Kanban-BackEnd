@@ -12,7 +12,6 @@ import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
-import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
 import ssi1.integrated.project_board.status.Status;
@@ -51,7 +50,6 @@ public class BoardService {
         if (jwtPayload == null) {
             throw new IllegalStateException("JWT Payload is null");
         }
-
 
         User user = userService.getUserByOid(jwtPayload.getOid());
         UserLocal userLocal=userLocalService.getUserByOid(jwtPayload.getOid());
@@ -174,7 +172,6 @@ public class BoardService {
             };
         }
 
-        //Can't access board
         if (!authorizationResult.isOwner()) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }

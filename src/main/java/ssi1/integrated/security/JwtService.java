@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.LinkedHashMap;

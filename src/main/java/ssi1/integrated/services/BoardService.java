@@ -12,7 +12,6 @@ import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
-import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
 import ssi1.integrated.project_board.collab_management.CollabBoardRepository;
 import ssi1.integrated.project_board.status.Status;
@@ -52,7 +51,6 @@ public class BoardService {
             throw new IllegalStateException("JWT Payload is null");
         }
 
-
         User user = userService.getUserByOid(jwtPayload.getOid());
         UserLocal userLocal=userLocalService.getUserByOid(jwtPayload.getOid());
         String userOid= user.getOid()==null? userLocal.getOid() : user.getOid();
@@ -81,10 +79,9 @@ public class BoardService {
             collabsBoardDTOs.add(contributorBoardDTO);
         }
         AllBoardDTO allBoardDTO = new AllBoardDTO();
-        allBoardDTO.setPersonalBoard(new ArrayList<>(toReturnPersonalBoard));  // Set personal boards
-        allBoardDTO.setCollabsBoard(collabsBoardDTOs);          // Add all collaboration boards
+        allBoardDTO.setPersonalBoard(new ArrayList<>(toReturnPersonalBoard));
+        allBoardDTO.setCollabsBoard(collabsBoardDTOs);
 
-        // Return the combined list
         return allBoardDTO;
     }
 
@@ -94,12 +91,9 @@ public class BoardService {
             throw new BadRequestException("Invalid board create body");
         }
 
-        // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        // Find the user associated with the OID from the JWT payload
         User user = userService.getUserByOid(jwtPayload.getOid());
 
-        // Create a new Board object and set its name and user
         Board newBoard = new Board();
         newBoard.setName(createBoardDTO.getName());
         newBoard.setUserOid(user.getOid());
@@ -109,10 +103,8 @@ public class BoardService {
         newBoard.setColor(createBoardDTO.getColor());
         newBoard.setVisibility(createBoardDTO.getVisibility());
 
-        // Save the new board to the repository
         boardRepository.save(newBoard);
 
-        //create default statuses
         NewStatusDTO noStatus = new NewStatusDTO();
         noStatus.setName("No Status");
         noStatus.setDescription("A status has not been assigned");
@@ -155,10 +147,8 @@ public class BoardService {
             return boardDTO;
         }
 
-
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
-        
 
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
@@ -182,7 +172,6 @@ public class BoardService {
             };
         }
 
-        //Can't access board
         if (!authorizationResult.isOwner()) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
@@ -191,7 +180,6 @@ public class BoardService {
             throw new BadRequestException("Invalid visibility");
         }
 
-        //Not in enum
         Visibility visibilityStatus = visibility.getVisibility();
 
         if (visibilityStatus != Visibility.PUBLIC && visibilityStatus != Visibility.PRIVATE) {
@@ -218,8 +206,6 @@ public class BoardService {
             };
         }
 
-
-        //Can't access board
         if (!authorizationResult.isOwner()) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
@@ -253,21 +239,11 @@ public class BoardService {
         return new BoardAuthorizationResult(isOwner, isPublic);
     }
 
-    // Check if user is the board owner
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
         User user = userService.getUserByOid(userOid);
         return user.getOid().equals(jwtPayload.getOid());
     }
-
-    // Check if collaborator has write access
-    public boolean isCollaboratorWriteAccess(String jwtToken, String boardId) {
-        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-
-        return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
-    }
-
     public boolean isCollaborator(String jwtToken, String boardId){
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());

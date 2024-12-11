@@ -19,9 +19,6 @@ import ssi1.integrated.exception.respond.ErrorResponse;
 import ssi1.integrated.exception.respond.FileErrorResponse;
 import ssi1.integrated.exception.respond.LimitationRespond;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 @RestControllerAdvice
 public class GlobalExceptionHandling {
 

@@ -1,9 +1,6 @@
 package ssi1.integrated.exception.handler;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import ssi1.integrated.dtos.FileInfoDTO;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -6,15 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.AllBoardDTO;
-import ssi1.integrated.dtos.BoardDTO;
 import ssi1.integrated.dtos.BoardVisibilityDTO;
 import ssi1.integrated.dtos.CreateBoardDTO;
 import ssi1.integrated.project_board.board.Board;
 import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.services.BoardService;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -55,18 +52,15 @@ public class BoardController {
 
         Board board = boardService.getBoardById(boardId);
 
-        // If the board is public, allow access without token
         if (board.getVisibility() == Visibility.PUBLIC) {
             return ResponseEntity.ok(boardService.getBoardDetail(boardId, null));
         }
 
-        // If the board is private, check if the token is present and valid
         if (accessToken != null && accessToken.startsWith("Bearer ")) {
             String jwtToken = accessToken.substring(7);
             return ResponseEntity.ok(boardService.getBoardDetail(boardId, jwtToken));
         }
 
-        // If no token is provided and the board is private, return access denied
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Access denied to private board with BOARD ID: " + boardId);
     }

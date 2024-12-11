@@ -1,6 +1,7 @@
 package ssi1.integrated.services;
 
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.AccessRightDTO;
@@ -24,16 +25,12 @@ import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
 
 @Service
+@AllArgsConstructor
 public class InvitationService {
-    @Autowired
     private BoardRepository boardRepository;
-    @Autowired
     private CollabBoardRepository collabBoardRepository;
-    @Autowired
     private JwtService jwtService;
-    @Autowired
     private CollabBoardService collabBoardService;
-    @Autowired
     private UserRepository userRepository;
 
     @Transactional

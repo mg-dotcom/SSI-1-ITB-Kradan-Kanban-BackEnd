@@ -1,44 +1,36 @@
 package ssi1.integrated.controller;
 
 import jakarta.mail.MessagingException;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.*;
-import ssi1.integrated.project_board.board.Board;
-import ssi1.integrated.project_board.board.Visibility;
-import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
-import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.CollabBoardService;
 import ssi1.integrated.services.InvitationService;
-
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = {"http://localhost:5173", "http://ip23ssi1.sit.kmutt.ac.th", "http://intproj23.sit.kmutt.ac.th"})
 @RequestMapping("/v3/boards")
 public class CollabBoardController {
+    private final CollabBoardService collabBoardService;
+    private final InvitationService invitationService;
+
     @Autowired
-    private BoardService boardService;
-    @Autowired
-    private CollabBoardService collabBoardService;
-    @Autowired
-    private InvitationService invitationService;
+    public CollabBoardController(CollabBoardService collabBoardService, InvitationService invitationService) {
+        this.collabBoardService = collabBoardService;
+        this.invitationService = invitationService;
+    }
+
     @GetMapping("/{boardId}/collabs")
     public ResponseEntity<List<CollaboratorDTO>> getAllCollaborators(
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
 
-        // Fetch the list of collaborators
         List<CollaboratorDTO> collaborators = collabBoardService.getAllCollabsBoard(accessToken, boardId);
-
-        // Directly return the list of collaborators
         return ResponseEntity.ok(collaborators);
     }
 
@@ -69,7 +61,7 @@ public class CollabBoardController {
 
     @GetMapping("/{boardId}/collabs/invitations")
     public BoardInvitationDTO getInvitation(@RequestHeader(name = "Authorization") String accessToken,
-                                        @PathVariable String boardId) {
+                                            @PathVariable String boardId) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return invitationService.getInvitaionStatus(jwtToken,boardId);
     }

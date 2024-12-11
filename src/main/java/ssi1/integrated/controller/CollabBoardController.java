@@ -1,17 +1,12 @@
 package ssi1.integrated.controller;
 
 import jakarta.mail.MessagingException;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ssi1.integrated.dtos.*;
-import ssi1.integrated.project_board.board.Board;
-import ssi1.integrated.project_board.board.Visibility;
-import ssi1.integrated.project_board.collab_management.AccessRight;
 import ssi1.integrated.project_board.collab_management.CollabBoard;
-import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.CollabBoardService;
 import ssi1.integrated.services.InvitationService;
 
@@ -69,7 +64,7 @@ public class CollabBoardController {
 
     @GetMapping("/{boardId}/collabs/invitations")
     public BoardInvitationDTO getInvitation(@RequestHeader(name = "Authorization") String accessToken,
-                                        @PathVariable String boardId) {
+                                            @PathVariable String boardId) {
         String jwtToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
         return invitationService.getInvitaionStatus(jwtToken,boardId);
     }

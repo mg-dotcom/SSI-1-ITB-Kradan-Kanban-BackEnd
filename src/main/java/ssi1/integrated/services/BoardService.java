@@ -3,7 +3,6 @@ package ssi1.integrated.services;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import ssi1.integrated.dtos.*;
@@ -30,37 +29,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class BoardService {
-    private final BoardRepository boardRepository;
-    private final UserService userService;
-    private final ModelMapper modelMapper;
-    private final JwtService jwtService;
-    private final StatusService statusService;
-    private final TaskRepository taskRepository;
-    private final StatusRepository statusRepository;
-    private final CollabBoardRepository collabBoardRepository;
-    private final UserLocalService userLocalService;
-
-    @Autowired
-    public BoardService(BoardRepository boardRepository,
-                        UserService userService,
-                        ModelMapper modelMapper,
-                        JwtService jwtService,
-                        StatusService statusService,
-                        TaskRepository taskRepository,
-                        StatusRepository statusRepository,
-                        CollabBoardRepository collabBoardRepository,
-                        UserLocalService userLocalService) {
-        this.boardRepository = boardRepository;
-        this.userService = userService;
-        this.modelMapper = modelMapper;
-        this.jwtService = jwtService;
-        this.statusService = statusService;
-        this.taskRepository = taskRepository;
-        this.statusRepository = statusRepository;
-        this.collabBoardRepository = collabBoardRepository;
-        this.userLocalService = userLocalService;
-    }
+    private BoardRepository boardRepository;
+    private UserService userService;
+    private ModelMapper modelMapper;
+    private JwtService jwtService;
+    private StatusService statusService;
+    private TaskRepository taskRepository;
+    private StatusRepository statusRepository;
+    private CollabBoardRepository collabBoardRepository;
+    private UserLocalService userLocalService;
 
     public List<Board> getAllBoards() {
         return boardRepository.findAll();
@@ -102,10 +81,9 @@ public class BoardService {
             collabsBoardDTOs.add(contributorBoardDTO);
         }
         AllBoardDTO allBoardDTO = new AllBoardDTO();
-        allBoardDTO.setPersonalBoard(new ArrayList<>(toReturnPersonalBoard));  // Set personal boards
-        allBoardDTO.setCollabsBoard(collabsBoardDTOs);          // Add all collaboration boards
+        allBoardDTO.setPersonalBoard(new ArrayList<>(toReturnPersonalBoard));
+        allBoardDTO.setCollabsBoard(collabsBoardDTOs);
 
-        // Return the combined list
         return allBoardDTO;
     }
 
@@ -115,12 +93,9 @@ public class BoardService {
             throw new BadRequestException("Invalid board create body");
         }
 
-        // Extract the JWT payload from the request
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        // Find the user associated with the OID from the JWT payload
         User user = userService.getUserByOid(jwtPayload.getOid());
 
-        // Create a new Board object and set its name and user
         Board newBoard = new Board();
         newBoard.setName(createBoardDTO.getName());
         newBoard.setUserOid(user.getOid());
@@ -130,10 +105,8 @@ public class BoardService {
         newBoard.setColor(createBoardDTO.getColor());
         newBoard.setVisibility(createBoardDTO.getVisibility());
 
-        // Save the new board to the repository
         boardRepository.save(newBoard);
 
-        //create default statuses
         NewStatusDTO noStatus = new NewStatusDTO();
         noStatus.setName("No Status");
         noStatus.setDescription("A status has not been assigned");
@@ -176,10 +149,8 @@ public class BoardService {
             return boardDTO;
         }
 
-
         boolean isOwner = isBoardOwner(board.getUserOid(), jwtToken);
         boolean isCollaborator = isCollaborator(jwtToken,boardId);
-        
 
         if (visibility == Visibility.PRIVATE && !isOwner &&!isCollaborator) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
@@ -212,7 +183,6 @@ public class BoardService {
             throw new BadRequestException("Invalid visibility");
         }
 
-        //Not in enum
         Visibility visibilityStatus = visibility.getVisibility();
 
         if (visibilityStatus != Visibility.PUBLIC && visibilityStatus != Visibility.PRIVATE) {
@@ -239,8 +209,6 @@ public class BoardService {
             };
         }
 
-
-        //Can't access board
         if (!authorizationResult.isOwner()) {
             throw new ForbiddenException("Access denied to board BOARD ID: " + boardId);
         }
@@ -274,21 +242,11 @@ public class BoardService {
         return new BoardAuthorizationResult(isOwner, isPublic);
     }
 
-    // Check if user is the board owner
     private boolean isBoardOwner(String userOid, String jwtToken) {
         JwtPayload jwtPayload=jwtService.extractPayload(jwtToken);
         User user = userService.getUserByOid(userOid);
         return user.getOid().equals(jwtPayload.getOid());
     }
-
-    // Check if collaborator has write access
-    public boolean isCollaboratorWriteAccess(String jwtToken, String boardId) {
-        JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
-        CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());
-
-        return collaborator != null && collaborator.getAccessRight() == AccessRight.WRITE;
-    }
-
     public boolean isCollaborator(String jwtToken, String boardId){
         JwtPayload jwtPayload = jwtService.extractPayload(jwtToken);
         CollabBoard collaborator = collabBoardRepository.findByBoard_IdAndUser_Oid(boardId, jwtPayload.getOid());

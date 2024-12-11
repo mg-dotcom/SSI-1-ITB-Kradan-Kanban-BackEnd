@@ -4,10 +4,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import ssi1.integrated.dtos.SendEmailDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import java.io.UnsupportedEncodingException;
@@ -30,12 +28,6 @@ public class EmailService {
 
         MimeMessage mailMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mailMessage, false, "UTF-8");
-//        message.setFrom("ITBKK-SSI1");
-//        message.setTo(to);
-//        message.setSubject(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'");
-//        message.setText(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'."+ "You can accept or decline this invitation at "+"https://intproj23.sit.kmutt.ac.th/ssi1/board/"+boardId+"/collab/invitations");
-//        String replyTo = "DO_NOT_REPLY_" + NO_REPLY_SUFFIX;
-//        message.setReplyTo(replyTo);
         String replyTo =  NO_REPLY_SUFFIX;
 
         String fromDisplayName = "ITBKK-SSI1";
@@ -46,6 +38,5 @@ public class EmailService {
         helper.setSubject(boardOwner + " has invited you to collaborate with"+" "+ accessRight + " access right on "+"'"+boardName+"'");
 
         mailSender.send(mailMessage);
-        System.out.println("Sent mail successfully!");
     }
 }

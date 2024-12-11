@@ -9,25 +9,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ssi1.integrated.exception.respond.ErrorResponse;
 import ssi1.integrated.project_board.board.Board;
-import ssi1.integrated.project_board.board.BoardRepository;
 import ssi1.integrated.project_board.board.Visibility;
 import ssi1.integrated.services.BoardService;
 import ssi1.integrated.services.UserService;
-import ssi1.integrated.user_account.UserRepository;
 import ssi1.integrated.utils.UriExtractor;
-
 import java.io.IOException;
 
 
@@ -35,15 +30,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
     private final UserService userService;
-    @Autowired
-    private BoardService boardService;
-    @Autowired
-    private BoardRepository boardRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    private final BoardService boardService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -92,12 +80,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        System.out.println("jwt= "+jwt);
         if (userName != null && authentication == null) {
             UserDetails userDetails = userService.loadUserByUsername(userName);
-//            System.out.println("here");
-//            System.out.println("username= "+userName);
-//            System.out.println("userDetail= "+userDetails);
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
@@ -107,14 +91,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } else {
-                System.out.println("bro");
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return;
-            }
+}
         }
-        System.out.println("successful");
-        filterChain.doFilter(request, response);
-    }
+                filterChain.doFilter(request, response);
+                }
 
 
     private void sendErrorResponse(HttpServletResponse response, String message, HttpServletRequest request, HttpStatus status) throws IOException {

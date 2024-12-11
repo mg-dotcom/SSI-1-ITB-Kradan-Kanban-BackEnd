@@ -12,12 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ssi1.integrated.exception.handler.ItemNotFoundException;
 import ssi1.integrated.project_board.user_local.UserLocal;
-import ssi1.integrated.project_board.user_local.UserLocalRepository;
 import ssi1.integrated.security.dtos.AccessToken;
 import ssi1.integrated.security.dtos.AuthenticationRequest;
 import ssi1.integrated.security.dtos.AuthenticationResponse;
 import ssi1.integrated.services.UserLocalService;
-import ssi1.integrated.services.UserService;
 import ssi1.integrated.user_account.Role;
 import ssi1.integrated.user_account.User;
 import ssi1.integrated.user_account.UserRepository;
@@ -26,11 +24,9 @@ import ssi1.integrated.user_account.UserRepository;
 @RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository userRepository;
-    private final UserLocalRepository userLocalRepository;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserLocalService userLocalService;
-    private final UserService userService;
     private final ModelMapper modelMapper;
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -73,7 +69,6 @@ public class AuthenticationService {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken); // Set Bearer token in the headers
-        System.out.println("Microsoft service");
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
         try {
@@ -98,7 +93,6 @@ public class AuthenticationService {
                     User newUser=modelMapper.map(microsoftUser,User.class);
                     newUser.setRole(Role.STUDENT);
                     userLocalService.addUserToUserLocal(newUser);
-                    System.out.println(newUser);
                     var jwtToken = jwtService.generateToken(newUser);
                     var refreshToken = jwtService.generateRefreshToken(newUser);
 
@@ -108,7 +102,6 @@ public class AuthenticationService {
                             .build();
 
                 }else {
-                    System.out.println("case 2");
                     userLocalService.addUserToUserLocal(existingUser);
                     // Generate tokens
                     var jwtToken = jwtService.generateToken(existingUser);

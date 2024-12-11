@@ -24,21 +24,21 @@ import java.util.Map;
 @CrossOrigin(origins = {"http://localhost:5173", "http://ip23ssi1.sit.kmutt.ac.th", "http://intproj23.sit.kmutt.ac.th"})
 @RequestMapping("/v3/boards")
 public class CollabBoardController {
+    private final CollabBoardService collabBoardService;
+    private final InvitationService invitationService;
+
     @Autowired
-    private BoardService boardService;
-    @Autowired
-    private CollabBoardService collabBoardService;
-    @Autowired
-    private InvitationService invitationService;
+    public CollabBoardController(CollabBoardService collabBoardService, InvitationService invitationService) {
+        this.collabBoardService = collabBoardService;
+        this.invitationService = invitationService;
+    }
+
     @GetMapping("/{boardId}/collabs")
     public ResponseEntity<List<CollaboratorDTO>> getAllCollaborators(
             @PathVariable String boardId,
             @RequestHeader(name = "Authorization", required = false) String accessToken) {
 
-        // Fetch the list of collaborators
         List<CollaboratorDTO> collaborators = collabBoardService.getAllCollabsBoard(accessToken, boardId);
-
-        // Directly return the list of collaborators
         return ResponseEntity.ok(collaborators);
     }
 
